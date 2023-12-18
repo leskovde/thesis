@@ -1,0 +1,4 @@
+- [x] založit repo
+  - [x] přenést do něj poznámky
+- [ ] prototypovat
+- [ ] dacapo benchmark
