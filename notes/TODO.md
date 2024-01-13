@@ -2,3 +2,5 @@
   - [x] přenést do něj poznámky
 - [ ] prototypovat
 - [ ] dacapo benchmark
+- [x] org cz.cuni.mff
+- [ ] Trace - mít interface, který dovolí se zeptat na hodnoty a volané funkce v nějakém čase exekuce - pokud nemá co vrátit, handlovat to jako optional monádu

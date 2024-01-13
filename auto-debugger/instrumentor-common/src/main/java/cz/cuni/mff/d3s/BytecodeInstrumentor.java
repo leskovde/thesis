@@ -1,4 +1,4 @@
-package org.mff;
+package cz.cuni.mff.d3s;
 
 public interface BytecodeInstrumentor {
     String loadBytecode(String filePath);

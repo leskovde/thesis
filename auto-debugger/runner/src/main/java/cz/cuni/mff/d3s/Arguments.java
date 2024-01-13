@@ -1,4 +1,4 @@
-package org.mff;
+package cz.cuni.mff.d3s;
 
 public class Arguments {
     private String programPath;

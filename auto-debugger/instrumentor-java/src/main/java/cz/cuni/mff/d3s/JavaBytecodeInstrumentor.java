@@ -1,4 +1,6 @@
-package org.mff;
+package cz.cuni.mff.d3s;
+
+import cz.cuni.mff.d3s.BytecodeInstrumentor;
 
 import java.io.IOException;
 import java.nio.file.Files;
