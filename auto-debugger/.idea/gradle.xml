@@ -12,6 +12,7 @@
             <option value="$PROJECT_DIR$/analyzer" />
             <option value="$PROJECT_DIR$/instrumentor-common" />
             <option value="$PROJECT_DIR$/instrumentor-java" />
+            <option value="$PROJECT_DIR$/runner" />
             <option value="$PROJECT_DIR$/test-generator-common" />
             <option value="$PROJECT_DIR$/test-generator-java" />
           </set>
