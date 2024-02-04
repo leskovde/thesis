@@ -1,6 +1,7 @@
-- [x] založit repo
-  - [x] přenést do něj poznámky
-- [ ] prototypovat
-- [ ] dacapo benchmark
-- [x] org cz.cuni.mff
-- [ ] Trace - mít interface, který dovolí se zeptat na hodnoty a volané funkce v nějakém čase exekuce - pokud nemá co vrátit, handlovat to jako optional monádu
+- [x] create a repo
+  - [x] move notes to the repo
+- [ ] design and document the possible skeleton of the project
+- [ ] mock all parts of the project
+- [ ] create examples from the dacapo benchmark
+- [x] rename packages to cz.cuni.mff
+- [ ] represent Trace as an interface that allows to query values and method that were called at a certain point in time - if there's nothing to return, handle it as the Optional monad
