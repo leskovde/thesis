@@ -1,4 +1,7 @@
-package cz.cuni.mff.d3s;
+package cz.cuni.mff.d3s.autodebugger.runner;
+
+import cz.cuni.mff.d3s.autodebugger.instrumentor.common.BytecodeInstrumentor;
+import cz.cuni.mff.d3s.autodebugger.instrumentor.java.JavaBytecodeInstrumentor;
 
 public class Main {
   public static void main(String[] args) {

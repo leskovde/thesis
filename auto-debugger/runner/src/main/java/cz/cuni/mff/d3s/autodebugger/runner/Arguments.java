@@ -1,4 +1,4 @@
-package cz.cuni.mff.d3s;
+package cz.cuni.mff.d3s.autodebugger.runner;
 
 public class Arguments {
     private String programPath;

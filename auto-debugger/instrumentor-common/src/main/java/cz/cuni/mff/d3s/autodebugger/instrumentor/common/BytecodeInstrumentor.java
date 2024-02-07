@@ -1,4 +1,4 @@
-package cz.cuni.mff.d3s;
+package cz.cuni.mff.d3s.autodebugger.instrumentor.common;
 
 public interface BytecodeInstrumentor {
     String loadBytecode(String filePath);

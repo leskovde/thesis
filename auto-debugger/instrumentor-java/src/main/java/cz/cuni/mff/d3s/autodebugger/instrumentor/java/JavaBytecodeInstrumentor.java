@@ -1,6 +1,6 @@
-package cz.cuni.mff.d3s;
+package cz.cuni.mff.d3s.autodebugger.instrumentor.java;
 
-import cz.cuni.mff.d3s.BytecodeInstrumentor;
+import cz.cuni.mff.d3s.autodebugger.instrumentor.common.BytecodeInstrumentor;
 
 import java.io.IOException;
 import java.nio.file.Files;

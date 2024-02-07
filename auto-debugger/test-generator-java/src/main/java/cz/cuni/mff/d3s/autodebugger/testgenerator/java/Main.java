@@ -1,6 +1,4 @@
-package cz.cuni.mff.d3s;
-
-;
+package cz.cuni.mff.d3s.autodebugger.testgenerator.java;
 
 public class Main {
   public static void main(String[] args) {
