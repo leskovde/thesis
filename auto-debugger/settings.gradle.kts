@@ -5,3 +5,16 @@ include("analyzer")
 include("test-generator-common")
 include("test-generator-java")
 include("runner")
+
+dependencyResolutionManagement {
+
+    versionCatalogs {
+        create("libs") {
+            library("slf4j", "org.slf4j:slf4j-log4j12:2.0.12")
+            library("log4j", "org.apache.logging.log4j:log4j-slf4j-impl:2.22.1")
+            library("junit5", "org.junit.jupiter:junit-jupiter:5.10.2")
+            library("junit5-bom", "org.junit:junit-bom:5.10.2")
+        }
+    }
+}
+include("analyzer-disl")

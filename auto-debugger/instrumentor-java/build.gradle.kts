@@ -1,5 +1,6 @@
 plugins {
     id("java")
+    id("io.freefair.lombok")
 }
 
 group = "org.example"
@@ -11,8 +12,10 @@ repositories {
 
 dependencies {
     implementation(project(mapOf("path" to ":instrumentor-common")))
-    testImplementation(platform("org.junit:junit-bom:5.9.1"))
-    testImplementation("org.junit.jupiter:junit-jupiter")
+    implementation(libs.slf4j)
+    implementation(libs.log4j)
+    testImplementation(platform(libs.junit5.bom))
+    testImplementation(libs.junit5)
 }
 
 tasks.test {
