@@ -1,10 +1,10 @@
 package cz.cuni.mff.d3s.autodebugger.instrumentor.java;
 
 import cz.cuni.mff.d3s.autodebugger.instrumentor.common.Instrumentor;
+import cz.cuni.mff.d3s.autodebugger.instrumentor.common.enums.InstrumentationStatus;
+import java.io.RandomAccessFile;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
-
-import java.io.RandomAccessFile;
 
 @Slf4j
 @SuperBuilder
@@ -13,6 +13,11 @@ public class DiSLInstrumentor extends Instrumentor {
 
   @Override
   public void runInstrumentation() {
+    var status = generateDiSLClass();
+    if (status == InstrumentationStatus.FAIL) {
+      log.info("DiSL class generation failed");
+      return;
+    }
     log.info("Running DiSL instrumentation");
     try {
       var scriptProcess =
@@ -27,5 +32,14 @@ public class DiSLInstrumentor extends Instrumentor {
     } catch (Exception e) {
       log.error("Failed to run DiSL instrumentation", e);
     }
+  }
+
+  private InstrumentationStatus generateDiSLClass() {
+    var classGenerator = new DiSLClassGenerator();
+    var status = classGenerator.generateDiSLClass();
+    if (status == InstrumentationStatus.SUCCESS || status == InstrumentationStatus.SKIPPED) {
+      return InstrumentationStatus.SUCCESS;
+    }
+    return InstrumentationStatus.FAIL;
   }
 }
