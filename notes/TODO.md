@@ -6,6 +6,8 @@
 - [x] rename packages to cz.cuni.mff
 - [ ] represent Trace as an interface that allows to query values and method that were called at a certain point in time - if there's nothing to return, handle it as the Optional monad
 - [ ] pick an UI framework: https://github.com/JetBrains/jewel?tab=readme-ov-file
+- [ ] DiSL scope annotation - see how to inject scope based on a value of a variable
 - [ ] write a section on Gradle
 	- [ ] Spring selection - yes/no
 	- [ ] UI framework selection
+- [ ] Solve DISL_PATH resolution in Gradle (different projects need different number of "`../`")
