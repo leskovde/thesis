@@ -11,3 +11,8 @@
 	- [ ] Spring selection - yes/no
 	- [ ] UI framework selection
 - [ ] Solve DISL_PATH resolution in Gradle (different projects need different number of "`../`")
+- DiSL functionality
+	- [ ] Method parameters
+	- [ ] Field writes
+	- [ ] Static field writes
+- [ ] Remove all generated sources before building (via Gradle task)
