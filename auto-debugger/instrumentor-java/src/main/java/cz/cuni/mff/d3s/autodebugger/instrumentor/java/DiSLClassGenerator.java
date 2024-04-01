@@ -1,51 +1,48 @@
 package cz.cuni.mff.d3s.autodebugger.instrumentor.java;
 
+import cz.cuni.mff.d3s.autodebugger.instrumentor.common.Instrumentor;
+import cz.cuni.mff.d3s.autodebugger.instrumentor.common.enums.InstrumentationStatus;
 import java.io.File;
 import java.io.FileWriter;
-
-import cz.cuni.mff.d3s.autodebugger.instrumentor.common.enums.InstrumentationStatus;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@AllArgsConstructor
 public class DiSLClassGenerator {
-    private static boolean alreadyGenerated = false;
-    private final String PACKAGE_NAME = "cz.cuni.mff.d3s.autodebugger.analyzer.disl";
-    private final String IMPORTS =
-        """
+  private final String PACKAGE_NAME = "cz.cuni.mff.d3s.autodebugger.analyzer.disl";
+  private final String IMPORTS =
+      """
           import ch.usi.dag.disl.annotation.After;
           import ch.usi.dag.disl.dynamiccontext.DynamicContext;
           import ch.usi.dag.disl.marker.BodyMarker;
-  
+
           import java.io.FileNotFoundException;
           import java.io.IOException;
           import java.io.RandomAccessFile;
           """;
-    private final String CLASS_NAME = "DiSLClass";
-    private final String METHOD_NAME = "getLocalVariableValue";
+  private final String CLASS_NAME = "NewDiSLClass";
+  private Instrumentor instrumentor;
 
-    public InstrumentationStatus generateDiSLClass() {
-        if (alreadyGenerated) {
-            log.info("DiSL class already generated");
-            return InstrumentationStatus.SKIPPED;
-        }
+  public InstrumentationStatus generateDiSLClass() {
+    try {
+      log.info("Generating DiSL class");
 
-        try {
-            log.info("Generating DiSL class");
-
-            String fileName = "NewDiSLClass.java";
-            File dislClassFile = new File(fileName);
-            try (FileWriter writer = new FileWriter(dislClassFile)) {
-              writer.write(
-                  String.format(
-                      """
+      String path = "analyzer-disl/src/main/java/cz/cuni/mff/d3s/autodebugger/analyzer/disl/";
+      String fileName = "NewDiSLClass.java";
+      File dislClassFile = new File(path + fileName);
+      try (FileWriter writer = new FileWriter(dislClassFile)) {
+        writer.write(
+            String.format(
+                """
                       package %s;
-  
+
                       %s
-  
+
                       public class %s {
-  
+
                           @After(marker = BodyMarker.class, scope = "Main.main")
-                          public static void %s(DynamicContext di) {
+                          public static void getLocalVariableValue(DynamicContext di) {
                               int a = di.getLocalVariableValue(0, int.class);
                               int b = di.getLocalVariableValue(1, int.class);
                               try (RandomAccessFile raf = new RandomAccessFile("test.txt", "rw")) {
@@ -59,15 +56,13 @@ public class DiSLClassGenerator {
                           }
                       }
                       """,
-                      PACKAGE_NAME, IMPORTS, CLASS_NAME, METHOD_NAME));
-            }
-
-            alreadyGenerated = true;
-            log.info("DiSL class generated");
-        } catch (Exception e) {
-            log.error("Failed to generate DiSL class", e);
-            return InstrumentationStatus.FAIL;
-        }
-        return InstrumentationStatus.SUCCESS;
+                PACKAGE_NAME, IMPORTS, CLASS_NAME));
+      }
+      log.info("DiSL class generated");
+    } catch (Exception e) {
+      log.error("Failed to generate DiSL class", e);
+      return InstrumentationStatus.FAIL;
     }
+    return InstrumentationStatus.SUCCESS;
+  }
 }

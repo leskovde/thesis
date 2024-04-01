@@ -11,7 +11,9 @@ public class Main {
 //    Arguments arguments = new Arguments(args[0], args[1]);
 
     // TODO: Select the implementation based on the language
-    DiSLInstrumentor instrumentor = DiSLInstrumentor.builder().build();
+    DiSLInstrumentor instrumentor = DiSLInstrumentor.builder()
+            .applicationPath("test.jar")
+            .build();
     instrumentor.runInstrumentation();
   }
 }

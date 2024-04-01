@@ -15,8 +15,12 @@ public class DiSLInstrumentor extends Instrumentor {
   public void runInstrumentation() {
     var status = generateDiSLClass();
     if (status == InstrumentationStatus.FAIL) {
-      log.info("DiSL class generation failed");
+      log.error("DiSLClass generation failed");
       return;
+    }
+    status = compileDiSLClass();
+    if (status == InstrumentationStatus.FAIL) {
+      log.error("DiSLClass compilation failed");
     }
     log.info("Running DiSL instrumentation");
     try {
@@ -35,8 +39,17 @@ public class DiSLInstrumentor extends Instrumentor {
   }
 
   private InstrumentationStatus generateDiSLClass() {
-    var classGenerator = new DiSLClassGenerator();
+    var classGenerator = new DiSLClassGenerator(this);
     var status = classGenerator.generateDiSLClass();
+    if (status == InstrumentationStatus.SUCCESS || status == InstrumentationStatus.SKIPPED) {
+      return InstrumentationStatus.SUCCESS;
+    }
+    return InstrumentationStatus.FAIL;
+  }
+
+  private InstrumentationStatus compileDiSLClass() {
+    var compiler = new DiSLCompiler(this);
+    var status = compiler.compileDiSLClass();
     if (status == InstrumentationStatus.SUCCESS || status == InstrumentationStatus.SKIPPED) {
       return InstrumentationStatus.SUCCESS;
     }
