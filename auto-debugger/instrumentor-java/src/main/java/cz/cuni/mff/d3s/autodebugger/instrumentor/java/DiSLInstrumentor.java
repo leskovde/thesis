@@ -1,8 +1,11 @@
 package cz.cuni.mff.d3s.autodebugger.instrumentor.java;
 
 import cz.cuni.mff.d3s.autodebugger.instrumentor.common.Instrumentor;
-import cz.cuni.mff.d3s.autodebugger.instrumentor.common.enums.InstrumentationStatus;
-import java.io.RandomAccessFile;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.Optional;
+
 import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
 
@@ -13,24 +16,29 @@ public class DiSLInstrumentor extends Instrumentor {
 
   @Override
   public void runInstrumentation() {
-    var status = generateDiSLClass();
-    if (status == InstrumentationStatus.FAIL) {
-      log.error("DiSLClass generation failed");
-      return;
-    }
-    status = compileDiSLClass();
-    if (status == InstrumentationStatus.FAIL) {
-      log.error("DiSLClass compilation failed");
-    }
+    var jarPath = generateDiSLClass().flatMap(this::compileDiSLClass);
+    jarPath.ifPresent(this::instrumentApplication);
+  }
+
+  private void instrumentApplication(String jarPath) {
     log.info("Running DiSL instrumentation");
     try {
       var scriptProcess =
-          new ProcessBuilder("python3", dislRunnerPath, "--", applicationPath).start();
-      try (var raf = new RandomAccessFile("test.txt", "rw")) {
-        int a = raf.readInt();
-        int b = raf.readInt();
-        log.info("Read from file: a={}, b={}", a, b);
+              new ProcessBuilder("python3", dislRunnerPath, "--", applicationPath).start();
+//      try (var raf = new RandomAccessFile("test.txt", "rw")) {
+//        int a = raf.readInt();
+//        int b = raf.readInt();
+//        log.info("Read from file: a={}, b={}", a, b);
+//      }
+
+      BufferedReader stdInput = new BufferedReader(new
+              InputStreamReader(scriptProcess.getInputStream()));
+
+      String s;
+      while ((s = stdInput.readLine()) != null) {
+        System.out.println(s);
       }
+
       scriptProcess.waitFor();
       log.info("DiSL instrumentation finished");
     } catch (Exception e) {
@@ -38,21 +46,13 @@ public class DiSLInstrumentor extends Instrumentor {
     }
   }
 
-  private InstrumentationStatus generateDiSLClass() {
+  private Optional<String> generateDiSLClass() {
     var classGenerator = new DiSLClassGenerator(this);
-    var status = classGenerator.generateDiSLClass();
-    if (status == InstrumentationStatus.SUCCESS || status == InstrumentationStatus.SKIPPED) {
-      return InstrumentationStatus.SUCCESS;
-    }
-    return InstrumentationStatus.FAIL;
+    return classGenerator.generateDiSLClass();
   }
 
-  private InstrumentationStatus compileDiSLClass() {
+  private Optional<String> compileDiSLClass(String classPath) {
     var compiler = new DiSLCompiler(this);
-    var status = compiler.compileDiSLClass();
-    if (status == InstrumentationStatus.SUCCESS || status == InstrumentationStatus.SKIPPED) {
-      return InstrumentationStatus.SUCCESS;
-    }
-    return InstrumentationStatus.FAIL;
+    return compiler.compileDiSLClass(classPath);
   }
 }

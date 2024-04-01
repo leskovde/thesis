@@ -1,9 +1,10 @@
 package cz.cuni.mff.d3s.autodebugger.instrumentor.java;
 
 import cz.cuni.mff.d3s.autodebugger.instrumentor.common.Instrumentor;
-import cz.cuni.mff.d3s.autodebugger.instrumentor.common.enums.InstrumentationStatus;
 import java.io.File;
 import java.io.FileWriter;
+import java.util.Optional;
+
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -24,7 +25,7 @@ public class DiSLClassGenerator {
   private final String CLASS_NAME = "NewDiSLClass";
   private Instrumentor instrumentor;
 
-  public InstrumentationStatus generateDiSLClass() {
+  public Optional<String> generateDiSLClass() {
     try {
       log.info("Generating DiSL class");
 
@@ -45,24 +46,18 @@ public class DiSLClassGenerator {
                           public static void getLocalVariableValue(DynamicContext di) {
                               int a = di.getLocalVariableValue(0, int.class);
                               int b = di.getLocalVariableValue(1, int.class);
-                              try (RandomAccessFile raf = new RandomAccessFile("test.txt", "rw")) {
-                                  raf.writeInt(a);
-                                  raf.writeInt(b);
-                              } catch (FileNotFoundException e) {
-                                  throw new RuntimeException("Could not open named pipe");
-                              } catch (IOException e) {
-                                  throw new RuntimeException(e);
-                              }
+                              System.out.println("disl: a=" + a);
+                              System.out.println("disl: b=" + b);
                           }
                       }
                       """,
                 PACKAGE_NAME, IMPORTS, CLASS_NAME));
       }
       log.info("DiSL class generated");
+      return Optional.of(dislClassFile.getParentFile().getAbsolutePath());
     } catch (Exception e) {
       log.error("Failed to generate DiSL class", e);
-      return InstrumentationStatus.FAIL;
+      return Optional.empty();
     }
-    return InstrumentationStatus.SUCCESS;
   }
 }
