@@ -12,8 +12,6 @@ repositories {
 
 dependencies {
     implementation(project(mapOf("path" to ":instrumentor-common")))
-    implementation(project(mapOf("path" to ":analyzer-disl")))
-    implementation(libs.slf4j)
     implementation(libs.log4j)
     testImplementation(platform(libs.junit5.bom))
     testImplementation(libs.junit5)
