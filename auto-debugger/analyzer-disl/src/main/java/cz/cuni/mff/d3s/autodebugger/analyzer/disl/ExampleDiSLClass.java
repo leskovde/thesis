@@ -8,7 +8,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
-public class DiSLClass {
+public class UncompilableDiSLClass {
 
     @After(marker = BodyMarker.class, scope = "Main.main")
     public static void getLocalVariableValue(DynamicContext di) {
