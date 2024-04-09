@@ -10,9 +10,13 @@
 - [ ] write a section on Gradle
 	- [ ] Spring selection - yes/no
 	- [ ] UI framework selection
-- [ ] Solve DISL_PATH resolution in Gradle (different projects need different number of "`../`")
+- [ ] Make DISL_PATH from Gradle accessible from the code
 - DiSL functionality
 	- [ ] Method parameters
+		- At the time of the method call
+	- [ ] Return values
 	- [ ] Field writes
+		- Don't care about the line numbers of the writes, only the possible values 
 	- [ ] Static field writes
+		- Don't care about the line numbers of the writes, only the possible values 
 - [ ] Remove all generated sources before building (via Gradle task)
