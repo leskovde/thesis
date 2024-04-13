@@ -8,7 +8,7 @@ public abstract class ModelToCodeVisitor implements ModelVisitor {
 
     @Override
     public void visit(Model visitable) {
-        visitable.accept(this);
+        visit(visitable.getRootClass());
     }
 
     @Override
@@ -16,7 +16,7 @@ public abstract class ModelToCodeVisitor implements ModelVisitor {
         visitable.accept(this);
     }
 
-    public String getCode() {
+    public String getGeneratedCode() {
         return stringBuilder.toString();
     }
 
