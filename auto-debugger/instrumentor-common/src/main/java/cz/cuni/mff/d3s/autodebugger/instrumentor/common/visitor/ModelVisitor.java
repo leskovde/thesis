@@ -5,5 +5,5 @@ import cz.cuni.mff.d3s.autodebugger.instrumentor.common.modelling.Model;
 
 public interface ModelVisitor {
     void visit(Model visitable);
-    void visit (Metaclass visitable);
+    void visit(Metaclass visitable);
 }
