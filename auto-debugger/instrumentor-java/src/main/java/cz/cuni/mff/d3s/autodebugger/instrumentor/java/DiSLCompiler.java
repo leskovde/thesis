@@ -43,12 +43,7 @@ public class DiSLCompiler {
           return Optional.empty();
         }
         fileManager.setLocation(StandardLocation.CLASS_OUTPUT, List.of(outputDirectory));
-        fileManager.setLocation(
-            StandardLocation.CLASS_PATH,
-            List.of(
-                new File(DISL_CLASS_PATH, "disl-server.jar"),
-                new File(DISL_CLASS_PATH, "dislre-server.jar"),
-                new File(DISL_CLASS_PATH, "dislre-dispatch.jar")));
+        fileManager.setLocation(StandardLocation.CLASS_PATH, getDiSLClassPath());
         Iterable<? extends JavaFileObject> compilationUnits =
             fileManager.getJavaFileObjectsFromFiles(List.of(dislClassFile));
         if (!compiler.getTask(null, fileManager, null, null, null, compilationUnits).call()) {
@@ -115,5 +110,12 @@ public class DiSLCompiler {
         target.closeEntry();
       }
     }
+  }
+
+  private List<File> getDiSLClassPath() {
+    return List.of(
+            new File(DISL_CLASS_PATH, "disl-server.jar"),
+            new File(DISL_CLASS_PATH, "dislre-server.jar"),
+            new File(DISL_CLASS_PATH, "dislre-dispatch.jar"));
   }
 }

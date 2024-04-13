@@ -6,6 +6,10 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.Optional;
 
+import cz.cuni.mff.d3s.autodebugger.instrumentor.common.modelling.Model;
+import cz.cuni.mff.d3s.autodebugger.instrumentor.common.visitor.ModelToCodeVisitor;
+import cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling.DiSLModel;
+import cz.cuni.mff.d3s.autodebugger.instrumentor.java.visitor.DiSLModelToCodeVisitor;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
 
@@ -16,7 +20,7 @@ public class DiSLInstrumentor extends Instrumentor {
 
   @Override
   public void runInstrumentation() {
-    var jarPath = generateDiSLClass().flatMap(this::compileDiSLClass);
+    var jarPath = generateDiSLClass(new DiSLModel(this)).flatMap(this::compileDiSLClass);
     jarPath.ifPresent(this::instrumentApplication);
   }
 
@@ -46,9 +50,10 @@ public class DiSLInstrumentor extends Instrumentor {
     }
   }
 
-  private Optional<String> generateDiSLClass() {
-    var classGenerator = new DiSLClassGenerator(this);
-    return classGenerator.generateDiSLClass();
+  private Optional<String> generateDiSLClass(Model model) {
+    ModelToCodeVisitor visitor = new DiSLModelToCodeVisitor();
+    visitor.visit(model);
+    return Optional.of(visitor.getGeneratedCode());
   }
 
   private Optional<String> compileDiSLClass(String classPath) {
