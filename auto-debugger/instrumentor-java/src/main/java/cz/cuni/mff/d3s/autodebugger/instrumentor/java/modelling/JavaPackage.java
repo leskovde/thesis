@@ -1,0 +1,18 @@
+package cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling;
+
+import cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifier.Identifier;
+import cz.cuni.mff.d3s.autodebugger.instrumentor.common.modelling.PackageClass;
+import cz.cuni.mff.d3s.autodebugger.instrumentor.common.visitor.ModelVisitor;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@Getter
+@AllArgsConstructor
+public class JavaPackage extends PackageClass {
+    private Identifier packageIdentifier;
+
+    @Override
+    public void accept(ModelVisitor visitor) {
+        visitor.visit(this);
+    }
+}
