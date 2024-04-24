@@ -9,10 +9,10 @@ public class MethodIdentifierFactory extends IdentifierFactory {
     @Override
     public Identifier createIdentifier(String name) {
       return MethodIdentifier.builder()
-              .className(name.substring(0, name.lastIndexOf('.')))
+              .returnType(name.substring(0, name.indexOf(' ')))
+              .className(name.substring(name.indexOf(' ') + 1, name.lastIndexOf('.')))
               .methodName(name.substring(name.lastIndexOf('.') + 1, name.indexOf('(')))
-              .returnType(name.substring(name.indexOf(')') + 1))
-              .parameterTypes(Arrays.asList(name.substring(name.indexOf('(') + 1, name.indexOf(')')).split(",")))
+              .parameterTypes(Arrays.asList(Arrays.stream(name.substring(name.indexOf('(') + 1, name.indexOf(')')).split(",")).filter(s -> !s.isEmpty()).toArray(String[]::new)))
               .build();
     }
 }

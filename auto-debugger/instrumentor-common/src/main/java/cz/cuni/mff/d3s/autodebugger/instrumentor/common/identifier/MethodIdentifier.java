@@ -14,6 +14,6 @@ public class MethodIdentifier implements Identifier {
     private final List<String> parameterTypes;
 
     public String getName() {
-        return className + "." + methodName;
+        return methodName;
     }
 }
