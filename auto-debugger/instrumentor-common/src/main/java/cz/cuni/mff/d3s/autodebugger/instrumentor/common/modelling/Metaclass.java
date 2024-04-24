@@ -4,7 +4,5 @@ import cz.cuni.mff.d3s.autodebugger.instrumentor.common.visitor.ModelVisitor;
 
 public abstract class Metaclass {
 
-    public void accept(ModelVisitor visitor) {
-        visitor.visit(this);
-    }
+    public abstract void accept(ModelVisitor visitor);
 }
