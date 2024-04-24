@@ -1,6 +1,10 @@
 package cz.cuni.mff.d3s.autodebugger.runner;
 
+import cz.cuni.mff.d3s.autodebugger.instrumentor.common.factories.IdentifierFactory;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.java.DiSLInstrumentor;
+
+import java.util.List;
+
 
 public class Main {
   public static void main(String[] args) {
@@ -13,6 +17,8 @@ public class Main {
     // TODO: Select the implementation based on the language
     DiSLInstrumentor instrumentor = DiSLInstrumentor.builder()
             .applicationPath("test.jar")
+            .methods(List.of(IdentifierFactory.createFrom("void Test.test()")))
+            .variables(List.of(IdentifierFactory.createFrom("int:a")))
             .build();
     instrumentor.runInstrumentation();
   }

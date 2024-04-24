@@ -27,7 +27,7 @@ public class DiSLCompiler {
     //  https://stackoverflow.com/questions/49876189/how-to-run-a-gradle-task-from-a-java-code
     try {
       log.info("Compiling DiSL class");
-      String fileName = "NewDiSLClass.java";
+      String fileName = "DiSLClass.java";
 
       File dislClassFile = new File(sourcePath, fileName);
       JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();

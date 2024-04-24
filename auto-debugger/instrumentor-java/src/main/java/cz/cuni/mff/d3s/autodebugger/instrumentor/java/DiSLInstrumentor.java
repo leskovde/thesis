@@ -53,7 +53,7 @@ public class DiSLInstrumentor extends Instrumentor {
   private Optional<String> generateDiSLClass(Model model) {
     ModelToCodeVisitor visitor = new DiSLModelToCodeVisitor();
     visitor.visit(model);
-    return Optional.of(visitor.getGeneratedCode());
+    return visitor.writeGeneratedCode();
   }
 
   private Optional<String> compileDiSLClass(String classPath) {
