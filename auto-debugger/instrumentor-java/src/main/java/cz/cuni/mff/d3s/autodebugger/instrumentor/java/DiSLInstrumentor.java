@@ -7,7 +7,6 @@ import java.io.InputStreamReader;
 import java.util.Optional;
 
 import cz.cuni.mff.d3s.autodebugger.instrumentor.common.modelling.Model;
-import cz.cuni.mff.d3s.autodebugger.instrumentor.common.visitor.ModelToCodeVisitor;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling.DiSLModel;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.java.visitor.DiSLModelToCodeVisitor;
 import lombok.experimental.SuperBuilder;
@@ -51,9 +50,8 @@ public class DiSLInstrumentor extends Instrumentor {
   }
 
   private Optional<String> generateDiSLClass(Model model) {
-    ModelToCodeVisitor visitor = new DiSLModelToCodeVisitor();
-    visitor.visit(model);
-    return visitor.writeGeneratedCode();
+    var generator = new DiSLClassGenerator(model);
+    return generator.generateCode(new DiSLModelToCodeVisitor());
   }
 
   private Optional<String> compileDiSLClass(String classPath) {
