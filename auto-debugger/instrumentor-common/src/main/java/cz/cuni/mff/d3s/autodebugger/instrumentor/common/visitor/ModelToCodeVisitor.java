@@ -2,8 +2,6 @@ package cz.cuni.mff.d3s.autodebugger.instrumentor.common.visitor;
 
 import cz.cuni.mff.d3s.autodebugger.instrumentor.common.modelling.Model;
 
-import java.util.Optional;
-
 public abstract class ModelToCodeVisitor implements ModelVisitor {
     protected final StringBuilder stringBuilder = new StringBuilder();
     protected int indentLevel = 0;
@@ -13,7 +11,7 @@ public abstract class ModelToCodeVisitor implements ModelVisitor {
         visitable.getRootClass().accept(this);
     }
 
-    public abstract Optional<String> writeGeneratedCode();
+    public abstract String getGeneratedCode();
 
     protected void append(String string) {
         assert(indentLevel >= 0);
