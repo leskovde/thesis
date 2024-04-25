@@ -51,7 +51,7 @@ public class DiSLModelToCodeVisitor extends ModelToCodeVisitor {
         append(method.getIdentifier().getName());
         append("(DynamicContext di) {\n");
         indentLevel++;
-        for (JavaVariable variable : method.getExports()) {
+        for (Extractable variable : method.getExports()) {
             variable.accept(this);
         }
         indentLevel--;
