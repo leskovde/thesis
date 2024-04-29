@@ -1,18 +1,20 @@
 package cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling;
 
-import cz.cuni.mff.d3s.autodebugger.instrumentor.common.modelling.InstrumentationMarkerClass;
-import cz.cuni.mff.d3s.autodebugger.instrumentor.common.visitor.ModelVisitor;
+import cz.cuni.mff.d3s.autodebugger.instrumentor.common.modelling.Metaclass;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling.enums.MarkerType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class DiSLMarker extends InstrumentationMarkerClass {
+public class DiSLMarker extends Metaclass {
     private MarkerType markerType;
 
     @Override
-    public void accept(ModelVisitor visitor) {
-        visitor.visit(this);
+    public String emitCode(int indentLevel) {
+        append("marker = ");
+        append(markerType.markerName);
+        append(".class");
+        return getCode();
     }
 }

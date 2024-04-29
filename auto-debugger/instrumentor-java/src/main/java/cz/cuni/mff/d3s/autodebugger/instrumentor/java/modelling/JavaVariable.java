@@ -1,20 +1,28 @@
 package cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling;
 
-import cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifier.Identifier;
-import cz.cuni.mff.d3s.autodebugger.instrumentor.common.modelling.VariableClass;
-import cz.cuni.mff.d3s.autodebugger.instrumentor.common.visitor.ModelVisitor;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
-@AllArgsConstructor
-public class JavaVariable extends VariableClass {
-    private Identifier variableIdentifier;
-    private String type;
-    private int frameSlot;
+public class JavaVariable extends ExportableValue {
+    private final int frameSlot;
+
+    public JavaVariable(int frameSlot, String type) {
+        super(type);
+        this.frameSlot = frameSlot;
+    }
 
     @Override
-    public void accept(ModelVisitor visitor) {
-        visitor.visit(this);
+    public String emitCode(int indentLevel) {
+        append("\n");
+        append(type);
+        append(" ");
+        append(instrumentationVariableIdentifier.getName());
+        append(" = ");
+        append("di.getLocalVariableValue(");
+        append(Integer.toString(frameSlot));
+        append(", ");
+        append(type);
+        append(".class);");
+        return getCode();
     }
 }

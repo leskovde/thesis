@@ -1,6 +1,10 @@
 package cz.cuni.mff.d3s.autodebugger.runner;
 
+import cz.cuni.mff.d3s.autodebugger.instrumentor.common.enums.ExportableValueType;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.common.factories.IdentifierFactory;
+import cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifier.IdentifierParameters;
+import cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifier.MethodIdentifierParameters;
+import cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifier.VariableIdentifierParameters;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.java.DiSLInstrumentor;
 
 import java.util.List;
@@ -17,8 +21,18 @@ public class Main {
     // TODO: Select the implementation based on the language
     DiSLInstrumentor instrumentor = DiSLInstrumentor.builder()
             .applicationPath("test.jar")
-            .methods(List.of(IdentifierFactory.createFrom("void Test.test()")))
-            .variables(List.of(IdentifierFactory.createFrom("int:a")))
+            .methods(List.of(IdentifierFactory.createFrom(new IdentifierParameters(
+                            MethodIdentifierParameters.builder()
+                                    .className("Test")
+                                    .methodName("test")
+                                    .returnType("void")
+                                    .build()))))
+            .variables(List.of(IdentifierFactory.createFrom(new IdentifierParameters(
+                                    VariableIdentifierParameters.builder()
+                                            .variableType("int")
+                                            .variableName("a")
+                                            .exportableType(ExportableValueType.VARIABLE)
+                                            .build()))))
             .build();
     instrumentor.runInstrumentation();
   }

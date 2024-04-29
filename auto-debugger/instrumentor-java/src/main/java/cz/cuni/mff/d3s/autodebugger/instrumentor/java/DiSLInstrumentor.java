@@ -8,7 +8,6 @@ import java.util.Optional;
 
 import cz.cuni.mff.d3s.autodebugger.instrumentor.common.modelling.Model;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling.DiSLModel;
-import cz.cuni.mff.d3s.autodebugger.instrumentor.java.visitor.DiSLModelToCodeVisitor;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
 
@@ -51,7 +50,7 @@ public class DiSLInstrumentor extends Instrumentor {
 
   private Optional<String> generateDiSLClass(Model model) {
     var generator = new DiSLClassGenerator(model);
-    return generator.generateCode(new DiSLModelToCodeVisitor());
+    return generator.generateCode();
   }
 
   private Optional<String> compileDiSLClass(String classPath) {

@@ -1,17 +1,18 @@
 package cz.cuni.mff.d3s.autodebugger.instrumentor.common.factories;
 
 import cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifier.Identifier;
+import cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifier.IdentifierParameters;
 
 public abstract class IdentifierFactory {
-    public abstract Identifier createIdentifier(String name);
+    protected int id = 0;
 
-    public static Identifier createFrom(String name) {
-        if (name.contains("(")) {
-            return new MethodIdentifierFactory().createIdentifier(name);
-        } else if (name.contains(".")) {
-            return new PackageIdentifierFactory().createIdentifier(name);
+    public static Identifier createFrom(IdentifierParameters parameters) {
+        if (parameters.getMethodParameters().isPresent()) {
+            return MethodIdentifierFactory.getInstance().createIdentifier(parameters.getMethodParameters().get());
+        } else if (parameters.getPackageParameters().isPresent()) {
+            return PackageIdentifierFactory.getInstance().createIdentifier(parameters.getPackageParameters().get());
         } else {
-            return new VariableIdentifierFactory().createIdentifier(name);
+            return VariableIdentifierFactory.getInstance().createIdentifier(parameters.getVariableParameters().get());
         }
     }
 }

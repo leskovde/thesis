@@ -1,12 +1,34 @@
 package cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling;
 
-import cz.cuni.mff.d3s.autodebugger.instrumentor.common.modelling.FieldClass;
-import cz.cuni.mff.d3s.autodebugger.instrumentor.common.visitor.ModelVisitor;
+import lombok.Getter;
 
-public class JavaField extends FieldClass {
+@Getter
+public class JavaField extends ExportableValue {
+    private final String name;
+    private final String ownerType;
 
+    public JavaField(String type, String name, String ownerType) {
+        super(type);
+        this.name = name;
+        this.ownerType = ownerType;
+    }
+
+    // TODO: Static fields
     @Override
-    public void accept(ModelVisitor visitor) {
-        visitor.visit(this);
+    public String emitCode(int indentLevel) {
+    // dc.getThis (), TargetClass.class, "instName", String.class
+        append("\n");
+        append(type);
+        append(" ");
+        append(instrumentationVariableIdentifier.getName());
+        append(" = ");
+        append("di.getInstanceFieldValue(di.getThis(), ");
+        append(ownerType);
+        append(".class, \"");
+        append(name);
+        append("\", ");
+        append(type);
+        append(".class);");
+        return getCode();
     }
 }

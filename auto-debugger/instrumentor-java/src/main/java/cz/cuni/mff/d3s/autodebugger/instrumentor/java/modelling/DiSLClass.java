@@ -1,24 +1,33 @@
 package cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling;
 
-import cz.cuni.mff.d3s.autodebugger.instrumentor.common.modelling.KlassClass;
-import cz.cuni.mff.d3s.autodebugger.instrumentor.common.visitor.ModelVisitor;
+import cz.cuni.mff.d3s.autodebugger.instrumentor.common.modelling.Metaclass;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.experimental.SuperBuilder;
 
 import java.util.List;
 
 @Getter
-@SuperBuilder
-public class DiSLClass extends KlassClass {
+@Builder
+public class DiSLClass extends Metaclass {
+    private final String CLASS_NAME = "DiSLClass";
     private JavaPackage classPackage;
     private List<JavaPackageImport> imports;
-
-    {
-        className = "DiSLClass";
-    }
+    protected List<DiSLInstrumentationLogic> logic;
 
     @Override
-    public void accept(ModelVisitor visitor) {
-        visitor.visit(this);
+    public String emitCode(int indentLevel) {
+        append(classPackage.emitCode(indentLevel));
+        append("\n\n");
+        for (JavaPackageImport imp : imports) {
+            append(imp.emitCode(indentLevel));
+            append("\n");
+        }
+        append("\npublic class " + CLASS_NAME + " {\n");
+        for (DiSLInstrumentationLogic method : logic) {
+            append("\n");
+            append(method.emitCode(indentLevel + 1));
+        }
+        append("\n}\n");
+        return getCode();
     }
 }

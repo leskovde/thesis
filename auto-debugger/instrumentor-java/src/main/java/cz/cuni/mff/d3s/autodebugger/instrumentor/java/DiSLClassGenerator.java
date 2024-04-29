@@ -7,7 +7,6 @@ import java.io.FileWriter;
 import java.util.Optional;
 
 import cz.cuni.mff.d3s.autodebugger.instrumentor.common.modelling.Model;
-import cz.cuni.mff.d3s.autodebugger.instrumentor.common.visitor.ModelToCodeVisitor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -18,9 +17,8 @@ public class DiSLClassGenerator extends InstrumentationCodeGenerator {
   }
 
   @Override
-  public Optional<String> generateCode(ModelToCodeVisitor codeGenerator) {
-    codeGenerator.visit(instrumentationModel);
-    var code = codeGenerator.getGeneratedCode();
+  public Optional<String> generateCode() {
+    var code = instrumentationModel.transform();
     try {
       log.info("Generating DiSL class");
       String path = "analyzer-disl/src/main/java/cz/cuni/mff/d3s/autodebugger/analyzer/disl/";
