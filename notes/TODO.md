@@ -1,22 +1,26 @@
 - [x] create a repo
   - [x] move notes to the repo
-- [ ] design and document the possible skeleton of the project
-- [ ] mock all parts of the project
-- [ ] create examples from the dacapo benchmark
+- [x] design and document the possible skeleton of the project
+- [ ] Mock all parts of the project
+- [ ] Create examples from the dacapo benchmark
 - [x] rename packages to cz.cuni.mff
-- [ ] represent Trace as an interface that allows to query values and method that were called at a certain point in time - if there's nothing to return, handle it as the Optional monad
-- [ ] pick an UI framework: https://github.com/JetBrains/jewel?tab=readme-ov-file
+- [ ] Represent Trace as an interface that allows to query values and method that were called at a certain point in time - if there's nothing to return, handle it as the Optional monad
+- [ ] Pick an UI framework: https://github.com/JetBrains/jewel?tab=readme-ov-file
 - [ ] DiSL scope annotation - see how to inject scope based on a value of a variable
-- [ ] write a section on Gradle
+- [ ] Write a section on Gradle
 	- [ ] Spring selection - yes/no
 	- [ ] UI framework selection
 - [ ] Make DISL_PATH from Gradle accessible from the code
 - DiSL functionality
-	- [ ] Method parameters
+	- [x] Method parameters
 		- At the time of the method call
-	- [ ] Return values
-	- [ ] Field writes
+	- [x] Return values
+	- [x] Field writes
 		- Don't care about the line numbers of the writes, only the possible values 
 	- [ ] Static field writes
 		- Don't care about the line numbers of the writes, only the possible values 
 - [ ] Remove all generated sources before building (via Gradle task)
+- [ ] Map variable names to slot indices
+- Tests
+	- [ ] Add UTs to code generation
+- [ ] Create a PNG folder in notes for individual diagrams

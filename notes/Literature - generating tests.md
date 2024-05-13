@@ -2,6 +2,6 @@
 - https://dl.acm.org/doi/abs/10.1145/2001420.2001463 - hybrid OOP, Palus tool
 - https://onlinelibrary.wiley.com/doi/abs/10.1002/smr.2158 - branch coverage prediction for generated tests
 - https://ieeexplore.ieee.org/abstract/document/1610607 - generation based on use cases
-- https://scholar.google.cz/scholar?hl=cs&as_sdt=0%2C5&as_ylo=2019&q=csmith+testing&oq=csmith+tes#d=gs_qabs&t=1698677466975&u=%23p%3Dx-3Vx67NXxoJ - DL based generation
-- https://scholar.google.cz/scholar?hl=cs&as_sdt=0%2C5&as_ylo=2019&q=csmith+testing&oq=csmith+tes#d=gs_qabs&t=1698677530348&u=%23p%3D-pRzhXiGn3QJ - randomized generation
+- https://www.ijcai.org/proceedings/2023/0542.pdf - DL based generation
+- https://dl.acm.org/doi/abs/10.1145/3597926.3604919 - randomized generation
 - https://arxiv.org/abs/2102.04664 - dataset 
