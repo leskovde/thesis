@@ -1,6 +1,6 @@
 package cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling;
 
-import cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifier.Identifier;
+import cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifiers.Identifier;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.common.modelling.Metaclass;
 import lombok.Getter;
 
@@ -13,7 +13,7 @@ public class JavaPackageImport extends Metaclass {
     }
 
     @Override
-    public String emitCode(int indentLevel) {
+    public String emitCode() {
         append("import ");
         append(importedPackage.getPackageIdentifier().getName());
         append(";");

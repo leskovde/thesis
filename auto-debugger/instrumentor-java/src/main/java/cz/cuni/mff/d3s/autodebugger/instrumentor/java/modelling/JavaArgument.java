@@ -1,7 +1,5 @@
 package cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling;
 
-import cz.cuni.mff.d3s.autodebugger.instrumentor.common.factories.VariableIdentifierFactory;
-import cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifier.VariableIdentifierParameters;
 import lombok.Getter;
 
 @Getter
@@ -14,7 +12,7 @@ public class JavaArgument extends ExportableValue {
     }
 
     @Override
-    public String emitCode(int indentLevel) {
+    public String emitCode() {
         append("\n");
         append(type);
         append(" ");

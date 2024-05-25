@@ -1,7 +1,7 @@
 package cz.cuni.mff.d3s.autodebugger.instrumentor.common.factories;
 
-import cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifier.PackageIdentifier;
-import cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifier.PackageIdentifierParameters;
+import cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifiers.PackageIdentifier;
+import cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifiers.PackageIdentifierParameters;
 import lombok.Getter;
 
 public class PackageIdentifierFactory extends IdentifierFactory {

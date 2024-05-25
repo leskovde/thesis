@@ -1,7 +1,7 @@
 package cz.cuni.mff.d3s.autodebugger.instrumentor.common.factories;
 
-import cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifier.VariableIdentifier;
-import cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifier.VariableIdentifierParameters;
+import cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifiers.VariableIdentifier;
+import cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifiers.VariableIdentifierParameters;
 import lombok.Getter;
 
 public class VariableIdentifierFactory extends IdentifierFactory {

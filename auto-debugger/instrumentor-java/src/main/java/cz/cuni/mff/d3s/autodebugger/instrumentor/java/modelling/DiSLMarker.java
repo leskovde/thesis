@@ -11,7 +11,7 @@ public class DiSLMarker extends Metaclass {
     private MarkerType markerType;
 
     @Override
-    public String emitCode(int indentLevel) {
+    public String emitCode() {
         append("marker = ");
         append(markerType.markerName);
         append(".class");

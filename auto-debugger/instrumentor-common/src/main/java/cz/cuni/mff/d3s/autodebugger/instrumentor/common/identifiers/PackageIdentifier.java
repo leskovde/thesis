@@ -1,4 +1,4 @@
-package cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifier;
+package cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifiers;
 
 import lombok.Builder;
 import lombok.Getter;

@@ -3,7 +3,7 @@ package cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.common.Instrumentor;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.common.factories.IdentifierFactory;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.common.factories.MethodIdentifierFactory;
-import cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifier.*;
+import cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifiers.*;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.common.modelling.Model;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.java.factories.ExportableValueFactory;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling.enums.ActivationTime;
@@ -65,5 +65,36 @@ public class DiSLModel extends Model {
     }
     classBuilder.logic(logic);
     rootClass = classBuilder.build();
+  }
+
+  @Override
+  public String transform() {
+    var result = super.transform();
+    return addIndentation(result);
+  }
+
+  private String addIndentation(String code) {
+    StringBuilder indentedCode = new StringBuilder();
+    int indentLevel = 0;
+    for (char c : code.toCharArray()) {
+      if (c == '{') {
+        indentLevel++;
+      }
+      if (c == '}') {
+        indentLevel--;
+        assert(indentLevel >= 0);
+        assert(indentedCode.length() - 1 >= 0);
+        if (indentedCode.charAt(indentedCode.length() - 1) == '\t') {
+          indentedCode.deleteCharAt(indentedCode.length() - 1);
+        }
+      }
+      if (c == '\n') {
+        indentedCode.append(c);
+        indentedCode.append("\t".repeat(indentLevel));
+        continue;
+      }
+      indentedCode.append(c);
+    }
+    return indentedCode.toString();
   }
 }

@@ -1,7 +1,7 @@
 package cz.cuni.mff.d3s.autodebugger.instrumentor.common.factories;
 
-import cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifier.Identifier;
-import cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifier.IdentifierParameters;
+import cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifiers.Identifier;
+import cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifiers.IdentifierParameters;
 
 public abstract class IdentifierFactory {
     protected int id = 0;

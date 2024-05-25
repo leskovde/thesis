@@ -7,6 +7,6 @@ public abstract class Model {
   protected Metaclass rootClass;
 
   public String transform() {
-    return rootClass.emitCode(0);
+    return rootClass.emitCode();
   }
 }

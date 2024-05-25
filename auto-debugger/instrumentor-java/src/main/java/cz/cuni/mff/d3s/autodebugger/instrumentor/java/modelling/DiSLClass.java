@@ -15,17 +15,17 @@ public class DiSLClass extends Metaclass {
     protected List<DiSLInstrumentationLogic> logic;
 
     @Override
-    public String emitCode(int indentLevel) {
-        append(classPackage.emitCode(indentLevel));
+    public String emitCode() {
+        append(classPackage.emitCode());
         append("\n\n");
         for (JavaPackageImport imp : imports) {
-            append(imp.emitCode(indentLevel));
+            append(imp.emitCode());
             append("\n");
         }
         append("\npublic class " + CLASS_NAME + " {\n");
         for (DiSLInstrumentationLogic method : logic) {
             append("\n");
-            append(method.emitCode(indentLevel + 1));
+            append(method.emitCode());
         }
         append("\n}\n");
         return getCode();

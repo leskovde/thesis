@@ -1,4 +1,4 @@
-package cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifier;
+package cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifiers;
 
 import cz.cuni.mff.d3s.autodebugger.instrumentor.common.enums.ExportableValueType;
 import lombok.Getter;

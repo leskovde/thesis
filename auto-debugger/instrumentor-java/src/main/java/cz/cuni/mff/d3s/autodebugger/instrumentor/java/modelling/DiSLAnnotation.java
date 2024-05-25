@@ -13,13 +13,13 @@ public class DiSLAnnotation extends Metaclass {
     private DiSLScope targetMethod;
 
     @Override
-    public String emitCode(int indentLevel) {
+    public String emitCode() {
         append("@");
         append(activationTime.annotationCode);
         append("(");
-        append(marker.emitCode(indentLevel));
+        append(marker.emitCode());
         append(", ");
-        append(targetMethod.emitCode(indentLevel));
+        append(targetMethod.emitCode());
         append(")");
         return getCode();
     }

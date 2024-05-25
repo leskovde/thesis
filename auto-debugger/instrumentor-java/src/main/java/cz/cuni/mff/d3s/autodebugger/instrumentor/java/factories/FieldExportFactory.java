@@ -1,6 +1,6 @@
 package cz.cuni.mff.d3s.autodebugger.instrumentor.java.factories;
 
-import cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifier.VariableIdentifier;
+import cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifiers.VariableIdentifier;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling.JavaField;
 import lombok.Getter;
 

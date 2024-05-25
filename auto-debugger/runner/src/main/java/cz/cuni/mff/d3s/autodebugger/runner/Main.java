@@ -2,9 +2,9 @@ package cz.cuni.mff.d3s.autodebugger.runner;
 
 import cz.cuni.mff.d3s.autodebugger.instrumentor.common.enums.ExportableValueType;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.common.factories.IdentifierFactory;
-import cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifier.IdentifierParameters;
-import cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifier.MethodIdentifierParameters;
-import cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifier.VariableIdentifierParameters;
+import cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifiers.IdentifierParameters;
+import cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifiers.MethodIdentifierParameters;
+import cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifiers.VariableIdentifierParameters;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.java.DiSLInstrumentor;
 
 import java.util.List;
@@ -37,3 +37,54 @@ public class Main {
     instrumentor.runInstrumentation();
   }
 }
+
+/*
+// Mozny format vstupu
+test.jar
+void Test.test()
+int a
+int b
+ */
+
+/*
+// Mozne spousteni z prikazove radky
+./runner.exe test.jar Test.test()
+ */
+
+
+/*
+// Oznacim, ze chci sledovat foo
+// + vsechny parametry, navratovou hodnotu
+// + fieldy pro setup objektu
+String foo(int bar) {
+  ...
+  api = Repository.getInstance()
+  ...
+}
+
+knownValuesForBar = {0, 1, 2}
+knownFieldsForThis = {3, 4, 5}
+
+// Priklad UT
+void generatedTest_1_3() {
+  // Arrange
+  Object o = new TestSomething();
+  setup(o, 3);
+
+  // Act
+  result = o.foo(bar: 0);
+
+  // Assert
+  assert()
+}
+
+// Priklad testu vnitrku - mozna dalsi faze pro padajici IT
+// Foo upraveno pomoci Delta Debugging nebo jineho rezani
+void generatedTestReduced_1_3() {
+  bar = 0;
+  ...
+  api = Repository.getInstance()
+  ...
+}
+
+ */

@@ -15,7 +15,7 @@ public class JavaField extends ExportableValue {
 
     // TODO: Static fields
     @Override
-    public String emitCode(int indentLevel) {
+    public String emitCode() {
     // dc.getThis (), TargetClass.class, "instName", String.class
         append("\n");
         append(type);

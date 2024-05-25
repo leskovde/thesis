@@ -12,7 +12,7 @@ public class JavaVariable extends ExportableValue {
     }
 
     @Override
-    public String emitCode(int indentLevel) {
+    public String emitCode() {
         append("\n");
         append(type);
         append(" ");
