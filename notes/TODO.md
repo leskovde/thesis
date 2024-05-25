@@ -23,4 +23,10 @@
 - [ ] Map variable names to slot indices
 - Tests
 	- [ ] Add UTs to code generation
-- [ ] Create a PNG folder in notes for individual diagrams
+- [x] Create a PNG folder in notes for individual diagrams
+- Write down a section of encountered problems
+	- [ ] Modeling (metaclasses etc.)
+	- [ ] Exporting values with non-primitive types
+		- [ ] External types specific to just the target app
+	- [ ] Tech debt
+	- [ ] Development testing  
