@@ -17,7 +17,6 @@ public class JavaField extends ExportableValue {
     @Override
     public String emitCode() {
     // dc.getThis (), TargetClass.class, "instName", String.class
-        append("\n");
         append(type);
         append(" ");
         append(instrumentationVariableIdentifier.getName());

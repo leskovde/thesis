@@ -1,10 +1,11 @@
 package cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifiers;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
 @Getter
-@Builder
+@AllArgsConstructor
 public class PackageIdentifier implements Identifier {
     private final String packageName;
 

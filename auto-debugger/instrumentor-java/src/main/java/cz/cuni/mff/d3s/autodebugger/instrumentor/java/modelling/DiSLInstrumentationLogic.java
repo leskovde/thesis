@@ -22,8 +22,9 @@ public class DiSLInstrumentationLogic extends Metaclass {
         append("(DynamicContext di) {\n");
         for (Metaclass variable : exports) {
             append(variable.emitCode());
+            append("\n");
         }
-        append("\n}");
+        append("}");
         return getCode();
     }
 }

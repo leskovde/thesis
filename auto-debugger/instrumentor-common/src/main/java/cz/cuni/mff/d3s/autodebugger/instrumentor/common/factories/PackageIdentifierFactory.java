@@ -12,10 +12,10 @@ public class PackageIdentifierFactory extends IdentifierFactory {
     }
 
     public PackageIdentifier createIdentifier(PackageIdentifierParameters parameters) {
-        return PackageIdentifier.builder().packageName(parameters.packageName).build();
+        return new PackageIdentifier(parameters.packageName);
     }
 
     public PackageIdentifier generateIdentifier() {
-        return PackageIdentifier.builder().packageName("generatedPackage" + id++).build();
+        return new PackageIdentifier("generatedPackage" + id++);
     }
 }

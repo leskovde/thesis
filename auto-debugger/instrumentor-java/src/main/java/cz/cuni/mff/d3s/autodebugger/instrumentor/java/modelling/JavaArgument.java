@@ -13,7 +13,6 @@ public class JavaArgument extends ExportableValue {
 
     @Override
     public String emitCode() {
-        append("\n");
         append(type);
         append(" ");
         append(instrumentationVariableIdentifier.getName());
