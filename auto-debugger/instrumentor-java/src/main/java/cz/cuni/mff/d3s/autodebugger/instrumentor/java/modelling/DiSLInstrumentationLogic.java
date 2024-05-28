@@ -27,6 +27,7 @@ public class DiSLInstrumentationLogic extends Metaclass {
         append("FileOutputStream fileOut;");
         append("ObjectOutputStream out;");
         append("try {\n");
+        // TODO: Not going to work for multiple values
         for (ExportableValue variable : exports) {
             append("fileOut = new FileOutputStream(\"");
             append(variable.instrumentationVariableIdentifier.getName());

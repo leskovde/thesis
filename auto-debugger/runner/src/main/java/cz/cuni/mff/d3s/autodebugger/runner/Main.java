@@ -1,5 +1,6 @@
 package cz.cuni.mff.d3s.autodebugger.runner;
 
+import cz.cuni.mff.d3s.autodebugger.analyzer.Trace;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.common.enums.ExportableValueType;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.common.factories.IdentifierFactory;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifiers.IdentifierParameters;
@@ -34,8 +35,8 @@ public class Main {
                                             .exportableType(ExportableValueType.VARIABLE)
                                             .build()))))
             .build();
-    var resultPath = instrumentor.runInstrumentation();
-
+    var resultPaths = instrumentor.runInstrumentation();
+    new Trace(resultPaths);
   }
 }
 

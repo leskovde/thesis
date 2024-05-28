@@ -6,6 +6,7 @@ import cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifiers.VariableIden
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,9 +18,9 @@ import lombok.extern.slf4j.Slf4j;
 public class Trace {
   private final Map<VariableIdentifier, Set<Object>> variableValues = new HashMap<>();
 
-  public Trace(List<String> paths) {
+  public Trace(List<Path> paths) {
     try {
-      for (String path : paths) {
+      for (var path : paths) {
         deserializeTrace(path);
       }
     } catch (IOException i) {
@@ -58,12 +59,12 @@ public class Trace {
     return keys.map(variableValues::get).flatMap(Set::stream).collect(Collectors.toSet());
   }
 
-  private void deserializeTrace(String path) throws IOException, ClassNotFoundException {
-    try (var fileIn = new FileInputStream(path);
+  private void deserializeTrace(Path path) throws IOException, ClassNotFoundException {
+    try (var fileIn = new FileInputStream(path.toFile());
         var in = new ObjectInputStream(fileIn)) {
       var value = in.readObject();
       var identifier =
-          new VariableIdentifier(VariableIdentifierParameters.builder().variableName(path).build());
+          new VariableIdentifier(VariableIdentifierParameters.builder().variableName(path.getFileName().toString()).build());
       if (variableValues.containsValue(identifier)) {
         variableValues.get(identifier).add(value);
       } else {
