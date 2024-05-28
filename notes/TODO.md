@@ -23,6 +23,7 @@
 - [ ] Map variable names to slot indices
 - Tests
 	- [ ] Add UTs to code generation
+- [ ] Explore ShadowVM for ShadowObject API and RemoteAnalysis
 - [x] Create a PNG folder in notes for individual diagrams
 - Write down a section of encountered problems
 	- [ ] Modeling (metaclasses etc.)
@@ -30,3 +31,5 @@
 		- [ ] External types specific to just the target app
 	- [ ] Tech debt
 	- [ ] Development testing  
+	- [ ] Access to sources
+		- [ ] Makes things easier, for example getting fields from a class makes use of imports
