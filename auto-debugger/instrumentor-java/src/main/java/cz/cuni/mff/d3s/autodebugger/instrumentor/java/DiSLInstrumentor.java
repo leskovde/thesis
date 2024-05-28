@@ -21,10 +21,7 @@ public class DiSLInstrumentor extends Instrumentor {
   @Override
   public List<Path> runInstrumentation() {
     var jarPath = generateDiSLClass(new DiSLModel(this)).flatMap(this::compileDiSLClass);
-    if (jarPath.isEmpty()) {
-      return List.of();
-    }
-    return instrumentApplication(jarPath.get());
+    return jarPath.map(this::instrumentApplication).orElseGet(List::of);
   }
 
   private List<Path> instrumentApplication(String jarPath) {
@@ -43,12 +40,12 @@ public class DiSLInstrumentor extends Instrumentor {
                   "-jar",
                   applicationPath)
               .start();
-      // Print stdout
+      // Collect stdout
       try (var stdoutReader =
           new BufferedReader(new InputStreamReader(scriptProcess.getInputStream()))) {
         String line;
         while ((line = stdoutReader.readLine()) != null) {
-          System.out.println(line);
+          paths.add(Path.of(line));
         }
       }
       // Print stderr
@@ -56,7 +53,7 @@ public class DiSLInstrumentor extends Instrumentor {
           new BufferedReader(new InputStreamReader(scriptProcess.getErrorStream()))) {
         String line;
         while ((line = stderrReader.readLine()) != null) {
-          System.err.println(line);
+          log.error(line);
         }
       }
       scriptProcess.waitFor();
