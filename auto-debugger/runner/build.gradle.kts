@@ -10,6 +10,7 @@ repositories {
 }
 
 dependencies {
+    implementation(project(mapOf("path" to ":analyzer")))
     implementation(project(mapOf("path" to ":instrumentor-common")))
     implementation(project(mapOf("path" to ":instrumentor-java")))
     testImplementation(platform("org.junit:junit-bom:5.9.1"))
