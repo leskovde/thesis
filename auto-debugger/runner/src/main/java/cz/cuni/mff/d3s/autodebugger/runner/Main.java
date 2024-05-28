@@ -34,7 +34,8 @@ public class Main {
                                             .exportableType(ExportableValueType.VARIABLE)
                                             .build()))))
             .build();
-    instrumentor.runInstrumentation();
+    var resultPath = instrumentor.runInstrumentation();
+
   }
 }
 

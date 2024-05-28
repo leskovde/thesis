@@ -8,19 +8,18 @@ import cz.cuni.mff.d3s.autodebugger.instrumentor.common.modelling.Model;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.java.factories.ExportableValueFactory;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling.enums.ActivationTime;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling.enums.MarkerType;
-import lombok.extern.slf4j.Slf4j;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class DiSLModel extends Model {
   private final String DEFAULT_PACKAGE_NAME = "cz.cuni.mff.d3s.autodebugger.analyzer.disl";
   private final JavaPackage DEFAULT_PACKAGE =
-      new JavaPackage(IdentifierFactory.createFrom(
-              new IdentifierParameters(
-                      new PackageIdentifierParameters(DEFAULT_PACKAGE_NAME))));
+      new JavaPackage(
+          IdentifierFactory.createFrom(
+              new IdentifierParameters(new PackageIdentifierParameters(DEFAULT_PACKAGE_NAME))));
   private final List<String> DISL_LIBRARY_IMPORTS =
       List.of(
           "ch.usi.dag.disl.annotation.After",
@@ -28,17 +27,21 @@ public class DiSLModel extends Model {
           "ch.usi.dag.disl.dynamiccontext.DynamicContext",
           "ch.usi.dag.disl.marker.BodyMarker");
   private final List<String> JAVA_IMPORTS =
-      List.of("java.io.FileNotFoundException", "java.io.IOException", "java.io.RandomAccessFile");
+      List.of(
+          "java.io.FileNotFoundException",
+          "java.io.IOException",
+          "java.io.FileOutputStream",
+          "java.io.ObjectOutputStream");
 
   public DiSLModel(Instrumentor instrumentor) {
     var classBuilder = DiSLClass.builder().classPackage(DEFAULT_PACKAGE);
     List<JavaPackageImport> imports =
         Stream.concat(DISL_LIBRARY_IMPORTS.stream(), JAVA_IMPORTS.stream())
-                .map(PackageIdentifierParameters::new)
-                .map(IdentifierParameters::new)
-                .map(IdentifierFactory::createFrom)
-                .map(JavaPackageImport::new)
-                .toList();
+            .map(PackageIdentifierParameters::new)
+            .map(IdentifierParameters::new)
+            .map(IdentifierFactory::createFrom)
+            .map(JavaPackageImport::new)
+            .toList();
     classBuilder.imports(imports);
     List<ExportableValue> exports = new ArrayList<>();
     for (var identifier : instrumentor.getVariables()) {
@@ -46,22 +49,24 @@ public class DiSLModel extends Model {
         String variableType = variableIdentifier.getType();
         // TODO: Determine frame slot
         exports.add(ExportableValueFactory.createFrom(variableIdentifier));
-        } else {
+      } else {
         log.error("Variable {} is not a VariableIdentifier", identifier);
       }
     }
     List<DiSLInstrumentationLogic> logic = new ArrayList<>();
     for (var i = 0; i < instrumentor.getMethods().size(); i++) {
       var method = instrumentor.getMethods().get(i);
-      var parameters = MethodIdentifierParameters.builder()
+      var parameters =
+          MethodIdentifierParameters.builder()
               .returnType("void")
               .className("DiSLClass")
               .parameterTypes(List.of("DynamicContext"))
               .build();
       var methodIdentifier = MethodIdentifierFactory.getInstance().generateIdentifier(parameters);
       var annotation =
-          new DiSLAnnotation(ActivationTime.BEFORE, new DiSLMarker(MarkerType.BODY), new DiSLScope(method));
-        logic.add(new DiSLInstrumentationLogic(methodIdentifier, annotation, exports));
+          new DiSLAnnotation(
+              ActivationTime.BEFORE, new DiSLMarker(MarkerType.BODY), new DiSLScope(method));
+      logic.add(new DiSLInstrumentationLogic(methodIdentifier, annotation, exports));
     }
     classBuilder.logic(logic);
     rootClass = classBuilder.build();
@@ -82,8 +87,8 @@ public class DiSLModel extends Model {
       }
       if (c == '}') {
         indentLevel--;
-        assert(indentLevel >= 0);
-        assert(indentedCode.length() - 1 >= 0);
+        assert (indentLevel >= 0);
+        assert (indentedCode.length() - 1 >= 0);
         if (indentedCode.charAt(indentedCode.length() - 1) == '\t') {
           indentedCode.deleteCharAt(indentedCode.length() - 1);
         }

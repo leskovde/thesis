@@ -4,6 +4,7 @@ import cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifiers.Identifier;
 import lombok.Getter;
 import lombok.experimental.SuperBuilder;
 
+import java.nio.file.Path;
 import java.util.List;
 
 @SuperBuilder
@@ -15,5 +16,5 @@ public abstract class Instrumentor {
     protected final List<Identifier> variables;
     protected final List<Identifier> methods;
 
-    public abstract void runInstrumentation();
+    public abstract List<Path> runInstrumentation();
 }

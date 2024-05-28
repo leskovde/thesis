@@ -24,7 +24,20 @@ public class DiSLInstrumentationLogic extends Metaclass {
             append(variable.emitCode());
             append("\n");
         }
-        append("}");
+        append("try {\n");
+        append("FileOutputStream fileOut = new FileOutputStream(\"variables.ser\");\n");
+        append("ObjectOutputStream out = new ObjectOutputStream(fileOut);\n");
+        for (ExportableValue variable : exports) {
+            append("out.writeObject(");
+            append(variable.instrumentationVariableIdentifier.getName());
+            append(");\n");
+        }
+        append("out.close();\n");
+        append("fileOut.close();\n");
+        append("} catch (IOException e) {\n");
+        append("e.printStackTrace();\n");
+        append("}\n");
+        append("}\n");
         return getCode();
     }
 }
