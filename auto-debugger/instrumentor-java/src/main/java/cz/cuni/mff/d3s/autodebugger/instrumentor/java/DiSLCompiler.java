@@ -61,6 +61,7 @@ public class DiSLCompiler {
   private Optional<String> packageObjects(StandardJavaFileManager fileManager) {
     Manifest manifest = new Manifest();
     manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
+    manifest.getMainAttributes().putValue("DiSL-Classes", "DiSLClass");
     try {
       if (new File(JAR_TARGET).getParentFile().mkdirs()) {
         log.info("Created JAR directory");
