@@ -10,10 +10,12 @@ import cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling.enums.MarkerType
 import java.util.List;
 
 public class Constants {
+    public static final String targetClassName = "Test";
+    public static final String targetMethodName = "test";
     public static final MethodIdentifierParameters targetMethodIdentifierParameters =
             MethodIdentifierParameters.builder()
-                    .className("Test")
-                    .methodName("test")
+                    .className(targetClassName)
+                    .methodName(targetMethodName)
                     .returnType("void")
                     .build();
     public static final MethodIdentifierParameters instrumentationLogicIdentifierParameters =
