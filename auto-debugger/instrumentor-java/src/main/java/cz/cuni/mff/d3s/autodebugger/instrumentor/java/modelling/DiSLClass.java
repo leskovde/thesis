@@ -10,14 +10,11 @@ import java.util.List;
 @Builder
 public class DiSLClass extends Metaclass {
     private final String CLASS_NAME = "DiSLClass";
-    private JavaPackage classPackage;
     private List<JavaPackageImport> imports;
     protected List<DiSLInstrumentationLogic> logic;
 
     @Override
     public String emitCode() {
-        append(classPackage.emitCode());
-        append("\n\n");
         for (JavaPackageImport imp : imports) {
             append(imp.emitCode());
             append("\n");

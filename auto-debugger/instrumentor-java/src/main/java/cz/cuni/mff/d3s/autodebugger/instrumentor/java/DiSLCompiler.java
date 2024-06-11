@@ -1,7 +1,7 @@
 package cz.cuni.mff.d3s.autodebugger.instrumentor.java;
 
-import cz.cuni.mff.d3s.autodebugger.instrumentor.common.Instrumentor;
 import java.io.*;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -16,13 +16,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @AllArgsConstructor
 public class DiSLCompiler {
-  private final String DISL_CLASS_PATH = "../../disl/output/lib/";
-  private final String JAR_TARGET = "analyzer-disl/build/libs/instrumentation.jar";
   // private final List<String> JAVAC_OPTIONS = List.of("-proc:only");
+  private DiSLInstrumentor instrumentor;
 
-  private Instrumentor instrumentor;
-
-  public Optional<String> compileDiSLClass(String sourcePath) {
+  public Optional<Path> compileDiSLClass(String sourcePath) {
     // TODO: Maybe via Gradle?
     //  https://stackoverflow.com/questions/49876189/how-to-run-a-gradle-task-from-a-java-code
     try {
@@ -58,19 +55,20 @@ public class DiSLCompiler {
     }
   }
 
-  private Optional<String> packageObjects(StandardJavaFileManager fileManager) {
+  private Optional<Path> packageObjects(StandardJavaFileManager fileManager) {
     Manifest manifest = new Manifest();
     manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
     manifest.getMainAttributes().putValue("DiSL-Classes", "DiSLClass");
     try {
-      if (new File(JAR_TARGET).getParentFile().mkdirs()) {
+      if (instrumentor.getJarOutputPath().toFile().getParentFile().mkdirs()) {
         log.info("Created JAR directory");
       }
     } catch (Exception e) {
       log.error("Failed to create JAR directory", e);
       return Optional.empty();
     }
-    try (JarOutputStream target = new JarOutputStream(new FileOutputStream(JAR_TARGET), manifest)) {
+    try (JarOutputStream target =
+        new JarOutputStream(new FileOutputStream(instrumentor.getJarOutputPath().toFile()), manifest)) {
       for (var object :
           fileManager.list(
               StandardLocation.CLASS_OUTPUT, "", Set.of(JavaFileObject.Kind.CLASS), true)) {
@@ -81,7 +79,7 @@ public class DiSLCompiler {
       log.error("Failed to package DiSL class", e);
       return Optional.empty();
     }
-    return Optional.of(JAR_TARGET);
+    return Optional.of(instrumentor.getJarOutputPath());
   }
 
   private void addToJar(File source, JarOutputStream target) throws IOException {
@@ -115,8 +113,8 @@ public class DiSLCompiler {
 
   private List<File> getDiSLClassPath() {
     return List.of(
-            new File(DISL_CLASS_PATH, "disl-server.jar"),
-            new File(DISL_CLASS_PATH, "dislre-server.jar"),
-            new File(DISL_CLASS_PATH, "dislre-dispatch.jar"));
+        new File(instrumentor.getDislClassPath().toString(), "disl-server.jar"),
+        new File(instrumentor.getDislClassPath().toString(), "dislre-server.jar"),
+        new File(instrumentor.getDislClassPath().toString(), "dislre-dispatch.jar"));
   }
 }

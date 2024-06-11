@@ -9,14 +9,37 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import lombok.Builder;
+import lombok.Getter;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @SuperBuilder
 public class DiSLInstrumentor extends Instrumentor {
-  private final String dislRunnerPath = "../../disl/bin/disl.py";
-  private final String dislHomePath = "../../disl/output";
+
+  @Builder.Default
+  private Path dislRepositoryPath = Path.of("../../disl/");
+
+  @Builder.Default
+  private Path generatedCodeOutputDirectory = Path.of("analyzer-disl/src/main/java/cz/cuni/mff/d3s/autodebugger/analyzer/disl/");
+
+  @Getter
+  @Builder.Default
+  private Path jarOutputPath = Path.of("analyzer-disl/build/libs/instrumentation.jar");
+
+  public Path getDislClassPath() {
+    return dislRepositoryPath.resolve("output/lib/");
+  }
+
+  public Path getDislRunnerPath() {
+    return dislRepositoryPath.resolve("bin/disl.py");
+  }
+
+  public Path getDislHomePath() {
+    return dislRepositoryPath.resolve("output");
+  }
 
   @Override
   public List<Path> runInstrumentation() {
@@ -24,21 +47,21 @@ public class DiSLInstrumentor extends Instrumentor {
     return jarPath.map(this::instrumentApplication).orElseGet(List::of);
   }
 
-  private List<Path> instrumentApplication(String jarPath) {
+  private List<Path> instrumentApplication(Path instrumentationJarPath) {
     List<Path> paths = new ArrayList<>();
     log.info("Running DiSL instrumentation");
     try {
       var scriptProcess =
           new ProcessBuilder(
                   "python3",
-                  dislRunnerPath,
+                  getDislRunnerPath().toString(),
                   "-d",
-                  dislHomePath,
+                  getDislHomePath().toString(),
                   "-cse",
                   "--",
-                  jarPath,
+                  instrumentationJarPath.toString(),
                   "-jar",
-                  applicationPath)
+                  applicationJarPath.toString())
               .start();
       // Collect stdout
       try (var stdoutReader =
@@ -65,11 +88,11 @@ public class DiSLInstrumentor extends Instrumentor {
   }
 
   private Optional<String> generateDiSLClass(Model model) {
-    var generator = new DiSLClassGenerator(model);
+    var generator = new DiSLClassGenerator(generatedCodeOutputDirectory, model);
     return generator.generateCode();
   }
 
-  private Optional<String> compileDiSLClass(String classPath) {
+  private Optional<Path> compileDiSLClass(String classPath) {
     var compiler = new DiSLCompiler(this);
     return compiler.compileDiSLClass(classPath);
   }

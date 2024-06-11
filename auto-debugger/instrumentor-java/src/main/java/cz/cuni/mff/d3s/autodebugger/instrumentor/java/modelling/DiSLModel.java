@@ -34,7 +34,7 @@ public class DiSLModel extends Model {
           "java.io.ObjectOutputStream");
 
   public DiSLModel(Instrumentor instrumentor) {
-    var classBuilder = DiSLClass.builder().classPackage(DEFAULT_PACKAGE);
+    var classBuilder = DiSLClass.builder();
     List<JavaPackageImport> imports =
         Stream.concat(DISL_LIBRARY_IMPORTS.stream(), JAVA_IMPORTS.stream())
             .map(PackageIdentifierParameters::new)

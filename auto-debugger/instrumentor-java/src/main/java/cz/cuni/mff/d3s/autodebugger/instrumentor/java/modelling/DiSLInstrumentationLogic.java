@@ -25,7 +25,8 @@ public class DiSLInstrumentationLogic extends Metaclass {
             append("\n");
         }
         append("FileOutputStream fileOut;");
-        append("ObjectOutputStream out;");
+        // TODO: Remove redundant '\n'
+        append("ObjectOutputStream out;\n");
         append("try {\n");
         // TODO: Not going to work for multiple values
         for (ExportableValue variable : exports) {
