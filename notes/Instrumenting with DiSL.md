@@ -1,5 +1,5 @@
 When instrumenting an application with DiSL, one is required to create a JAR with the instrumentation logic. The source code from which the JAR is created may look like this, based on the examples available in DiSL:
-```
+```java
 import ch.usi.dag.disl.annotation.After;  
 import ch.usi.dag.disl.annotation.AfterThrowing;  
 import ch.usi.dag.disl.annotation.AfterReturning;  
