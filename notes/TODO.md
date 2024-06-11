@@ -22,9 +22,11 @@
 - [ ] Remove all generated sources before building (via Gradle task)
 - [ ] Map variable names to slot indices
 - Tests
-	- [ ] Add UTs to code generation
+	- [x] Add UTs to code generation
 - [ ] Explore ShadowVM for ShadowObject API and RemoteAnalysis
+- [ ] Move serialization into separate packages, leave them in the project (do not delete them)
 - [x] Create a PNG folder in notes for individual diagrams
+- [ ] Configure Gradle to compile test resources into separate JARs
 - Write down a section of encountered problems
 	- [ ] Modeling (metaclasses etc.)
 	- [ ] Exporting values with non-primitive types
