@@ -28,7 +28,7 @@ public class DiSLInstrumentorTests {
                     new MethodIdentifier(
                         MethodIdentifierParameters.builder()
                             .className("Main")
-                            .methodName("main")
+                            .methodName("testMul")
                             .returnType("void")
                             .build())))
             .variables(
