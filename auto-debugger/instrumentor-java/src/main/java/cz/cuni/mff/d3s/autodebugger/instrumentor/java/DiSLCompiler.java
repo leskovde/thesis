@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @AllArgsConstructor
 public class DiSLCompiler {
+  private final String DISL_CLASS_NAME = "DiSLClass";
   // private final List<String> JAVAC_OPTIONS = List.of("-proc:only");
   private DiSLInstrumentor instrumentor;
 
@@ -24,13 +25,12 @@ public class DiSLCompiler {
     //  https://stackoverflow.com/questions/49876189/how-to-run-a-gradle-task-from-a-java-code
     try {
       log.info("Compiling DiSL class");
-      String fileName = "DiSLClass.java";
-
+      String fileName = DISL_CLASS_NAME + ".java";
       File dislClassFile = new File(sourcePath, fileName);
       JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
       try (StandardJavaFileManager fileManager =
           compiler.getStandardFileManager(null, null, null)) {
-        File outputDirectory = new File("analyzer-disl/build/classes/java/main/");
+        File outputDirectory = new File("../analyzer-disl/build/classes/java/main/");
         try {
           if (outputDirectory.mkdirs()) {
             log.info("Created output directory");
@@ -60,6 +60,19 @@ public class DiSLCompiler {
     manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
     manifest.getMainAttributes().putValue("DiSL-Classes", "DiSLClass");
     try {
+      if (instrumentor.getJarOutputPath().toFile().exists()) {
+        if (instrumentor.getJarOutputPath().toFile().delete()) {
+          log.info("Removed old JAR file");
+        } else {
+          log.error("Failed to remove old JAR file");
+          return Optional.empty();
+        }
+      }
+    } catch (Exception e) {
+      log.error("Failed to remove old JAR file", e);
+      return Optional.empty();
+    }
+    try {
       if (instrumentor.getJarOutputPath().toFile().getParentFile().mkdirs()) {
         log.info("Created JAR directory");
       }
@@ -68,7 +81,8 @@ public class DiSLCompiler {
       return Optional.empty();
     }
     try (JarOutputStream target =
-        new JarOutputStream(new FileOutputStream(instrumentor.getJarOutputPath().toFile()), manifest)) {
+        new JarOutputStream(
+            new FileOutputStream(instrumentor.getJarOutputPath().toFile()), manifest)) {
       for (var object :
           fileManager.list(
               StandardLocation.CLASS_OUTPUT, "", Set.of(JavaFileObject.Kind.CLASS), true)) {
@@ -83,18 +97,21 @@ public class DiSLCompiler {
   }
 
   private void addToJar(File source, JarOutputStream target) throws IOException {
-    String name = source.getPath().replace("\\", "/");
+    // String name = source.getPath().replace("\\", "/");
+    String name = source.toPath().getFileName().toString();
     if (source.isDirectory()) {
-      if (!name.endsWith("/")) {
-        name += "/";
-      }
-      JarEntry entry = new JarEntry(name);
-      entry.setTime(source.lastModified());
-      target.putNextEntry(entry);
-      target.closeEntry();
-      for (File nestedFile : source.listFiles()) {
-        addToJar(nestedFile, target);
-      }
+      //      if (!name.endsWith("/")) {
+      //        name += "/";
+      //      }
+      //      JarEntry entry = new JarEntry(name);
+      //      entry.setTime(source.lastModified());
+      //      target.putNextEntry(entry);
+      //      target.closeEntry();
+      //      for (File nestedFile : source.listFiles()) {
+      //        addToJar(nestedFile, target);
+      //      }
+      log.error("Directory in JAR not supported");
+      throw new IOException("Directory in JAR not supported");
     } else {
       JarEntry entry = new JarEntry(name);
       entry.setTime(source.lastModified());
