@@ -66,7 +66,7 @@ public class DiSLModel extends Model {
       var annotation =
           new DiSLAnnotation(
               ActivationTime.BEFORE, new DiSLMarker(MarkerType.BODY), new DiSLScope(method));
-      logic.add(new DiSLInstrumentationLogic(methodIdentifier, annotation, exports));
+      logic.add(new ShadowDiSLInstrumentationLogic(methodIdentifier, annotation, exports));
     }
     classBuilder.logic(logic);
     rootClass = classBuilder.build();
