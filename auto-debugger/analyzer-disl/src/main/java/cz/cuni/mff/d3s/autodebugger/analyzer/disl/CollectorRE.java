@@ -8,6 +8,9 @@ public class CollectorRE {
 
   public static void testingBasic(
       final boolean b, final byte by, final char c, final short s, final int i, final long l) {
+
+    System.out.println("[Sending process] PID: " + ProcessHandle.current().pid());
+
     REDispatch.analysisStart(tbId);
 
     REDispatch.sendBoolean(b);

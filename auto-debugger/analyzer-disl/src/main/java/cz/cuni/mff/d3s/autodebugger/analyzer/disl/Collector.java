@@ -59,6 +59,9 @@ public class Collector extends RemoteAnalysis {
 
   public void testingBasic(
       final boolean b, final byte by, final char c, final short s, final int i, final long l) {
+
+    System.out.println("[Receiving process] PID: " + ProcessHandle.current().pid());
+
     if (b != true) {
       throw new RuntimeException("Incorect transfer of boolean");
     }
