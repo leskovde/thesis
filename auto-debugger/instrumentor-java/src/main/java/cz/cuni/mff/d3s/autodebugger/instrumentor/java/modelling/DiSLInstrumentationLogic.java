@@ -9,44 +9,8 @@ import java.util.List;
 
 @Getter
 @AllArgsConstructor
-public class DiSLInstrumentationLogic extends Metaclass {
-    private final Identifier identifier;
-    private final DiSLAnnotation annotation;
+public abstract class DiSLInstrumentationLogic extends Metaclass {
+    protected final Identifier identifier;
+    protected final DiSLAnnotation annotation;
     protected List<ExportableValue> exports;
-
-    @Override
-    public String emitCode() {
-        append(annotation.emitCode());
-        append("\npublic static void ");
-        append(identifier.getName());
-        append("(DynamicContext di) {\n");
-        for (Metaclass variable : exports) {
-            append(variable.emitCode());
-            append("\n");
-        }
-        append("FileOutputStream fileOut;");
-        // TODO: Remove redundant '\n'
-        append("ObjectOutputStream out;\n");
-        append("try {\n");
-        // TODO: Not going to work for multiple values
-        for (ExportableValue variable : exports) {
-            append("fileOut = new FileOutputStream(\"");
-            append(variable.instrumentationVariableIdentifier.getName());
-            append(".ser\");\n");
-            append("out = new ObjectOutputStream(fileOut);\n");
-            append("out.writeObject(");
-            append(variable.instrumentationVariableIdentifier.getName());
-            append(");\n");
-            append("out.close();\n");
-            append("fileOut.close();\n");
-            append("System.out.println(\"");
-            append(variable.instrumentationVariableIdentifier.getName());
-            append(".ser\");\n");
-        }
-        append("} catch (IOException e) {\n");
-        append("e.printStackTrace();\n");
-        append("}\n");
-        append("}\n");
-        return getCode();
-    }
 }
