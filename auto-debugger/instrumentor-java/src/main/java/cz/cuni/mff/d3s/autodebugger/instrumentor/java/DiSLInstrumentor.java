@@ -68,7 +68,8 @@ public class DiSLInstrumentor extends Instrumentor {
           new BufferedReader(new InputStreamReader(scriptProcess.getInputStream()))) {
         String line;
         while ((line = stdoutReader.readLine()) != null) {
-          paths.add(Path.of(line));
+//          paths.add(Path.of(line));
+            log.info(line);
         }
       }
       // Print stderr

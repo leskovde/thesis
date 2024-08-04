@@ -27,6 +27,8 @@ public class DiSLCompiler {
       log.info("Compiling DiSL class");
       String fileName = DISL_CLASS_NAME + ".java";
       File dislClassFile = new File(sourcePath, fileName);
+      File collectorClassFile = new File(sourcePath, "Collector.java");
+      File collectorReClassFile = new File(sourcePath, "CollectorRe.java");
       JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
       try (StandardJavaFileManager fileManager =
           compiler.getStandardFileManager(null, null, null)) {
@@ -42,7 +44,7 @@ public class DiSLCompiler {
         fileManager.setLocation(StandardLocation.CLASS_OUTPUT, List.of(outputDirectory));
         fileManager.setLocation(StandardLocation.CLASS_PATH, getDiSLClassPath());
         Iterable<? extends JavaFileObject> compilationUnits =
-            fileManager.getJavaFileObjectsFromFiles(List.of(dislClassFile));
+            fileManager.getJavaFileObjectsFromFiles(List.of(dislClassFile, collectorClassFile, collectorReClassFile));
         if (!compiler.getTask(null, fileManager, null, null, null, compilationUnits).call()) {
           log.error("Failed to compile DiSL class");
           return Optional.empty();
