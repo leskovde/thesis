@@ -47,3 +47,107 @@ public static void generatedMethod0(DynamicContext di) {
 #### GRPC
 
 #### ShadowVM
+A built-in way of sending values from the instrumentation to another process is through the ShadowObject API.
+
+ShadowVM serves as a system for creating dynamic analyses on top of the DiSL instrumentation. While the DiSL instrumentation can provides us with means of observing the instrumented application, ShadowVM allows us to use the observed values in a custom analyzer. 
+
+##### ShadowVM Example
+In order to illustrate the purpose of ShadowVM and the ShadowObject API, let's look at the following code based on the `dispatch` example in the DiSL repository.
+
+The instrumented (target) application's code is listed below. Running the main function is enough to trigger the instrumentation, so the body of the function is kept simple.
+```java
+public class Main {  
+    
+    public static void main(String[] args) {  
+    
+       System.out.println("[Instrumentee process] PID: " + ProcessHandle.current().pid());  
+  
+       System.out.println("app: main");  
+    }  
+}
+```
+
+Below is the instrumentation code. The logic of the instrumentation might be more complex, e.g., listing values of local variables and parameters. However, here it's kept simple. The instrumentation just performs a call to a custom analysis logic exposed by `CodeExecutedRE`.
+```java
+public class DiSLClass {  
+  
+    @After(marker = BodyMarker.class, scope = "Main.main")  
+    public static void testing() {  
+  
+       System.out.println("[Instrumentation process] PID: " + ProcessHandle.current().pid());  
+  
+       CodeExecutedRE.testingBasic(true, (byte) 125, 's', (short) 50000, 100000, 10000000000L);
+    }  
+}
+```
+
+In `CodeExecutedRE`, we showcase the possibility of transferring obtained values from one process to another. Using the `REDispatch` class, we send several primitive values to the receiving process. The same applies to objects, these are however omitted from this simple example and showcased in later sections.
+```java
+public class CodeExecutedRE {
+
+private static short tbId = REDispatch.registerMethod(  
+       "CodeExecuted.testingBasic");
+       
+	public static void testingBasic(final boolean b, final byte by, final char c, final short s, final int i,  
+	         final long l) {  
+	    REDispatch.analysisStart(tbId);  
+	  
+	    System.out.println("[Sending process] PID: " + ProcessHandle.current().pid());  
+	  
+	    REDispatch.sendBoolean(b);  
+	    REDispatch.sendByte(by);  
+	    REDispatch.sendChar(c);  
+	    REDispatch.sendShort(s);  
+	    REDispatch.sendInt(i);  
+	    REDispatch.sendLong(l);  
+	  
+	    REDispatch.analysisEnd();  
+	}
+}
+```
+
+The receiving class extend the `RemoteAnalysis` class provided by DiSL. Here, we can receive primitive values sent to us from the instance of the custom `CodeExecutedRE` class. The primitive values are received in the same form. These values can now be used for further manipulation in an outside process, while the instrumented process remains isolated.
+```java
+public class CodeExecuted extends RemoteAnalysis {
+	public void testingBasic(final boolean b, final byte by, final char c, final short s, final int i, final long l) {  
+	
+	    System.out.println("[Receiving process] PID: " + ProcessHandle.current().pid());  
+	  
+	    if(b != true) {  
+	       throw new RuntimeException("Incorect transfer of boolean");  
+	    }  
+	  
+	    if(by != (byte) 125) {  
+	       throw new RuntimeException("Incorect transfer of byte");  
+	    }  
+	  
+	    if(c != 's') {  
+	       throw new RuntimeException("Incorect transfer of char");  
+	    }  
+	  
+	    if(s != (short) 50000) {  
+	       throw new RuntimeException("Incorect transfer of short");  
+	    }  
+	  
+	    if(i != 100000) {  
+	       throw new RuntimeException("Incorect transfer of int");  
+	    }  
+	  
+	    if(l != 10000000000L) {  
+	       throw new RuntimeException("Incorect transfer of long");  
+	    }
+	}
+}
+```
+
+Upon correct execution with the proper ShadowVM option (`-cse`), we arrive at the following output.
+```
+     [exec] [Instrumentee process] PID: 28737
+     [exec] app: main
+     [exec] [Instrumentation process] PID: 28737
+     [exec] [Sending process] PID: 28737
+     [exec] [Receiving process] PID: 28732
+```
+As we can see, the instrumentation logic in `DiSLClass` and the logic that sends the values in `CodeExecutedRE` are woven into the instrumented (target) application, thus sharing the same PID. The values are received by an outside process, where we can analyze and process the values further.
+
+*TODO: Show ShadowObject API on objects*
