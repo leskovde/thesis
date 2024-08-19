@@ -3,7 +3,7 @@ plugins {
     id("io.freefair.lombok")
 }
 
-group = "org.example"
+group = "cz.cuni.mff.d3s"
 version = "1.0-SNAPSHOT"
 
 repositories {

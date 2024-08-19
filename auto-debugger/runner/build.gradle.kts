@@ -2,7 +2,7 @@ plugins {
     id("java")
 }
 
-group = "org.example"
+group = "cz.cuni.mff.d3s"
 version = "1.0-SNAPSHOT"
 
 repositories {
