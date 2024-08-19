@@ -1,5 +1,5 @@
 plugins {
-    id("java")
+    id("java-library")
 }
 
 group = "cz.cuni.mff.d3s"
@@ -10,8 +10,8 @@ repositories {
 }
 
 dependencies {
-    implementation(project(mapOf("path" to ":test-generator-common")))
-    implementation(project(mapOf("path" to ":analyzer")))
+    api(project(mapOf("path" to ":test-generator-common")))
+    api(project(mapOf("path" to ":analyzer")))
     testImplementation(platform("org.junit:junit-bom:5.9.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
 }
