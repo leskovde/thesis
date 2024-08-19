@@ -1,37 +1,20 @@
 import ch.usi.dag.dislre.REDispatch;
 
 public class CollectorRE {
+  private static final String messageFormat = "[%s]: %s";
+  private static final String processName = "Receiving process";
 
-  private static short tbId = REDispatch.registerMethod("Collector.testingBasic");
+  private static short intId = REDispatch.registerMethod("Collector.collectInt");
 
-  private static short taId = REDispatch.registerMethod("Collector.testingAdvanced");
+  public static void collectInt(final int i) {
+    printPid();
 
-  public static void testingBasic(
-      final boolean b, final byte by, final char c, final short s, final int i, final long l) {
-
-    System.out.println("[Sending process] PID: " + ProcessHandle.current().pid());
-
-    REDispatch.analysisStart(tbId);
-
-    REDispatch.sendBoolean(b);
-    REDispatch.sendByte(by);
-    REDispatch.sendChar(c);
-    REDispatch.sendShort(s);
+    REDispatch.analysisStart(intId);
     REDispatch.sendInt(i);
-    REDispatch.sendLong(l);
-
     REDispatch.analysisEnd();
   }
 
-  public static void testingAdvanced(
-      final String s, final Object o, final Class<?> c, final Thread t) {
-    REDispatch.analysisStart(taId);
-
-    REDispatch.sendObjectPlusData(s);
-    REDispatch.sendObject(o);
-    REDispatch.sendObject(c);
-    REDispatch.sendObjectPlusData(t);
-
-    REDispatch.analysisEnd();
+  private static void printPid() {
+    System.out.println(String.format(messageFormat, processName, "PID: " + ProcessHandle.current().pid()));
   }
 }
