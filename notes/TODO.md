@@ -35,8 +35,8 @@
 	- [ ] Development testing  
 	- [ ] Access to sources
 		- [ ] Makes things easier, for example getting fields from a class makes use of imports
-## Until 6th August
-- [ ] Sending values from `Instrumentation` to `auto-debugger` 
+## Until 20th August
+- [x] Sending values from `Instrumentation` to `auto-debugger` 
 - [ ] Generating tests based on values - all parameter values used for running tests
 - [ ] Create a step-by-step list for all the required features of the project (backlog)
 	- [ ] Work on those steps
