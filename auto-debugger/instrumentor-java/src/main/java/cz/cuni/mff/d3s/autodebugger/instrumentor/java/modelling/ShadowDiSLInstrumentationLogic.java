@@ -25,8 +25,9 @@ public class ShadowDiSLInstrumentationLogic extends DiSLInstrumentationLogic {
     }
     append(
         "System.out.println(\"[Instrumentation process] PID: \" + ProcessHandle.current().pid());\n");
-    append(
-        "CollectorRE.testingBasic(true, (byte) 125, 's', (short) 50000, 100000, 10000000000L);\n");
+    for (ExportableValue variable : exports) {
+      append("CollectorRE.collectInt(" + variable.instrumentationVariableIdentifier.getName() + ");\n");
+    }
     append("}\n");
     return getCode();
   }

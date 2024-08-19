@@ -39,7 +39,15 @@ public class DiSLInstrumentorTests {
                                 .variableType("int")
                                 .variableName("a")
                                 .exportableType(ExportableValueType.VARIABLE)
-                                .build()))))
+                                .build())),
+                        IdentifierFactory.createFrom(
+                                new IdentifierParameters(
+                                        VariableIdentifierParameters.builder()
+                                                .variableType("int")
+                                                .variableName("b")
+                                                .exportableType(ExportableValueType.VARIABLE)
+                                                .build()))
+                        ))
             .build();
 
     // when
