@@ -3,6 +3,9 @@ import ch.usi.dag.dislreserver.shadow.ShadowClass;
 import ch.usi.dag.dislreserver.shadow.ShadowObject;
 import ch.usi.dag.dislreserver.shadow.ShadowString;
 import ch.usi.dag.dislreserver.shadow.ShadowThread;
+import cz.cuni.mff.d3s.autodebugger.testgenerator.java.trace.TraceBasedUnitTestGenerator;
+import cz.cuni.mff.d3s.autodebugger.testgenerator.common.TraceBasedGenerator;
+import cz.cuni.mff.d3s.autodebugger.testgenerator.common.UnitTestGenerator;
 
 public class Collector extends RemoteAnalysis {
   private final String messageFormat = "[%s]: %s";
@@ -20,6 +23,8 @@ public class Collector extends RemoteAnalysis {
   @Override
   public void atExit() {
     System.out.println(String.format(messageFormat, processName, "Exiting analysis..."));
+    TraceBasedUnitTestGenerator generator = new TraceBasedUnitTestGenerator();
+    generator.generateUnitTests();
   }
 
   @Override

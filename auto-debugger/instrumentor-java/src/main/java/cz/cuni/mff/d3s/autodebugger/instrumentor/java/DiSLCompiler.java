@@ -134,6 +134,8 @@ public class DiSLCompiler {
     return List.of(
         new File(instrumentor.getDislClassPath().toString(), "disl-server.jar"),
         new File(instrumentor.getDislClassPath().toString(), "dislre-server.jar"),
-        new File(instrumentor.getDislClassPath().toString(), "dislre-dispatch.jar"));
+        new File(instrumentor.getDislClassPath().toString(), "dislre-dispatch.jar"),
+        new File("../test-generator-java/build/libs/test-generator-java-1.0-SNAPSHOT.jar"),
+        new File("../test-generator-common/build/libs/test-generator-common-1.0-SNAPSHOT.jar"));
   }
 }
