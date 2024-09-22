@@ -10,6 +10,7 @@ repositories {
 }
 
 dependencies {
+    implementation("info.picocli:picocli:4.7.6")
     implementation(project(mapOf("path" to ":analyzer")))
     implementation(project(mapOf("path" to ":instrumentor-common")))
     implementation(project(mapOf("path" to ":instrumentor-java")))
