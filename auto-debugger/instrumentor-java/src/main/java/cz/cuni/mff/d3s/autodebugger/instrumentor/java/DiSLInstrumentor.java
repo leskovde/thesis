@@ -58,6 +58,8 @@ public class DiSLInstrumentor extends Instrumentor {
                   "-d",
                   getDislHomePath().toString(),
                   "-cse",
+                  "-e_cp",
+                  "../test-generator-java/build/libs/*:../test-generator-common/build/libs/*",
                   "--",
                   instrumentationJarPath.toString(),
                   "-jar",
