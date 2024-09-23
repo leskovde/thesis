@@ -6,7 +6,6 @@ import cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling.DiSLModel;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -48,7 +47,6 @@ public class DiSLInstrumentor extends Instrumentor {
   }
 
   private List<Path> instrumentApplication(Path instrumentationJarPath) {
-    List<Path> paths = new ArrayList<>();
     log.info("Running DiSL instrumentation");
     try {
       var scriptProcess =
@@ -65,12 +63,11 @@ public class DiSLInstrumentor extends Instrumentor {
                   "-jar",
                   applicationJarPath.toString())
               .start();
-      // Collect stdout
+      // Print stdout
       try (var stdoutReader =
           new BufferedReader(new InputStreamReader(scriptProcess.getInputStream()))) {
         String line;
         while ((line = stdoutReader.readLine()) != null) {
-//          paths.add(Path.of(line));
             log.info(line);
         }
       }
@@ -87,7 +84,7 @@ public class DiSLInstrumentor extends Instrumentor {
     } catch (Exception e) {
       log.error("Failed to run DiSL instrumentation", e);
     }
-    return paths;
+    return List.of();
   }
 
   private Optional<String> generateDiSLClass(Model model) {
