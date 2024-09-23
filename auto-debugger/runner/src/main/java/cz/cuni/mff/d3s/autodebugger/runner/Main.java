@@ -1,17 +1,14 @@
 package cz.cuni.mff.d3s.autodebugger.runner;
 
 import cz.cuni.mff.d3s.autodebugger.analyzer.Trace;
-import cz.cuni.mff.d3s.autodebugger.instrumentor.common.enums.ExportableValueType;
-import cz.cuni.mff.d3s.autodebugger.instrumentor.common.factories.IdentifierFactory;
-import cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifiers.IdentifierParameters;
+import cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifiers.ArgumentIdentifier;
+import cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifiers.ArgumentIdentifierParameters;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifiers.MethodIdentifier;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifiers.MethodIdentifierParameters;
-import cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifiers.VariableIdentifierParameters;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.java.DiSLInstrumentor;
-import picocli.CommandLine;
-
 import java.nio.file.Path;
 import java.util.List;
+import picocli.CommandLine;
 
 public class Main {
   public static void main(String[] args) {
@@ -22,23 +19,25 @@ public class Main {
     DiSLInstrumentor instrumentor =
         DiSLInstrumentor.builder()
             .applicationJarPath(Path.of("test.jar"))
-            .methods(
+            .method(
+                new MethodIdentifier(
+                    MethodIdentifierParameters.builder()
+                        .className("Test")
+                        .methodName("test")
+                        .returnType("void")
+                        .build()))
+            .exportedValues(
                 List.of(
-                    new MethodIdentifier(
-                        MethodIdentifierParameters.builder()
-                            .className("Test")
-                            .methodName("test")
-                            .returnType("void")
+                    new ArgumentIdentifier(
+                        ArgumentIdentifierParameters.builder()
+                            .argumentSlot(0)
+                            .variableType("int")
+                            .build()),
+                    new ArgumentIdentifier(
+                        ArgumentIdentifierParameters.builder()
+                            .argumentSlot(1)
+                            .variableType("int")
                             .build())))
-            .variables(
-                List.of(
-                    IdentifierFactory.createFrom(
-                        new IdentifierParameters(
-                            VariableIdentifierParameters.builder()
-                                .variableType("int")
-                                .variableName("a")
-                                .exportableType(ExportableValueType.VARIABLE)
-                                .build()))))
             .build();
     var resultPaths = instrumentor.runInstrumentation();
     new Trace(resultPaths);
