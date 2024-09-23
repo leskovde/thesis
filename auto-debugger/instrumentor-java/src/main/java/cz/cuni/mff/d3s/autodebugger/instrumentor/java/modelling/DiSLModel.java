@@ -44,31 +44,25 @@ public class DiSLModel extends Model {
             .toList();
     classBuilder.imports(imports);
     List<ExportableValue> exports = new ArrayList<>();
-    for (var identifier : instrumentor.getVariables()) {
-      if (identifier instanceof VariableIdentifier variableIdentifier) {
-        String variableType = variableIdentifier.getType();
-        // TODO: Determine frame slot
-        exports.add(ExportableValueFactory.createFrom(variableIdentifier));
+    for (var identifier : instrumentor.getExportedValues()) {
+      if (identifier instanceof ExportableIdentifier exportableIdentifier) {
+        exports.add(ExportableValueFactory.createFrom(exportableIdentifier));
       } else {
         log.error("Variable {} is not a VariableIdentifier", identifier);
       }
     }
-    List<DiSLInstrumentationLogic> logic = new ArrayList<>();
-    for (var i = 0; i < instrumentor.getMethods().size(); i++) {
-      var method = instrumentor.getMethods().get(i);
-      var parameters =
-          MethodIdentifierParameters.builder()
-              .returnType("void")
-              .className("DiSLClass")
-              .parameterTypes(List.of("DynamicContext"))
-              .build();
-      var methodIdentifier = MethodIdentifierFactory.getInstance().generateIdentifier(parameters);
-      var annotation =
-          new DiSLAnnotation(
-              ActivationTime.BEFORE, new DiSLMarker(MarkerType.BODY), new DiSLScope(method));
-      logic.add(new ShadowDiSLInstrumentationLogic(methodIdentifier, annotation, exports));
-    }
-    classBuilder.logic(logic);
+    var method = instrumentor.getMethod();
+    var parameters =
+        MethodIdentifierParameters.builder()
+            .returnType("void")
+            .className("DiSLClass")
+            .parameterTypes(List.of("DynamicContext"))
+            .build();
+    var methodIdentifier = MethodIdentifierFactory.getInstance().generateIdentifier(parameters);
+    var annotation =
+        new DiSLAnnotation(
+            ActivationTime.BEFORE, new DiSLMarker(MarkerType.BODY), new DiSLScope(method));
+    classBuilder.logic(new ShadowDiSLInstrumentationLogic(methodIdentifier, annotation, exports));
     rootClass = classBuilder.build();
   }
 

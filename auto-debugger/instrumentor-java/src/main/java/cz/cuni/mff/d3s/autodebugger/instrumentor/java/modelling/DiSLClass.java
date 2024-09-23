@@ -11,7 +11,7 @@ import java.util.List;
 public class DiSLClass extends Metaclass {
     private final String CLASS_NAME = "DiSLClass";
     private List<JavaPackageImport> imports;
-    protected List<DiSLInstrumentationLogic> logic;
+    protected DiSLInstrumentationLogic logic;
 
     @Override
     public String emitCode() {
@@ -20,10 +20,7 @@ public class DiSLClass extends Metaclass {
             append("\n");
         }
         append("\npublic class " + CLASS_NAME + " {\n");
-        for (DiSLInstrumentationLogic method : logic) {
-            append("\n");
-            append(method.emitCode());
-        }
+        append(logic.emitCode());
         append("\n}\n");
         return getCode();
     }
