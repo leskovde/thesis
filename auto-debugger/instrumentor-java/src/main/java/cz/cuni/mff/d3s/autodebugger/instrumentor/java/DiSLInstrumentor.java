@@ -8,7 +8,6 @@ import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
-
 import lombok.Builder;
 import lombok.Getter;
 import lombok.experimental.SuperBuilder;
@@ -18,14 +17,13 @@ import lombok.extern.slf4j.Slf4j;
 @SuperBuilder
 public class DiSLInstrumentor extends Instrumentor {
 
-  @Builder.Default
-  private Path dislRepositoryPath = Path.of("../../disl/");
+  @Builder.Default private Path dislRepositoryPath = Path.of("../../disl/");
 
   @Builder.Default
-  private Path generatedCodeOutputDirectory = Path.of("analyzer-disl/src/main/java/cz/cuni/mff/d3s/autodebugger/analyzer/disl/");
+  private Path generatedCodeOutputDirectory =
+      Path.of("analyzer-disl/src/main/java/cz/cuni/mff/d3s/autodebugger/analyzer/disl/");
 
-  @Getter
-  @Builder.Default
+  @Getter @Builder.Default
   private Path jarOutputPath = Path.of("analyzer-disl/build/libs/instrumentation.jar");
 
   public Path getDislClassPath() {
@@ -57,7 +55,7 @@ public class DiSLInstrumentor extends Instrumentor {
                   getDislHomePath().toString(),
                   "-cse",
                   "-e_cp",
-                  "../test-generator-java/build/libs/*:../test-generator-common/build/libs/*",
+                  "../test-generator-java/build/libs/*:../test-generator-common/build/libs/*:../analyzer/build/libs/*",
                   "--",
                   instrumentationJarPath.toString(),
                   "-jar",
@@ -68,7 +66,7 @@ public class DiSLInstrumentor extends Instrumentor {
           new BufferedReader(new InputStreamReader(scriptProcess.getInputStream()))) {
         String line;
         while ((line = stdoutReader.readLine()) != null) {
-            log.info(line);
+          log.info(line);
         }
       }
       // Print stderr

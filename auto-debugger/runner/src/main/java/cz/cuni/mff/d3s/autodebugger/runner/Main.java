@@ -40,7 +40,7 @@ public class Main {
                             .build())))
             .build();
     var resultPaths = instrumentor.runInstrumentation();
-    new Trace(resultPaths);
+    new Trace();
   }
 }
 
