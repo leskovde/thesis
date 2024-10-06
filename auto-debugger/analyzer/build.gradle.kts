@@ -1,5 +1,5 @@
 plugins {
-    id("java")
+    id("java-library")
     id("io.freefair.lombok")
 }
 
@@ -11,8 +11,7 @@ repositories {
 }
 
 dependencies {
-    implementation(project(mapOf("path" to ":instrumentor-common")))
-    implementation(libs.log4j)
+    api(project(mapOf("path" to ":instrumentor-common")))
     testImplementation(platform("org.junit:junit-bom:5.9.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
 }
