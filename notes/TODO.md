@@ -35,8 +35,17 @@
 	- [ ] Development testing  
 	- [ ] Access to sources
 		- [ ] Makes things easier, for example getting fields from a class makes use of imports
+- [ ] Allow the user to specify field names using wildcards
 ## Until 20th August
 - [x] Sending values from `Instrumentation` to `auto-debugger` 
+## Until 7th October
+- Enhance the instrumentation 
+	- [ ] Run instrumentation before and after a method call
+	- Work with different types of variables
+		- [ ] Primitives
+		- [ ] Objects
+	- [ ] Take values of fields of an object
+	- [ ] Take the return value of the object
 - [ ] Generating tests based on values - all parameter values used for running tests
 - [ ] Create a step-by-step list for all the required features of the project (backlog)
 	- [ ] Work on those steps
