@@ -1,8 +1,6 @@
 package cz.cuni.mff.d3s.autodebugger.analyzer;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class Trace {
   private Map<Integer, Set<Byte>> byteSlotValues = new HashMap<>();
@@ -18,7 +16,7 @@ public class Trace {
     if (byteSlotValues.containsKey(slot)) {
       byteSlotValues.get(slot).add(value);
     } else {
-      byteSlotValues.put(slot, Set.of(value));
+      byteSlotValues.put(slot, new HashSet<>(List.of(value)));
     }
   }
 
@@ -26,7 +24,7 @@ public class Trace {
     if (charSlotValues.containsKey(slot)) {
       charSlotValues.get(slot).add(value);
     } else {
-      charSlotValues.put(slot, Set.of(value));
+      charSlotValues.put(slot, new HashSet<>(List.of(value)));
     }
   }
 
@@ -34,7 +32,7 @@ public class Trace {
     if (shortSlotValues.containsKey(slot)) {
       shortSlotValues.get(slot).add(value);
     } else {
-      shortSlotValues.put(slot, Set.of(value));
+      shortSlotValues.put(slot, new HashSet<>(List.of(value)));
     }
   }
 
@@ -42,7 +40,7 @@ public class Trace {
     if (intSlotValues.containsKey(slot)) {
       intSlotValues.get(slot).add(value);
     } else {
-      intSlotValues.put(slot, Set.of(value));
+      intSlotValues.put(slot, new HashSet<>(List.of(value)));
     }
   }
 
@@ -50,7 +48,7 @@ public class Trace {
     if (longSlotValues.containsKey(slot)) {
       longSlotValues.get(slot).add(value);
     } else {
-      longSlotValues.put(slot, Set.of(value));
+      longSlotValues.put(slot, new HashSet<>(List.of(value)));
     }
   }
 
@@ -58,7 +56,7 @@ public class Trace {
     if (floatSlotValues.containsKey(slot)) {
       floatSlotValues.get(slot).add(value);
     } else {
-      floatSlotValues.put(slot, Set.of(value));
+      floatSlotValues.put(slot, new HashSet<>(List.of(value)));
     }
   }
 
@@ -66,7 +64,7 @@ public class Trace {
     if (doubleSlotValues.containsKey(slot)) {
       doubleSlotValues.get(slot).add(value);
     } else {
-      doubleSlotValues.put(slot, Set.of(value));
+      doubleSlotValues.put(slot, new HashSet<>(List.of(value)));
     }
   }
 
@@ -74,7 +72,7 @@ public class Trace {
     if (booleanSlotValues.containsKey(slot)) {
       booleanSlotValues.get(slot).add(value);
     } else {
-      booleanSlotValues.put(slot, Set.of(value));
+      booleanSlotValues.put(slot, new HashSet<>(List.of(value)));
     }
   }
 
@@ -94,6 +92,4 @@ public class Trace {
       System.out.println("Slot: " + entry.getKey() + " values: " + entry.getValue());
     }
   }
-
-
 }
