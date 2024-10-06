@@ -11,9 +11,9 @@ public class Collector extends RemoteAnalysis {
   private final String messageFormat = "[%s]: %s";
   private final String processName = "Receiving process";
 
-  public void collectInt(final int i) {
+  public void collectIntArg(final int slot, final int i) {
     printPid();
-    System.out.println("Collected int: " + i);
+    System.out.println("Collected int: " + i + " from slot: " + slot);
   }
 
   private void printPid() {
