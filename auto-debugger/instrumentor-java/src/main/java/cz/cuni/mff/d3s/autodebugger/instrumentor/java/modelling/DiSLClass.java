@@ -1,27 +1,28 @@
 package cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling;
 
 import cz.cuni.mff.d3s.autodebugger.instrumentor.common.modelling.Metaclass;
+import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
-
-import java.util.List;
 
 @Getter
 @Builder
 public class DiSLClass extends Metaclass {
-    private final String CLASS_NAME = "DiSLClass";
-    private List<JavaPackageImport> imports;
-    protected DiSLInstrumentationLogic logic;
+  private final String CLASS_NAME = "DiSLClass";
+  protected List<DiSLInstrumentationLogic> instrumentationMethods;
+  private List<JavaPackageImport> imports;
 
-    @Override
-    public String emitCode() {
-        for (JavaPackageImport imp : imports) {
-            append(imp.emitCode());
-            append("\n");
-        }
-        append("\npublic class " + CLASS_NAME + " {\n");
-        append(logic.emitCode());
-        append("\n}\n");
-        return getCode();
+  @Override
+  public String emitCode() {
+    for (JavaPackageImport imp : imports) {
+      append(imp.emitCode());
+      append("\n");
     }
+    append("\npublic class " + CLASS_NAME + " {\n");
+    for (DiSLInstrumentationLogic method : instrumentationMethods) {
+      append(method.emitCode());
+    }
+    append("\n}\n");
+    return getCode();
+  }
 }

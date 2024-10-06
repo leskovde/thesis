@@ -10,6 +10,8 @@ public abstract class Metaclass {
     }
 
     protected String getCode() {
-        return builder.toString();
+        var result = builder.toString();
+        builder.setLength(0);
+        return result;
     }
 }
