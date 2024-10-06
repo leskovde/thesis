@@ -59,10 +59,10 @@ public class DiSLModel extends Model {
             .parameterTypes(List.of("DynamicContext"))
             .build();
     var methodIdentifier = MethodIdentifierFactory.getInstance().generateIdentifier(parameters);
-    var annotation =
+    var beforeAnnotation =
         new DiSLAnnotation(
             ActivationTime.BEFORE, new DiSLMarker(MarkerType.BODY), new DiSLScope(method));
-    classBuilder.logic(new ShadowDiSLInstrumentationLogic(methodIdentifier, annotation, exports));
+    classBuilder.logic(new ShadowDiSLInstrumentationLogic(methodIdentifier, beforeAnnotation, exports));
     rootClass = classBuilder.build();
   }
 
