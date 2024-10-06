@@ -19,4 +19,6 @@ public abstract class ExportableValue extends Metaclass {
         this.instrumentationVariableIdentifier = VariableIdentifierFactory.getInstance()
                 .generateIdentifier(parameters);
     }
+
+    public abstract String emitCollectorCode();
 }

@@ -24,4 +24,9 @@ public class JavaArgument extends ExportableValue {
         append(".class);");
         return getCode();
     }
+
+    @Override
+    public String emitCollectorCode() {
+        return "CollectorRE.collectIntArg(" + argumentSlot + ", " + instrumentationVariableIdentifier.getName() + ");";
+    }
 }

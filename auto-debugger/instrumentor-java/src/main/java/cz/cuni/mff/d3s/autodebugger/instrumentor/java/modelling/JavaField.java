@@ -30,4 +30,9 @@ public class JavaField extends ExportableValue {
         append(".class);");
         return getCode();
     }
+
+    @Override
+    public String emitCollectorCode() {
+        return "";
+    }
 }

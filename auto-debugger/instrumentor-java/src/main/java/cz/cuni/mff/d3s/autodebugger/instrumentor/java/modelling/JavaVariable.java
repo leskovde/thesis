@@ -24,4 +24,9 @@ public class JavaVariable extends ExportableValue {
         append(".class);");
         return getCode();
     }
+
+    @Override
+    public String emitCollectorCode() {
+        return "";
+    }
 }
