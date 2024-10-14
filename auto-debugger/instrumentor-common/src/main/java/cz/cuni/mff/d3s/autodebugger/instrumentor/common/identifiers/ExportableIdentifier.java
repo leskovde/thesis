@@ -6,6 +6,7 @@ import lombok.Getter;
 @Getter
 public abstract class ExportableIdentifier implements Identifier {
     private final ExportableValueType exportableValueType;
+    protected String type;
 
     protected ExportableIdentifier(ExportableValueType exportableValueType) {
         this.exportableValueType = exportableValueType;

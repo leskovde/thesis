@@ -10,6 +10,6 @@ public class ArgumentExportFactory extends ExportableValueFactory {
   private ArgumentExportFactory() {}
 
   public JavaArgument createExportable(ArgumentIdentifier identifier) {
-    return new JavaArgument(identifier.getArgumentSlot(), identifier.getArgumentType());
+    return new JavaArgument(identifier.getArgumentSlot(), identifier.getType());
   }
 }

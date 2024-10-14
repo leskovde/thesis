@@ -3,14 +3,14 @@ package cz.cuni.mff.d3s.autodebugger.analyzer;
 import java.util.*;
 
 public class Trace {
-  private Map<Integer, Set<Byte>> byteSlotValues = new HashMap<>();
-  private Map<Integer, Set<Character>> charSlotValues = new HashMap<>();
-  private Map<Integer, Set<Short>> shortSlotValues = new HashMap<>();
-  private Map<Integer, Set<Integer>> intSlotValues = new HashMap<>();
-  private Map<Integer, Set<Long>> longSlotValues = new HashMap<>();
-  private Map<Integer, Set<Float>> floatSlotValues = new HashMap<>();
-  private Map<Integer, Set<Double>> doubleSlotValues = new HashMap<>();
-  private Map<Integer, Set<Boolean>> booleanSlotValues = new HashMap<>();
+  private final Map<Integer, Set<Byte>> byteSlotValues = new HashMap<>();
+  private final Map<Integer, Set<Character>> charSlotValues = new HashMap<>();
+  private final Map<Integer, Set<Short>> shortSlotValues = new HashMap<>();
+  private final Map<Integer, Set<Integer>> intSlotValues = new HashMap<>();
+  private final Map<Integer, Set<Long>> longSlotValues = new HashMap<>();
+  private final Map<Integer, Set<Float>> floatSlotValues = new HashMap<>();
+  private final Map<Integer, Set<Double>> doubleSlotValues = new HashMap<>();
+  private final Map<Integer, Set<Boolean>> booleanSlotValues = new HashMap<>();
 
   public void addByteArgValue(int slot, byte value) {
     if (byteSlotValues.containsKey(slot)) {

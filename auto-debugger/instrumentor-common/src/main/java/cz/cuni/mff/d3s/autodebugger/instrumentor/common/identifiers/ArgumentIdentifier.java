@@ -6,16 +6,15 @@ import lombok.Getter;
 @Getter
 public class ArgumentIdentifier extends ExportableIdentifier {
     private final int argumentSlot;
-    private final String argumentType;
 
     public ArgumentIdentifier(ArgumentIdentifierParameters parameters) {
         super(ExportableValueType.ARGUMENT);
         this.argumentSlot = parameters.argumentSlot;
-        this.argumentType = parameters.variableType;
+        this.type = parameters.variableType;
     }
 
     @Override
     public String getName() {
-        return argumentType + "_" + argumentSlot;
+        return type + "_" + argumentSlot;
     }
 }
