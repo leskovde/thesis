@@ -67,3 +67,17 @@ public class MethodInvocationMarker extends AbstractDWRMarker {
     }  
 }
 ```
+We can access values of the instrumented application based on their type: arguments, locals, and fields.
+```
+int i = di.getMethodArgumentValue(1, int.class);
+```
+
+```
+int a = di.getLocalVariableValue(0, int.class);
+```
+
+```
+final Class <?> instType = dc.getInstanceFieldValue (  
+    dc.getThis (), TargetClass.class, "instType", Class.class  
+);
+```

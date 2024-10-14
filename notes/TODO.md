@@ -40,13 +40,17 @@
 - [x] Sending values from `Instrumentation` to `auto-debugger` 
 ## Until 7th October
 - Enhance the instrumentation 
-	- [ ] Run instrumentation before and after a method call
+	- [x] Run instrumentation before and after a method call
 	- Work with different types of variables
-		- [ ] Primitives
+		- [x] Primitives
+		- [ ] Strings
 		- [ ] Objects
-	- [ ] Take values of fields of an object
+	- [x] Take values of fields of an object
 	- [ ] Take the return value of the object
 - [ ] Use jvm options to pass in classpath to ShadowVM 
 - [ ] Generating tests based on values - all parameter values used for running tests
 - [ ] Create a step-by-step list for all the required features of the project (backlog)
 	- [ ] Work on those steps
+
+
+- https://dataspecer.com/
