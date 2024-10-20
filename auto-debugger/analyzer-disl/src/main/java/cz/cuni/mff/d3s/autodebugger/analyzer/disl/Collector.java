@@ -1,12 +1,8 @@
 import ch.usi.dag.dislreserver.remoteanalysis.RemoteAnalysis;
 import ch.usi.dag.dislreserver.shadow.ShadowObject;
+import ch.usi.dag.dislreserver.shadow.ShadowString;
 import cz.cuni.mff.d3s.autodebugger.analyzer.Trace;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.java.trace.TraceBasedUnitTestGenerator;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 public class Collector extends RemoteAnalysis {
   private final String messageFormat = "[%s]: %s";
@@ -62,6 +58,29 @@ public class Collector extends RemoteAnalysis {
     System.out.println("Collected boolean: " + z + " from slot: " + slot);
   }
 
+  public void collectIntInstanceField(
+      final ShadowObject ownerType, final ShadowObject fieldName, final int value) {
+    printPid();
+
+    if (!(ownerType instanceof ShadowString)) {
+      throw new RuntimeException("ShadowObject ownerType should be transfered as string");
+    }
+    if (!(fieldName instanceof ShadowString)) {
+      throw new RuntimeException("ShadowObject fieldName should be transfered as string");
+    }
+
+    String ownerTypeString = ownerType.toString();
+    String fieldNameString = fieldName.toString();
+    trace.addIntInstanceFieldValue(ownerTypeString, fieldNameString, value);
+    System.out.println(
+        "Collected int: "
+            + value
+            + " from instance field: "
+            + fieldNameString
+            + " in object: "
+            + ownerTypeString);
+  }
+
   private void printPid() {
     System.out.println(
         String.format(messageFormat, processName, "PID: " + ProcessHandle.current().pid()));
@@ -71,6 +90,7 @@ public class Collector extends RemoteAnalysis {
   public void atExit() {
     System.out.println(String.format(messageFormat, processName, "Exiting analysis..."));
     trace.printSlotValues();
+    trace.printInstanceFieldValues();
     TraceBasedUnitTestGenerator generator = new TraceBasedUnitTestGenerator();
     generator.generateTests(trace);
   }

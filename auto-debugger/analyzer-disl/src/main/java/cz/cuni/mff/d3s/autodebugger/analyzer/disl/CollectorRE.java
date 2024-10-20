@@ -13,6 +13,8 @@ public class CollectorRE {
   private static short doubleArgId = REDispatch.registerMethod("Collector.collectDoubleArg");
   private static short booleanArgId = REDispatch.registerMethod("Collector.collectBooleanArg");
 
+  private static short intInstanceFieldId = REDispatch.registerMethod("Collector.collectIntInstanceField");
+
   public static void collectByteArg(final int slot, final byte b) {
     printPid();
     REDispatch.analysisStart(byteArgId);
@@ -74,6 +76,17 @@ public class CollectorRE {
     REDispatch.analysisStart(booleanArgId);
     REDispatch.sendInt(slot);
     REDispatch.sendBoolean(z);
+    REDispatch.analysisEnd();
+  }
+
+  public static void collectIntInstanceField(final String ownerType, final String fieldName, final int value) {
+    printPid();
+    REDispatch.analysisStart(intInstanceFieldId);
+    // TODO: Instead of transferring the ownerType and fieldName, we can create UUID (or int ID) for each exportable
+    // value and transfer that ID. The receiving side can then use the ID to look up the value in a map.
+    REDispatch.sendObjectPlusData(ownerType);
+    REDispatch.sendObjectPlusData(fieldName);
+    REDispatch.sendInt(value);
     REDispatch.analysisEnd();
   }
 

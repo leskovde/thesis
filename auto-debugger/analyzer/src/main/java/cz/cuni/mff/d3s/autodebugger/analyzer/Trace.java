@@ -12,6 +12,8 @@ public class Trace {
   private final Map<Integer, Set<Double>> doubleSlotValues = new HashMap<>();
   private final Map<Integer, Set<Boolean>> booleanSlotValues = new HashMap<>();
 
+  private final Map<String, Map<String, Set<Integer>>> intInstanceFieldValues = new HashMap<>();
+
   public void addByteArgValue(int slot, byte value) {
     if (byteSlotValues.containsKey(slot)) {
       byteSlotValues.get(slot).add(value);
@@ -87,9 +89,37 @@ public class Trace {
     printSlotValues(booleanSlotValues);
   }
 
+  public void addIntInstanceFieldValue(String ownerType, String fieldName, int value) {
+    if (intInstanceFieldValues.containsKey(ownerType)) {
+      Map<String, Set<Integer>> fieldValues = intInstanceFieldValues.get(ownerType);
+      if (fieldValues.containsKey(fieldName)) {
+        fieldValues.get(fieldName).add(value);
+      } else {
+        fieldValues.put(fieldName, new HashSet<>(List.of(value)));
+      }
+    } else {
+      Map<String, Set<Integer>> fieldValues = new HashMap<>();
+      fieldValues.put(fieldName, new HashSet<>(List.of(value)));
+      intInstanceFieldValues.put(ownerType, fieldValues);
+    }
+  }
+
+  public void printInstanceFieldValues() {
+    printInstanceFieldValues(intInstanceFieldValues);
+  }
+
   private <T> void printSlotValues(final Map<Integer, Set<T>> slotValues) {
     for (Map.Entry<Integer, Set<T>> entry : slotValues.entrySet()) {
       System.out.println("Slot: " + entry.getKey() + " values: " + entry.getValue());
+    }
+  }
+
+  private <T> void printInstanceFieldValues(final Map<String, Map<String, Set<T>>> fieldValues) {
+    for (Map.Entry<String, Map<String, Set<T>>> entry : fieldValues.entrySet()) {
+      System.out.println("Owner type: " + entry.getKey());
+      for (Map.Entry<String, Set<T>> fieldEntry : entry.getValue().entrySet()) {
+        System.out.println("Field: " + fieldEntry.getKey() + " values: " + fieldEntry.getValue());
+      }
     }
   }
 }
