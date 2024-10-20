@@ -1,6 +1,7 @@
 package cz.cuni.mff.d3s.autodebugger.instrumentor.java;
 
 import cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifiers.*;
+import cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling.Constants;
 import java.nio.file.Path;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -21,7 +22,7 @@ public class DiSLInstrumentorTests {
             .method(
                 new MethodIdentifier(
                     MethodIdentifierParameters.builder()
-                        .className("Main")
+                        .ownerClassIdentifier(Constants.testClassIdentifier)
                         .methodName("testMul")
                         .returnType("void")
                         .build()))
@@ -48,7 +49,8 @@ public class DiSLInstrumentorTests {
     // given
     DiSLInstrumentor instrumentor =
         DiSLInstrumentor.builder()
-            .applicationJarPath(Path.of("src/test/resources/targets/extraction/Test.jar"))
+            .applicationJarPath(Constants.targetJarPath)
+            .classpath(List.of(Constants.targetJarPath))
             .generatedCodeOutputDirectory(
                 Path.of(
                     "../analyzer-disl/src/main/java/cz/cuni/mff/d3s/autodebugger/analyzer/disl/"))
@@ -57,7 +59,7 @@ public class DiSLInstrumentorTests {
             .method(
                 new MethodIdentifier(
                     MethodIdentifierParameters.builder()
-                        .className("Main")
+                        .ownerClassIdentifier(Constants.testClassIdentifier)
                         .methodName("testAdd")
                         .returnType("void")
                         .build()))
@@ -65,14 +67,17 @@ public class DiSLInstrumentorTests {
                 List.of(
                     new FieldIdentifier(
                         FieldIdentifierParameters.builder()
-                            .fieldName("f")
-                            .ownerType("Test")
+                            .variableName("f")
+                            .ownerClassIdentifier(Constants.testClassIdentifier)
+                            // TODO:
+                            //  Create a better abstraction for classes (types)
+                            //  and use it for return types and parameter types
                             .variableType("int")
                             .build()),
                     new FieldIdentifier(
                         FieldIdentifierParameters.builder()
-                            .fieldName("g")
-                            .ownerType("Test")
+                            .variableName("g")
+                            .ownerClassIdentifier(Constants.testClassIdentifier)
                             .variableType("int")
                             .build())))
             .build();
