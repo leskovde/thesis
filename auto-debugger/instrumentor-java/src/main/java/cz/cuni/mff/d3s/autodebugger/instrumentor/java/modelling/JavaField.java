@@ -10,6 +10,7 @@ public class JavaField extends ExportableValue {
     public JavaField(String type, String name, String ownerType) {
         super(type);
         this.name = name;
+        // TODO: Use fully qualified name for ownerType
         this.ownerType = ownerType;
     }
 
@@ -33,6 +34,6 @@ public class JavaField extends ExportableValue {
 
     @Override
     public String emitCollectorCode() {
-        return "";
+        return "CollectorRE.collectIntInstanceField(\"" + ownerType + "\", \"" + name + "\", " + instrumentationVariableIdentifier.getName() + ");";
     }
 }

@@ -5,7 +5,7 @@ import lombok.Builder;
 
 @Builder
 public class MethodIdentifierParameters {
-  public String className;
+  public ClassIdentifier ownerClassIdentifier;
   public String methodName;
   public String returnType;
   public List<String> parameterTypes;

@@ -5,18 +5,18 @@ import lombok.Getter;
 
 @Getter
 public class FieldIdentifier extends ExportableIdentifier {
-    private final String name;
-    private final String ownerType;
+    private final String fieldName;
+    private final ClassIdentifier ownerClassIdentifier;
 
     public FieldIdentifier(FieldIdentifierParameters parameters) {
         super(ExportableValueType.FIELD);
-        this.name = parameters.variableName;
-        this.ownerType = parameters.ownerType;
+        this.fieldName = parameters.variableName;
+        this.ownerClassIdentifier = parameters.ownerClassIdentifier;
         this.type = parameters.variableType;
     }
 
     @Override
     public String getName() {
-        return name;
+        return fieldName;
     }
 }

@@ -6,13 +6,13 @@ import lombok.Getter;
 
 @Getter
 public class MethodIdentifier implements Identifier {
-    private final String className;
+    private final ClassIdentifier ownerClassIdentifier;
     private final String methodName;
     private final String returnType;
     private final List<String> parameterTypes;
 
     public MethodIdentifier(MethodIdentifierParameters parameters) {
-        this.className = parameters.className;
+        this.ownerClassIdentifier = parameters.ownerClassIdentifier;
         this.methodName = parameters.methodName;
         this.returnType = parameters.returnType;
         this.parameterTypes = parameters.parameterTypes;
