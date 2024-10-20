@@ -13,7 +13,7 @@ public class DiSLScope extends Metaclass {
     @Override
     public String emitCode() {
         append("scope = \"");
-        append(methodIdentifier.getClassName());
+        append(methodIdentifier.getOwnerClassIdentifier().getName());
         append(".");
         append(methodIdentifier.getName());
         append("\"");

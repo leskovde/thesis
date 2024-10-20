@@ -1,7 +1,6 @@
 package cz.cuni.mff.d3s.autodebugger.instrumentor.java.factories;
 
 import cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifiers.FieldIdentifier;
-import cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifiers.VariableIdentifier;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling.JavaField;
 import lombok.Getter;
 
@@ -13,6 +12,6 @@ public class FieldExportFactory extends ExportableValueFactory {
     }
 
     public JavaField createExportable(FieldIdentifier identifier) {
-        return new JavaField(identifier.getType(), identifier.getName(), identifier.getOwnerType());
+        return new JavaField(identifier.getType(), identifier.getFieldName(), identifier.getOwnerClassIdentifier().getName());
     }
 }
