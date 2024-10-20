@@ -46,7 +46,7 @@
 		- [ ] Strings
 		- [ ] Objects
 	- [x] Take values of fields of an object
-	- [ ] Take the return value of the object
+	- [ ] Take the return value of the method
 - [ ] Use jvm options to pass in classpath to ShadowVM 
 - [ ] Generating tests based on values - all parameter values used for running tests
 - [ ] Create a step-by-step list for all the required features of the project (backlog)
