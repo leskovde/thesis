@@ -2,6 +2,7 @@ package cz.cuni.mff.d3s.autodebugger.instrumentor.java;
 
 import java.io.*;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -9,6 +10,7 @@ import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
+import java.util.stream.Collectors;
 import javax.tools.*;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,15 +22,16 @@ public class DiSLCompiler {
   // private final List<String> JAVAC_OPTIONS = List.of("-proc:only");
   private DiSLInstrumentor instrumentor;
 
-  public Optional<Path> compileDiSLClass(String sourcePath) {
+  public Optional<Path> compileDiSLClass(Path instrumentationSourcePath, List<Path> appClasspath) {
     // TODO: Maybe via Gradle?
     //  https://stackoverflow.com/questions/49876189/how-to-run-a-gradle-task-from-a-java-code
     try {
       log.info("Compiling DiSL class");
+      File instrumentationSourceFile = instrumentationSourcePath.toFile();
       String fileName = DISL_CLASS_NAME + ".java";
-      File dislClassFile = new File(sourcePath, fileName);
-      File collectorClassFile = new File(sourcePath, "Collector.java");
-      File collectorReClassFile = new File(sourcePath, "CollectorRe.java");
+      File dislClassFile = new File(instrumentationSourceFile, fileName);
+      File collectorClassFile = new File(instrumentationSourceFile, "Collector.java");
+      File collectorReClassFile = new File(instrumentationSourceFile, "CollectorRe.java");
       JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
       try (StandardJavaFileManager fileManager =
           compiler.getStandardFileManager(null, null, null)) {
@@ -42,9 +45,10 @@ public class DiSLCompiler {
           return Optional.empty();
         }
         fileManager.setLocation(StandardLocation.CLASS_OUTPUT, List.of(outputDirectory));
-        fileManager.setLocation(StandardLocation.CLASS_PATH, getDiSLClassPath());
+        fileManager.setLocation(StandardLocation.CLASS_PATH, getDiSLClassPath(appClasspath));
         Iterable<? extends JavaFileObject> compilationUnits =
-            fileManager.getJavaFileObjectsFromFiles(List.of(dislClassFile, collectorClassFile, collectorReClassFile));
+            fileManager.getJavaFileObjectsFromFiles(
+                List.of(dislClassFile, collectorClassFile, collectorReClassFile));
         if (!compiler.getTask(null, fileManager, null, null, null, compilationUnits).call()) {
           log.error("Failed to compile DiSL class");
           return Optional.empty();
@@ -130,13 +134,16 @@ public class DiSLCompiler {
     }
   }
 
-  private List<File> getDiSLClassPath() {
-    return List.of(
-        new File(instrumentor.getDislClassPath().toString(), "disl-server.jar"),
-        new File(instrumentor.getDislClassPath().toString(), "dislre-server.jar"),
-        new File(instrumentor.getDislClassPath().toString(), "dislre-dispatch.jar"),
-        new File("../test-generator-java/build/libs/test-generator-java-1.0-SNAPSHOT.jar"),
-        new File("../test-generator-common/build/libs/test-generator-common-1.0-SNAPSHOT.jar"),
-        new File("../analyzer/build/libs/analyzer-1.0-SNAPSHOT.jar"));
+  private List<File> getDiSLClassPath(List<Path> appClasspath) {
+    List<File> classPath = appClasspath.stream().map(Path::toFile).collect(Collectors.toList());
+    classPath.add(new File(instrumentor.getDislClassPath().toString(), "disl-server.jar"));
+    classPath.add(new File(instrumentor.getDislClassPath().toString(), "dislre-server.jar"));
+    classPath.add(new File(instrumentor.getDislClassPath().toString(), "dislre-dispatch.jar"));
+    classPath.add(
+        new File("../test-generator-java/build/libs/test-generator-java-1.0-SNAPSHOT.jar"));
+    classPath.add(
+        new File("../test-generator-common/build/libs/test-generator-common-1.0-SNAPSHOT.jar"));
+    classPath.add(new File("../analyzer/build/libs/analyzer-1.0-SNAPSHOT.jar"));
+    return classPath;
   }
 }

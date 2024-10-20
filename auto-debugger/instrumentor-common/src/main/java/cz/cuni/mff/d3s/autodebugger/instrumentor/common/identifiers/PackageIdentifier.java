@@ -8,6 +8,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public class PackageIdentifier implements Identifier {
     private final String packageName;
+    public static final PackageIdentifier DEFAULT_PACKAGE = new PackageIdentifier("");
 
     @Override
     public String getName() {

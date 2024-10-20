@@ -18,7 +18,7 @@ public class DiSLClassGenerator extends InstrumentationCodeGenerator {
   }
 
   @Override
-  public Optional<String> generateCode() {
+  public Optional<Path> generateCode() {
     var code = instrumentationModel.transform();
     try {
       log.info("Generating DiSL class");
@@ -28,7 +28,7 @@ public class DiSLClassGenerator extends InstrumentationCodeGenerator {
         writer.write(code);
       }
       log.info("DiSL class generated");
-      return Optional.of(dislClassFile.getParentFile().getAbsolutePath());
+      return Optional.of(Path.of(dislClassFile.getParentFile().getAbsolutePath()));
     } catch (Exception e) {
       log.error("Failed to generate DiSL class", e);
       return Optional.empty();

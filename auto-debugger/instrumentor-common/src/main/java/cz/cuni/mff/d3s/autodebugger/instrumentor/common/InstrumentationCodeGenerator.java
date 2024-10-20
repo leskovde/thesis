@@ -12,5 +12,5 @@ import java.util.Optional;
 public abstract class InstrumentationCodeGenerator {
     protected Path outputDirectory;
     protected Model instrumentationModel;
-    public abstract Optional<String> generateCode();
+    public abstract Optional<Path> generateCode();
 }

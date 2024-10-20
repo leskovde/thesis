@@ -85,13 +85,13 @@ public class DiSLInstrumentor extends Instrumentor {
     return List.of();
   }
 
-  private Optional<String> generateDiSLClass(Model model) {
+  private Optional<Path> generateDiSLClass(Model model) {
     var generator = new DiSLClassGenerator(generatedCodeOutputDirectory, model);
     return generator.generateCode();
   }
 
-  private Optional<Path> compileDiSLClass(String classPath) {
+  private Optional<Path> compileDiSLClass(Path instrumentationSource) {
     var compiler = new DiSLCompiler(this);
-    return compiler.compileDiSLClass(classPath);
+    return compiler.compileDiSLClass(instrumentationSource, classpath);
   }
 }

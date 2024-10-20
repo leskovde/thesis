@@ -10,6 +10,8 @@ import cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling.enums.Activation
 import cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling.enums.MarkerType;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 
@@ -41,21 +43,28 @@ public class DiSLModel extends Model {
             .map(IdentifierParameters::new)
             .map(IdentifierFactory::createFrom)
             .map(JavaPackageImport::new)
-            .toList();
+            .collect(Collectors.toList());
     classBuilder.imports(imports);
     List<ExportableValue> exports = new ArrayList<>();
     for (var identifier : instrumentor.getExportedValues()) {
       if (identifier instanceof ExportableIdentifier exportableIdentifier) {
         exports.add(ExportableValueFactory.createFrom(exportableIdentifier));
+        getImport(exportableIdentifier)
+            .ifPresent(i -> imports.add(new JavaPackageImport(i)));
       } else {
-        log.error("Variable {} is not a VariableIdentifier", identifier);
+        log.error("Variable {} is not a ExportableIdentifier", identifier);
       }
     }
     var method = instrumentor.getMethod();
     var parameters =
         MethodIdentifierParameters.builder()
             .returnType("void")
-            .className("DiSLClass")
+            .ownerClassIdentifier(
+                new ClassIdentifier(
+                    ClassIdentifierParameters.builder()
+                        .className("DiSLClass")
+                        .packageIdentifier(PackageIdentifier.DEFAULT_PACKAGE)
+                        .build()))
             .parameterTypes(List.of("DynamicContext"))
             .build();
     var beforeAnnotation =
@@ -81,6 +90,14 @@ public class DiSLModel extends Model {
   public String transform() {
     var result = super.transform();
     return addIndentation(result);
+  }
+
+  private Optional<PackageIdentifier> getImport(
+      ExportableIdentifier exportableIdentifier) {
+    if (exportableIdentifier instanceof FieldIdentifier fieldIdentifier) {
+      return Optional.of(fieldIdentifier.getOwnerClassIdentifier().getAsImportablePackage());
+    }
+    return Optional.empty();
   }
 
   private String addIndentation(String code) {

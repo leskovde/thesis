@@ -11,6 +11,7 @@ import lombok.experimental.SuperBuilder;
 @Getter
 public abstract class Instrumentor {
   protected final Path applicationJarPath;
+  protected final List<Path> classpath;
   protected final Identifier className;
   protected final List<Identifier> exportedValues;
   protected final MethodIdentifier method;
