@@ -3,7 +3,7 @@ package cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling;
 import lombok.Getter;
 
 @Getter
-public class JavaField extends ExportableValue {
+public class JavaField extends JavaValue {
     private final String name;
     private final String ownerType;
 
@@ -30,10 +30,5 @@ public class JavaField extends ExportableValue {
         append(type);
         append(".class);");
         return getCode();
-    }
-
-    @Override
-    public String emitCollectorCode() {
-        return "CollectorRE.collectIntInstanceField(\"" + ownerType + "\", \"" + name + "\", " + instrumentationVariableIdentifier.getName() + ");";
     }
 }

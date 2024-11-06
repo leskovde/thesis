@@ -1,32 +1,28 @@
 package cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling;
 
+import cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifiers.ExportableValue;
 import lombok.Getter;
 
 @Getter
-public class JavaVariable extends ExportableValue {
+public class JavaVariable extends JavaValue {
     private final int frameSlot;
 
-    public JavaVariable(int frameSlot, String type) {
-        super(type);
+    public JavaVariable(int frameSlot, ExportableValue exportableValue) {
+        super(exportableValue);
         this.frameSlot = frameSlot;
     }
 
     @Override
     public String emitCode() {
-        append(type);
+        append(exportedValueIdentifier.getType());
         append(" ");
         append(instrumentationVariableIdentifier.getName());
         append(" = ");
         append("di.getLocalVariableValue(");
         append(Integer.toString(frameSlot));
         append(", ");
-        append(type);
+        append(exportedValueIdentifier.getType());
         append(".class);");
         return getCode();
-    }
-
-    @Override
-    public String emitCollectorCode() {
-        return "";
     }
 }

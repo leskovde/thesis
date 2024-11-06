@@ -3,7 +3,7 @@ package cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling;
 import lombok.Getter;
 
 @Getter
-public class JavaArgument extends ExportableValue {
+public class JavaArgument extends JavaValue {
     private final int argumentSlot;
 
     public JavaArgument(int argumentSlot, String type) {
@@ -23,10 +23,5 @@ public class JavaArgument extends ExportableValue {
         append(type);
         append(".class);");
         return getCode();
-    }
-
-    @Override
-    public String emitCollectorCode() {
-        return "CollectorRE.collectIntArg(" + argumentSlot + ", " + instrumentationVariableIdentifier.getName() + ");";
     }
 }
