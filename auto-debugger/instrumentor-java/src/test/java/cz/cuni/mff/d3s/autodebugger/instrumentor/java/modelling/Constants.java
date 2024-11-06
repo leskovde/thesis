@@ -54,7 +54,7 @@ public class Constants {
 
     public static final DiSLAnnotation dislAnnotation = new DiSLAnnotation(ActivationTime.BEFORE, dislMarker, dislScope);
 
-    public static final List<ExportableValue> instrumentationLogicExports = List.of();
+    public static final List<JavaValue> instrumentationLogicExports = List.of();
 
     public static final JavaArgument javaArgument = new JavaArgument(0, "String");
 
