@@ -60,7 +60,8 @@ public class Constants {
 
     public static final JavaField javaField = new JavaField("String", "testField", "Test");
 
-    public static final JavaVariable javaVariable = new JavaVariable(0, "String");
+    // TODO
+    //public static final JavaVariable javaVariable = new JavaVariable(0, "String");
 
   public static final JavaPackageImport javaPackageImport =
       new JavaPackageImport(new PackageIdentifier("java.util.List"));
