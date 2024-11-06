@@ -10,76 +10,76 @@ public class Collector extends RemoteAnalysis {
 
   private Trace trace = new Trace();
 
-  public void collectByteArg(final int slot, final byte b) {
+  public void collectByte(final int slot, final byte b) {
     printPid();
-    trace.addByteArgValue(slot, b);
+    trace.addByteValue(slot, b);
     System.out.println("Collected byte: " + b + " from slot: " + slot);
   }
 
-  public void collectCharArg(final int slot, final char c) {
+  public void collectChar(final int slot, final char c) {
     printPid();
-    trace.addCharArgValue(slot, c);
+    trace.addCharValue(slot, c);
     System.out.println("Collected char: " + c + " from slot: " + slot);
   }
 
-  public void collectShortArg(final int slot, final short s) {
+  public void collectShort(final int slot, final short s) {
     printPid();
-    trace.addShortArgValue(slot, s);
+    trace.addShortValue(slot, s);
     System.out.println("Collected short: " + s + " from slot: " + slot);
   }
 
-  public void collectIntArg(final int slot, final int i) {
+  public void collectInt(final int slot, final int i) {
     printPid();
-    trace.addIntArgValue(slot, i);
+    trace.addIntValue(slot, i);
     System.out.println("Collected int: " + i + " from slot: " + slot);
   }
 
-  public void collectLongArg(final int slot, final long l) {
+  public void collectLong(final int slot, final long l) {
     printPid();
-    trace.addLongArgValue(slot, l);
+    trace.addLongValue(slot, l);
     System.out.println("Collected long: " + l + " from slot: " + slot);
   }
 
-  public void collectFloatArg(final int slot, final float f) {
+  public void collectFloat(final int slot, final float f) {
     printPid();
-    trace.addFloatArgValue(slot, f);
+    trace.addFloatValue(slot, f);
     System.out.println("Collected float: " + f + " from slot: " + slot);
   }
 
-  public void collectDoubleArg(final int slot, final double d) {
+  public void collectDouble(final int slot, final double d) {
     printPid();
-    trace.addDoubleArgValue(slot, d);
+    trace.addDoubleValue(slot, d);
     System.out.println("Collected double: " + d + " from slot: " + slot);
   }
 
-  public void collectBooleanArg(final int slot, final boolean z) {
+  public void collectBoolean(final int slot, final boolean z) {
     printPid();
-    trace.addBooleanArgValue(slot, z);
+    trace.addBooleanValue(slot, z);
     System.out.println("Collected boolean: " + z + " from slot: " + slot);
   }
 
-  public void collectIntInstanceField(
-      final ShadowObject ownerType, final ShadowObject fieldName, final int value) {
-    printPid();
-
-    if (!(ownerType instanceof ShadowString)) {
-      throw new RuntimeException("ShadowObject ownerType should be transfered as string");
-    }
-    if (!(fieldName instanceof ShadowString)) {
-      throw new RuntimeException("ShadowObject fieldName should be transfered as string");
-    }
-
-    String ownerTypeString = ownerType.toString();
-    String fieldNameString = fieldName.toString();
-    trace.addIntInstanceFieldValue(ownerTypeString, fieldNameString, value);
-    System.out.println(
-        "Collected int: "
-            + value
-            + " from instance field: "
-            + fieldNameString
-            + " in object: "
-            + ownerTypeString);
-  }
+//  public void collectIntInstanceField(
+//      final ShadowObject ownerType, final ShadowObject fieldName, final int value) {
+//    printPid();
+//
+//    if (!(ownerType instanceof ShadowString)) {
+//      throw new RuntimeException("ShadowObject ownerType should be transfered as string");
+//    }
+//    if (!(fieldName instanceof ShadowString)) {
+//      throw new RuntimeException("ShadowObject fieldName should be transfered as string");
+//    }
+//
+//    String ownerTypeString = ownerType.toString();
+//    String fieldNameString = fieldName.toString();
+//    trace.addIntInstanceFieldValue(ownerTypeString, fieldNameString, value);
+//    System.out.println(
+//        "Collected int: "
+//            + value
+//            + " from instance field: "
+//            + fieldNameString
+//            + " in object: "
+//            + ownerTypeString);
+//  }
 
   private void printPid() {
     System.out.println(
