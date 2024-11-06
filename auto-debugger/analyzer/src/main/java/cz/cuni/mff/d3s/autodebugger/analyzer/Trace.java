@@ -3,109 +3,88 @@ package cz.cuni.mff.d3s.autodebugger.analyzer;
 import java.util.*;
 
 public class Trace {
-  private final Map<Integer, Set<Byte>> byteSlotValues = new HashMap<>();
-  private final Map<Integer, Set<Character>> charSlotValues = new HashMap<>();
-  private final Map<Integer, Set<Short>> shortSlotValues = new HashMap<>();
-  private final Map<Integer, Set<Integer>> intSlotValues = new HashMap<>();
-  private final Map<Integer, Set<Long>> longSlotValues = new HashMap<>();
-  private final Map<Integer, Set<Float>> floatSlotValues = new HashMap<>();
-  private final Map<Integer, Set<Double>> doubleSlotValues = new HashMap<>();
-  private final Map<Integer, Set<Boolean>> booleanSlotValues = new HashMap<>();
+  private final Map<Integer, Set<Byte>> byteValues = new HashMap<>();
+  private final Map<Integer, Set<Character>> charValues = new HashMap<>();
+  private final Map<Integer, Set<Short>> shortValues = new HashMap<>();
+  private final Map<Integer, Set<Integer>> intValues = new HashMap<>();
+  private final Map<Integer, Set<Long>> longValues = new HashMap<>();
+  private final Map<Integer, Set<Float>> floatValues = new HashMap<>();
+  private final Map<Integer, Set<Double>> doubleValues = new HashMap<>();
+  private final Map<Integer, Set<Boolean>> booleanValues = new HashMap<>();
 
-  private final Map<String, Map<String, Set<Integer>>> intInstanceFieldValues = new HashMap<>();
-
-  public void addByteArgValue(int slot, byte value) {
-    if (byteSlotValues.containsKey(slot)) {
-      byteSlotValues.get(slot).add(value);
+  public void addByteValue(int slot, byte value) {
+    if (byteValues.containsKey(slot)) {
+      byteValues.get(slot).add(value);
     } else {
-      byteSlotValues.put(slot, new HashSet<>(List.of(value)));
+      byteValues.put(slot, new HashSet<>(List.of(value)));
     }
   }
 
-  public void addCharArgValue(int slot, char value) {
-    if (charSlotValues.containsKey(slot)) {
-      charSlotValues.get(slot).add(value);
+  public void addCharValue(int slot, char value) {
+    if (charValues.containsKey(slot)) {
+      charValues.get(slot).add(value);
     } else {
-      charSlotValues.put(slot, new HashSet<>(List.of(value)));
+      charValues.put(slot, new HashSet<>(List.of(value)));
     }
   }
 
-  public void addShortArgValue(int slot, short value) {
-    if (shortSlotValues.containsKey(slot)) {
-      shortSlotValues.get(slot).add(value);
+  public void addShortValue(int slot, short value) {
+    if (shortValues.containsKey(slot)) {
+      shortValues.get(slot).add(value);
     } else {
-      shortSlotValues.put(slot, new HashSet<>(List.of(value)));
+      shortValues.put(slot, new HashSet<>(List.of(value)));
     }
   }
 
-  public void addIntArgValue(int slot, int value) {
-    if (intSlotValues.containsKey(slot)) {
-      intSlotValues.get(slot).add(value);
+  public void addIntValue(int slot, int value) {
+    if (intValues.containsKey(slot)) {
+      intValues.get(slot).add(value);
     } else {
-      intSlotValues.put(slot, new HashSet<>(List.of(value)));
+      intValues.put(slot, new HashSet<>(List.of(value)));
     }
   }
 
-  public void addLongArgValue(int slot, long value) {
-    if (longSlotValues.containsKey(slot)) {
-      longSlotValues.get(slot).add(value);
+  public void addLongValue(int slot, long value) {
+    if (longValues.containsKey(slot)) {
+      longValues.get(slot).add(value);
     } else {
-      longSlotValues.put(slot, new HashSet<>(List.of(value)));
+      longValues.put(slot, new HashSet<>(List.of(value)));
     }
   }
 
-  public void addFloatArgValue(int slot, float value) {
-    if (floatSlotValues.containsKey(slot)) {
-      floatSlotValues.get(slot).add(value);
+  public void addFloatValue(int slot, float value) {
+    if (floatValues.containsKey(slot)) {
+      floatValues.get(slot).add(value);
     } else {
-      floatSlotValues.put(slot, new HashSet<>(List.of(value)));
+      floatValues.put(slot, new HashSet<>(List.of(value)));
     }
   }
 
-  public void addDoubleArgValue(int slot, double value) {
-    if (doubleSlotValues.containsKey(slot)) {
-      doubleSlotValues.get(slot).add(value);
+  public void addDoubleValue(int slot, double value) {
+    if (doubleValues.containsKey(slot)) {
+      doubleValues.get(slot).add(value);
     } else {
-      doubleSlotValues.put(slot, new HashSet<>(List.of(value)));
+      doubleValues.put(slot, new HashSet<>(List.of(value)));
     }
   }
 
-  public void addBooleanArgValue(int slot, boolean value) {
-    if (booleanSlotValues.containsKey(slot)) {
-      booleanSlotValues.get(slot).add(value);
+  public void addBooleanValue(int slot, boolean value) {
+    if (booleanValues.containsKey(slot)) {
+      booleanValues.get(slot).add(value);
     } else {
-      booleanSlotValues.put(slot, new HashSet<>(List.of(value)));
+      booleanValues.put(slot, new HashSet<>(List.of(value)));
     }
   }
 
   public void printSlotValues() {
-    printSlotValues(byteSlotValues);
-    printSlotValues(charSlotValues);
-    printSlotValues(shortSlotValues);
-    printSlotValues(intSlotValues);
-    printSlotValues(longSlotValues);
-    printSlotValues(floatSlotValues);
-    printSlotValues(doubleSlotValues);
-    printSlotValues(booleanSlotValues);
-  }
-
-  public void addIntInstanceFieldValue(String ownerType, String fieldName, int value) {
-    if (intInstanceFieldValues.containsKey(ownerType)) {
-      Map<String, Set<Integer>> fieldValues = intInstanceFieldValues.get(ownerType);
-      if (fieldValues.containsKey(fieldName)) {
-        fieldValues.get(fieldName).add(value);
-      } else {
-        fieldValues.put(fieldName, new HashSet<>(List.of(value)));
-      }
-    } else {
-      Map<String, Set<Integer>> fieldValues = new HashMap<>();
-      fieldValues.put(fieldName, new HashSet<>(List.of(value)));
-      intInstanceFieldValues.put(ownerType, fieldValues);
-    }
-  }
-
-  public void printInstanceFieldValues() {
-    printInstanceFieldValues(intInstanceFieldValues);
+    printSlotValues(byteValues);
+    printSlotValues(charValues);
+    printSlotValues(shortValues);
+    printSlotValues(intValues);
+    printSlotValues(longValues);
+    printSlotValues(floatValues);
+    printSlotValues(doubleValues);
+    printSlotValues(booleanValues);
   }
 
   private <T> void printSlotValues(final Map<Integer, Set<T>> slotValues) {
