@@ -22,7 +22,7 @@ public class MethodIdentifierFactory extends IdentifierFactory {
     }
 
     public MethodIdentifier generateIdentifier(MethodIdentifierParameters parameters) {
-        parameters.methodName = "generatedMethod" + id++;
+        parameters.methodName = "generatedMethod" + getNextId();
         return new MethodIdentifier(parameters);
     }
 }

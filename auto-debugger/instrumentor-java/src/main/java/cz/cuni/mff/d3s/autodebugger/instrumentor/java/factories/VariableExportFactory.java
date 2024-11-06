@@ -13,6 +13,6 @@ public class VariableExportFactory extends ExportableValueFactory {
 
     public JavaVariable createExportable(VariableIdentifier identifier) {
         // TODO: Get slot number
-        return new JavaVariable(0, identifier.getType());
+        throw new IllegalStateException("Not implemented");
     }
 }

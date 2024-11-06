@@ -4,7 +4,7 @@ import cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifiers.Identifier;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifiers.IdentifierParameters;
 
 public abstract class IdentifierFactory {
-    protected int id = 0;
+    private static int id = 0;
 
     public static Identifier createFrom(IdentifierParameters parameters) {
         if (parameters.getMethodParameters().isPresent()) {
@@ -14,5 +14,9 @@ public abstract class IdentifierFactory {
         } else {
             return VariableIdentifierFactory.getInstance().createIdentifier(parameters.getVariableParameters().get());
         }
+    }
+
+    public static int getNextId() {
+        return ++id;
     }
 }

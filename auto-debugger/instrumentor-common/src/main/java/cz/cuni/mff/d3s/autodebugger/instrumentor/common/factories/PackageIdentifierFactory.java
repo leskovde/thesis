@@ -16,6 +16,6 @@ public class PackageIdentifierFactory extends IdentifierFactory {
     }
 
     public PackageIdentifier generateIdentifier() {
-        return new PackageIdentifier("generatedPackage" + id++);
+        return new PackageIdentifier("generatedPackage" + getNextId());
     }
 }

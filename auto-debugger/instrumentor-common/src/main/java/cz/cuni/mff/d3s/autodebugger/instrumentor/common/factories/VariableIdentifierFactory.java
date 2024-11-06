@@ -20,7 +20,7 @@ public class VariableIdentifierFactory extends IdentifierFactory {
     }
 
     public VariableIdentifier generateIdentifier(VariableIdentifierParameters parameters) {
-        parameters.variableName = "generatedVariable" + id++;
+        parameters.variableName = "generatedVariable" + getNextId();
         return new VariableIdentifier(parameters);
     }
 }
