@@ -3,7 +3,7 @@ package cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifiers;
 import lombok.Getter;
 
 @Getter
-public class VariableIdentifier extends ExportableIdentifier {
+public class VariableIdentifier extends ValueIdentifier {
     private final String variableName;
     private final String variableType;
 
