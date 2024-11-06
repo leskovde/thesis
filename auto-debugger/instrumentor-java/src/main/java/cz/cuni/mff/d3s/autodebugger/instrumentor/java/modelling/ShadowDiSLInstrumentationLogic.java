@@ -9,7 +9,7 @@ import lombok.Getter;
 public class ShadowDiSLInstrumentationLogic extends DiSLInstrumentationLogic {
 
   public ShadowDiSLInstrumentationLogic(
-      Identifier identifier, DiSLAnnotation annotation, List<ExportableValue> exports) {
+      Identifier identifier, DiSLAnnotation annotation, List<JavaValue> exports) {
     super(identifier, annotation, exports);
   }
 
@@ -25,7 +25,7 @@ public class ShadowDiSLInstrumentationLogic extends DiSLInstrumentationLogic {
     }
     append(
         "System.out.println(\"[Instrumentation process] PID: \" + ProcessHandle.current().pid());\n");
-    for (ExportableValue variable : exports) {
+    for (JavaValue variable : exports) {
       append(variable.emitCollectorCode());
       append("\n");
     }

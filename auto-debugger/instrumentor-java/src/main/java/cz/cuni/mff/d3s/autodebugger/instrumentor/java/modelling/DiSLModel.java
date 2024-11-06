@@ -45,11 +45,11 @@ public class DiSLModel extends Model {
             .map(JavaPackageImport::new)
             .collect(Collectors.toList());
     classBuilder.imports(imports);
-    List<ExportableValue> exports = new ArrayList<>();
+    List<JavaValue> exports = new ArrayList<>();
     for (var identifier : instrumentor.getExportedValues()) {
-      if (identifier instanceof ExportableIdentifier exportableIdentifier) {
-        exports.add(ExportableValueFactory.createFrom(exportableIdentifier));
-        getImport(exportableIdentifier)
+      if (identifier instanceof ValueIdentifier valueIdentifier) {
+        exports.add(ExportableValueFactory.createFrom(valueIdentifier));
+        getImport(valueIdentifier)
             .ifPresent(i -> imports.add(new JavaPackageImport(i)));
       } else {
         log.error("Variable {} is not a ExportableIdentifier", identifier);
@@ -93,8 +93,8 @@ public class DiSLModel extends Model {
   }
 
   private Optional<PackageIdentifier> getImport(
-      ExportableIdentifier exportableIdentifier) {
-    if (exportableIdentifier instanceof FieldIdentifier fieldIdentifier) {
+      ValueIdentifier valueIdentifier) {
+    if (valueIdentifier instanceof FieldIdentifier fieldIdentifier) {
       return Optional.of(fieldIdentifier.getOwnerClassIdentifier().getAsImportablePackage());
     }
     return Optional.empty();

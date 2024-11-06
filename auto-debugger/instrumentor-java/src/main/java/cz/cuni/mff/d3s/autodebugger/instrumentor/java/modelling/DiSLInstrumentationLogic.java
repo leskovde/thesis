@@ -12,5 +12,5 @@ import java.util.List;
 public abstract class DiSLInstrumentationLogic extends Metaclass {
     protected final Identifier identifier;
     protected final DiSLAnnotation annotation;
-    protected List<ExportableValue> exports;
+    protected List<JavaValue> exports;
 }

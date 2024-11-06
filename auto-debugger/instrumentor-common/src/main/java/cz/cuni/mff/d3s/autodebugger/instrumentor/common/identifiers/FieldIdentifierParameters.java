@@ -1,6 +1,6 @@
 package cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifiers;
 
-import cz.cuni.mff.d3s.autodebugger.instrumentor.common.enums.ExportableValueType;
+import cz.cuni.mff.d3s.autodebugger.instrumentor.common.enums.ValueType;
 import lombok.experimental.SuperBuilder;
 
 @SuperBuilder
@@ -8,6 +8,6 @@ public class FieldIdentifierParameters extends ExportableValueIdentifierParamete
     public final ClassIdentifier ownerClassIdentifier;
 
     {
-        exportableType = ExportableValueType.FIELD;
+        exportableType = ValueType.FIELD;
     }
 }

@@ -9,7 +9,7 @@ import java.util.List;
 @Getter
 public class SerializationDiSLInstrumentationLogic extends DiSLInstrumentationLogic {
 
-    public SerializationDiSLInstrumentationLogic(Identifier identifier, DiSLAnnotation annotation, List<ExportableValue> exports) {
+    public SerializationDiSLInstrumentationLogic(Identifier identifier, DiSLAnnotation annotation, List<JavaValue> exports) {
         super(identifier, annotation, exports);
     }
 
@@ -28,7 +28,7 @@ public class SerializationDiSLInstrumentationLogic extends DiSLInstrumentationLo
         append("ObjectOutputStream out;\n");
         append("try {\n");
         // TODO: Not going to work for multiple values
-        for (ExportableValue variable : exports) {
+        for (JavaValue variable : exports) {
             append("fileOut = new FileOutputStream(\"");
             append(variable.instrumentationVariableIdentifier.getName());
             append(".ser\");\n");

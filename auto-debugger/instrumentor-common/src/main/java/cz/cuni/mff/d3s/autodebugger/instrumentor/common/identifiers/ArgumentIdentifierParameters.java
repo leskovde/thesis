@@ -1,6 +1,6 @@
 package cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifiers;
 
-import cz.cuni.mff.d3s.autodebugger.instrumentor.common.enums.ExportableValueType;
+import cz.cuni.mff.d3s.autodebugger.instrumentor.common.enums.ValueType;
 import lombok.experimental.SuperBuilder;
 
 
@@ -9,6 +9,6 @@ public class ArgumentIdentifierParameters extends ExportableValueIdentifierParam
     public final int argumentSlot;
 
     {
-        exportableType = ExportableValueType.ARGUMENT;
+        exportableType = ValueType.ARGUMENT;
     }
 }
