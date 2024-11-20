@@ -3,10 +3,12 @@ import ch.usi.dag.dislreserver.shadow.ShadowObject;
 import ch.usi.dag.dislreserver.shadow.ShadowString;
 import cz.cuni.mff.d3s.autodebugger.model.java.Trace;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.java.trace.TraceBasedUnitTestGenerator;
+import java.nio.file.Path;
 
 public class Collector extends RemoteAnalysis {
   private final String messageFormat = "[%s]: %s";
   private final String processName = "Receiving process";
+  private final String identifierMappingFilePath = "${PATH}";
 
   private Trace trace = new Trace();
 
@@ -90,7 +92,7 @@ public class Collector extends RemoteAnalysis {
   public void atExit() {
     System.out.println(String.format(messageFormat, processName, "Exiting analysis..."));
     trace.printSlotValues();
-    TraceBasedUnitTestGenerator generator = new TraceBasedUnitTestGenerator();
+    TraceBasedUnitTestGenerator generator = new TraceBasedUnitTestGenerator(Path.of(identifierMappingFilePath));
     generator.generateTests(trace);
   }
 
