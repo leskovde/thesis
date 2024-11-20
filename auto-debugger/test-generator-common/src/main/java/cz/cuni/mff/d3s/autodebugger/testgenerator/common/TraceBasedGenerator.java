@@ -1,6 +1,6 @@
 package cz.cuni.mff.d3s.autodebugger.testgenerator.common;
 
-import cz.cuni.mff.d3s.autodebugger.analyzer.Trace;
+import cz.cuni.mff.d3s.autodebugger.model.java.Trace;
 
 import java.nio.file.Path;
 import java.util.List;
