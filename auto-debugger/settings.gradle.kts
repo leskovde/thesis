@@ -1,10 +1,11 @@
 rootProject.name = "auto-debugger"
 include("instrumentor-common")
 include("instrumentor-java")
-include("analyzer")
+include("model-java")
 include("test-generator-common")
 include("test-generator-java")
 include("runner")
+include("analyzer-disl")
 
 dependencyResolutionManagement {
 
@@ -17,4 +18,3 @@ dependencyResolutionManagement {
         }
     }
 }
-include("analyzer-disl")
