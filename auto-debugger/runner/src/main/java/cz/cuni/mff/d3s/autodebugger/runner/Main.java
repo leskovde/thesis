@@ -1,7 +1,7 @@
 package cz.cuni.mff.d3s.autodebugger.runner;
 
-import cz.cuni.mff.d3s.autodebugger.analyzer.Trace;
-import cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifiers.*;
+import cz.cuni.mff.d3s.autodebugger.model.java.Trace;
+import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.*;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.java.DiSLInstrumentor;
 import java.nio.file.Path;
 import java.util.List;

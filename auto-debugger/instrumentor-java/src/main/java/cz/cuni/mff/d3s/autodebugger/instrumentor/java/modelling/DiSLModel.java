@@ -3,6 +3,7 @@ package cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.common.Instrumentor;
 import cz.cuni.mff.d3s.autodebugger.model.java.factories.IdentifierFactory;
 import cz.cuni.mff.d3s.autodebugger.model.java.factories.MethodIdentifierFactory;
+import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.*;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.common.modelling.Model;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.java.factories.ExportableValueFactory;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling.enums.ActivationTime;
