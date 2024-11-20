@@ -11,7 +11,7 @@ repositories {
 
 dependencies {
     api(project(mapOf("path" to ":test-generator-common")))
-    api(project(mapOf("path" to ":analyzer")))
+    api(project(mapOf("path" to ":model-java")))
     testImplementation(platform("org.junit:junit-bom:5.9.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
 }
