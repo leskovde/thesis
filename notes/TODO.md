@@ -58,7 +58,12 @@
 - [ ] Use jvm options to pass in classpath to ShadowVM
 - [ ] Test effects of field writes
 - [ ] Generating tests based on values - all parameter values used for running tests
+	- [ ] Static methods
+	- [ ] Instance methods
+		- [ ] Setup an object based on field values etc.
+- [ ] Running generated tests
 - [ ] Create a step-by-step list for all the required features of the project (backlog)
 	- [ ] Work on those steps
 - Overleaf
+	- [ ] Use official template instead of the alternative one
 	- [ ] Create an outline for the thesis
