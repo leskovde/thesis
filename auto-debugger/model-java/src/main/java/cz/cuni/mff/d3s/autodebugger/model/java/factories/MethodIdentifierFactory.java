@@ -1,0 +1,28 @@
+package cz.cuni.mff.d3s.autodebugger.model.java.factories;
+
+import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.MethodIdentifier;
+import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.MethodIdentifierParameters;
+import lombok.Getter;
+
+public class MethodIdentifierFactory extends IdentifierFactory {
+    @Getter
+    private static final MethodIdentifierFactory instance = new MethodIdentifierFactory();
+
+    private MethodIdentifierFactory() {
+    }
+
+    public MethodIdentifier createIdentifier(MethodIdentifierParameters parameters) {
+//      return MethodIdentifier.builder()
+//              .returnType(name.substring(0, name.indexOf(' ')))
+//              .className(name.substring(name.indexOf(' ') + 1, name.lastIndexOf('.')))
+//              .methodName(name.substring(name.lastIndexOf('.') + 1, name.indexOf('(')))
+//              .parameterTypes(Arrays.asList(Arrays.stream(name.substring(name.indexOf('(') + 1, name.indexOf(')')).split(",")).filter(s -> !s.isEmpty()).toArray(String[]::new)))
+//              .build();
+        return new MethodIdentifier(parameters);
+    }
+
+    public MethodIdentifier generateIdentifier(MethodIdentifierParameters parameters) {
+        parameters.methodName = "generatedMethod" + getNextId();
+        return new MethodIdentifier(parameters);
+    }
+}

@@ -1,0 +1,24 @@
+package cz.cuni.mff.d3s.autodebugger.model.java.identifiers;
+
+import lombok.Getter;
+
+@Getter
+public class VariableIdentifier extends ValueIdentifier {
+    private final String variableName;
+    private final String variableType;
+
+    public VariableIdentifier(VariableIdentifierParameters parameters) {
+        super(parameters.exportableType);
+        this.variableName = parameters.variableName;
+        this.variableType = parameters.variableType;
+    }
+
+    @Override
+    public String getName() {
+        return variableName;
+    }
+
+    public String getType() {
+        return variableType;
+    }
+}
