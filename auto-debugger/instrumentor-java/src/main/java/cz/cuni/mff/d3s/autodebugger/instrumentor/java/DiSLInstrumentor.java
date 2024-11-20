@@ -12,6 +12,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
+import org.javatuples.Pair;
 
 @Slf4j
 @SuperBuilder
@@ -40,6 +41,12 @@ public class DiSLInstrumentor extends Instrumentor {
 
   @Override
   public List<Path> runInstrumentation() {
+    var identifierMapping = serializeIdentifiers(Path.of("../identifiers"));
+    var templateHandler = new JavaTemplateHandler(new JavaTemplateTransformer("${%s}"));
+    templateHandler.transformFile(
+            generatedCodeOutputDirectory.resolve("Collector.jt"),
+            generatedCodeOutputDirectory.resolve("Collector.java"),
+            Pair.with("PATH", identifierMapping.toAbsolutePath().toString()));
     var jarPath = generateDiSLClass(new DiSLModel(this)).flatMap(this::compileDiSLClass);
     return jarPath.map(this::instrumentApplication).orElseGet(List::of);
   }
@@ -55,7 +62,7 @@ public class DiSLInstrumentor extends Instrumentor {
                   getDislHomePath().toString(),
                   "-cse",
                   "-e_cp",
-                  "../test-generator-java/build/libs/*:../test-generator-common/build/libs/*:../analyzer/build/libs/*",
+                  "../test-generator-java/build/libs/*:../test-generator-common/build/libs/*:../model-java/build/libs/*",
                   "--",
                   instrumentationJarPath.toString(),
                   "-jar",

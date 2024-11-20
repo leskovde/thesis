@@ -2,7 +2,6 @@ package cz.cuni.mff.d3s.autodebugger.instrumentor.java;
 
 import java.io.*;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -143,7 +142,7 @@ public class DiSLCompiler {
         new File("../test-generator-java/build/libs/test-generator-java-1.0-SNAPSHOT.jar"));
     classPath.add(
         new File("../test-generator-common/build/libs/test-generator-common-1.0-SNAPSHOT.jar"));
-    classPath.add(new File("../analyzer/build/libs/analyzer-1.0-SNAPSHOT.jar"));
+    classPath.add(new File("../model-java/build/libs/model-java-1.0-SNAPSHOT.jar"));
     return classPath;
   }
 }

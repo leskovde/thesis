@@ -15,6 +15,7 @@ public class DiSLInstrumentorTests {
     DiSLInstrumentor instrumentor =
         DiSLInstrumentor.builder()
             .applicationJarPath(Path.of("src/test/resources/targets/extraction/Test.jar"))
+            .classpath(List.of(Constants.targetJarPath))
             .generatedCodeOutputDirectory(
                 Path.of(
                     "../analyzer-disl/src/main/java/cz/cuni/mff/d3s/autodebugger/analyzer/disl/"))
