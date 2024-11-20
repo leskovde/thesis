@@ -1,7 +1,7 @@
 - [x] create a repo
   - [x] move notes to the repo
 - [x] design and document the possible skeleton of the project
-- [ ] Mock all parts of the project
+- [x] Mock all parts of the project
 - [ ] Create examples from the dacapo benchmark
 - [x] rename packages to cz.cuni.mff
 - [ ] Represent Trace as an interface that allows to query values and method that were called at a certain point in time - if there's nothing to return, handle it as the Optional monad
@@ -20,7 +20,7 @@
 	- [ ] Static field writes
 		- Don't care about the line numbers of the writes, only the possible values 
 - [ ] Remove all generated sources before building (via Gradle task)
-- [ ] Map variable names to slot indices
+- [x] Map variable names to slot indices
 - Tests
 	- [x] Add UTs for code generation
 - [x] Explore ShadowVM for ShadowObject API and RemoteAnalysis
@@ -38,17 +38,27 @@
 - [ ] Allow the user to specify field names using wildcards
 ## Until 20th August
 - [x] Sending values from `Instrumentation` to `auto-debugger` 
-## Until 7th October
+## Until 20th November
 - Enhance the instrumentation 
 	- [x] Run instrumentation before and after a method call
 	- Work with different types of variables
 		- [x] Primitives
 		- [x] Strings
-		- [ ] Objects
 	- [x] Take values of fields of an object
+- [x] Generating tests based on values - call the instrumented method with a value
+- Overleaf
+	- [x] Take a template (from somebody or from the bachelor thesis)
+	- [x] Send a link with invite 
+
+## Until 25th November
+- Enhance the instrumentation
+	- Work with different types of variables
+		- [ ] Objects
 	- [ ] Take the return value of the method
 - [ ] Use jvm options to pass in classpath to ShadowVM
 - [ ] Test effects of field writes
 - [ ] Generating tests based on values - all parameter values used for running tests
 - [ ] Create a step-by-step list for all the required features of the project (backlog)
 	- [ ] Work on those steps
+- Overleaf
+	- [ ] Create an outline for the thesis
