@@ -1,9 +1,10 @@
 package cz.cuni.mff.d3s.autodebugger.instrumentor.java;
 
-import cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifiers.*;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling.Constants;
 import java.nio.file.Path;
 import java.util.List;
+
+import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.*;
 import org.junit.jupiter.api.Test;
 
 public class DiSLInstrumentorTests {
