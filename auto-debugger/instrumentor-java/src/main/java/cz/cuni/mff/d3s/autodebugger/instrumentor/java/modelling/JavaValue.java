@@ -1,10 +1,10 @@
 package cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling;
 
-import cz.cuni.mff.d3s.autodebugger.instrumentor.common.enums.ValueType;
-import cz.cuni.mff.d3s.autodebugger.instrumentor.common.factories.VariableIdentifierFactory;
-import cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifiers.ExportableValue;
-import cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifiers.VariableIdentifier;
-import cz.cuni.mff.d3s.autodebugger.instrumentor.common.identifiers.VariableIdentifierParameters;
+import cz.cuni.mff.d3s.autodebugger.model.java.enums.ValueType;
+import cz.cuni.mff.d3s.autodebugger.model.java.factories.VariableIdentifierFactory;
+import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.ExportableValue;
+import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.VariableIdentifier;
+import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.VariableIdentifierParameters;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.common.modelling.Metaclass;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.java.CollectorMethodRegistry;
 

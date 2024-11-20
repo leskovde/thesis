@@ -1,7 +1,7 @@
 import ch.usi.dag.dislreserver.remoteanalysis.RemoteAnalysis;
 import ch.usi.dag.dislreserver.shadow.ShadowObject;
 import ch.usi.dag.dislreserver.shadow.ShadowString;
-import cz.cuni.mff.d3s.autodebugger.analyzer.Trace;
+import cz.cuni.mff.d3s.autodebugger.model.java.Trace;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.java.trace.TraceBasedUnitTestGenerator;
 
 public class Collector extends RemoteAnalysis {
@@ -90,7 +90,6 @@ public class Collector extends RemoteAnalysis {
   public void atExit() {
     System.out.println(String.format(messageFormat, processName, "Exiting analysis..."));
     trace.printSlotValues();
-    trace.printInstanceFieldValues();
     TraceBasedUnitTestGenerator generator = new TraceBasedUnitTestGenerator();
     generator.generateTests(trace);
   }

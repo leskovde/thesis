@@ -1,5 +1,6 @@
 package cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling;
 
+import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.ExportableValue;
 import lombok.Getter;
 
 @Getter
@@ -7,8 +8,8 @@ public class JavaField extends JavaValue {
     private final String name;
     private final String ownerType;
 
-    public JavaField(String type, String name, String ownerType) {
-        super(type);
+    public JavaField(String name, String ownerType, ExportableValue exportableValue) {
+        super(exportableValue);
         this.name = name;
         // TODO: Use fully qualified name for ownerType
         this.ownerType = ownerType;
@@ -18,7 +19,7 @@ public class JavaField extends JavaValue {
     @Override
     public String emitCode() {
     // dc.getThis (), TargetClass.class, "instName", String.class
-        append(type);
+        append(exportedValueIdentifier.getType());
         append(" ");
         append(instrumentationVariableIdentifier.getName());
         append(" = ");
@@ -27,7 +28,7 @@ public class JavaField extends JavaValue {
         append(".class, \"");
         append(name);
         append("\", ");
-        append(type);
+        append(exportedValueIdentifier.getType());
         append(".class);");
         return getCode();
     }

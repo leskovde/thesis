@@ -1,26 +1,27 @@
 package cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling;
 
+import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.ExportableValue;
 import lombok.Getter;
 
 @Getter
 public class JavaArgument extends JavaValue {
     private final int argumentSlot;
 
-    public JavaArgument(int argumentSlot, String type) {
-        super(type);
+    public JavaArgument(int argumentSlot, ExportableValue exportableValue) {
+        super(exportableValue);
         this.argumentSlot = argumentSlot;
     }
 
     @Override
     public String emitCode() {
-        append(type);
+        append(exportedValueIdentifier.getType());
         append(" ");
         append(instrumentationVariableIdentifier.getName());
         append(" = ");
         append("di.getMethodArgumentValue(");
         append(Integer.toString(argumentSlot));
         append(", ");
-        append(type);
+        append(exportedValueIdentifier.getType());
         append(".class);");
         return getCode();
     }
