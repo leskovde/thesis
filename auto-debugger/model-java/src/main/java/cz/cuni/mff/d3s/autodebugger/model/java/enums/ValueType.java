@@ -4,5 +4,6 @@ public enum ValueType {
     ARGUMENT,
     VARIABLE,
     FIELD,
-    STATIC_FIELD
+    STATIC_FIELD,
+    RETURN_VALUE
 }
