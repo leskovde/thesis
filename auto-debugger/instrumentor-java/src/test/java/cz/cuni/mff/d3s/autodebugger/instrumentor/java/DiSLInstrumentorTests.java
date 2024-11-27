@@ -87,4 +87,31 @@ public class DiSLInstrumentorTests {
     // when
     var resultPaths = instrumentor.runInstrumentation();
   }
+
+  @Test
+  public void givenStaticMethod_whenInstrumentingReturnValue_thenValuesAreExtracted() {
+    // given
+    MethodIdentifier methodIdentifier = new MethodIdentifier(
+            MethodIdentifierParameters.builder()
+                    .ownerClassIdentifier(Constants.testClassIdentifier)
+                    .methodName("testMul")
+                    .returnType("void")
+                    .build());
+    DiSLInstrumentor instrumentor =
+            DiSLInstrumentor.builder()
+                    .applicationJarPath(Path.of("src/test/resources/targets/extraction/Test.jar"))
+                    .classpath(List.of(Constants.targetJarPath))
+                    .generatedCodeOutputDirectory(
+                            Path.of(
+                                    "../analyzer-disl/src/main/java/cz/cuni/mff/d3s/autodebugger/analyzer/disl/"))
+                    .jarOutputPath(Path.of("../analyzer-disl/build/libs/instrumentation.jar"))
+                    .dislRepositoryPath(Path.of("../../../disl"))
+                    .method(methodIdentifier)
+                    .exportedValues(
+                            List.of(new ReturnValueIdentifier(new ReturnValueIdentifierParameters(methodIdentifier))))
+                    .build();
+
+    // when
+    var resultPaths = instrumentor.runInstrumentation();
+  }
 }

@@ -1,9 +1,6 @@
 package cz.cuni.mff.d3s.autodebugger.instrumentor.java.factories;
 
-import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.ArgumentIdentifier;
-import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.ValueIdentifier;
-import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.FieldIdentifier;
-import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.VariableIdentifier;
+import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.*;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling.JavaValue;
 
 public abstract class ExportableValueFactory {
@@ -16,6 +13,8 @@ public abstract class ExportableValueFactory {
           FieldExportFactory.getInstance().createExportable((FieldIdentifier) identifier);
       case VARIABLE ->
           VariableExportFactory.getInstance().createExportable((VariableIdentifier) identifier);
+      case RETURN_VALUE ->
+          ReturnValueExportFactory.getInstance().createExportable((ReturnValueIdentifier) identifier);
       default ->
           throw new IllegalArgumentException(
               "Unknown exportable type: " + identifier.getValueType());
