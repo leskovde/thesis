@@ -16,7 +16,6 @@ public abstract class JavaValue extends Metaclass {
         this.exportedValueIdentifier = exportableValue;
         var parameters = VariableIdentifierParameters.builder()
                 .variableType(exportableValue.getType())
-                .exportableType(ValueType.VARIABLE)
                 .build();
         this.instrumentationVariableIdentifier = VariableIdentifierFactory.getInstance()
                 .generateIdentifier(parameters);

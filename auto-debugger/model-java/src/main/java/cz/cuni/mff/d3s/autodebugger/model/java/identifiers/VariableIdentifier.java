@@ -1,5 +1,6 @@
 package cz.cuni.mff.d3s.autodebugger.model.java.identifiers;
 
+import cz.cuni.mff.d3s.autodebugger.model.java.enums.ValueType;
 import lombok.Getter;
 
 @Getter
@@ -8,7 +9,7 @@ public class VariableIdentifier extends ValueIdentifier {
     private final String variableType;
 
     public VariableIdentifier(VariableIdentifierParameters parameters) {
-        super(parameters.exportableType);
+        super(ValueType.VARIABLE);
         this.variableName = parameters.variableName;
         this.variableType = parameters.variableType;
     }
