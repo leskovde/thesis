@@ -139,7 +139,7 @@ public class DiSLCompiler {
     classPath.add(new File(instrumentor.getDislClassPath().toString(), "dislre-server.jar"));
     classPath.add(new File(instrumentor.getDislClassPath().toString(), "dislre-dispatch.jar"));
     classPath.add(
-        new File("../test-generator-java/build/libs/test-generator-java-1.0-SNAPSHOT.jar"));
+        new File("../test-generator-java/build/libs/test-generator-java-1.0-SNAPSHOT-all.jar"));
     classPath.add(
         new File("../test-generator-common/build/libs/test-generator-common-1.0-SNAPSHOT.jar"));
     classPath.add(new File("../model-java/build/libs/model-java-1.0-SNAPSHOT.jar"));
