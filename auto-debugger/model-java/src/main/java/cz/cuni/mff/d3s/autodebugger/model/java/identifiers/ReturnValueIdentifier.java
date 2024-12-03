@@ -2,10 +2,14 @@ package cz.cuni.mff.d3s.autodebugger.model.java.identifiers;
 
 import cz.cuni.mff.d3s.autodebugger.model.java.enums.ValueType;
 import cz.cuni.mff.d3s.autodebugger.model.java.factories.IdentifierFactory;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@Getter
+@NoArgsConstructor
 public class ReturnValueIdentifier extends ValueIdentifier implements ExportableValue {
-    private final int internalId;
-    private final MethodIdentifier methodIdentifier;
+    private int internalId;
+    private MethodIdentifier methodIdentifier;
 
     public ReturnValueIdentifier(ReturnValueIdentifierParameters parameters) {
         super(ValueType.RETURN_VALUE);
