@@ -1,5 +1,6 @@
 package cz.cuni.mff.d3s.autodebugger.testgenerator.java.trace;
 
+import cz.cuni.mff.d3s.autodebugger.model.java.Trace;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.ExportableValue;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.common.TraceBasedGenerator;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.common.UnitTestGenerator;
@@ -29,8 +30,15 @@ public class TraceBasedUnitTestGenerator implements TraceBasedGenerator, UnitTes
   }
 
   @Override
-  public List<Path> generateTests(cz.cuni.mff.d3s.autodebugger.model.java.Trace trace) {
+  public List<Path> generateTests(Trace trace) {
     log.info("Generating unit tests from trace: {}", trace);
+    var mapper = new TraceIdentifierMapper(trace, identifierMapping);
+    for (var slot : mapper.getSlots()) {
+      var value = mapper.getExportableValue(slot);
+      log.info("Slot {}: {}", slot, value.getType());
+      log.info("Values: {}", mapper.getSlotValues(slot));
+    }
+    log.info("Generated unit tests");
     return List.of();
   }
 

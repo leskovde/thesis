@@ -76,6 +76,38 @@ public class Trace {
     }
   }
 
+  public Set<Byte> getByteValues(int slot) {
+    return byteValues.getOrDefault(slot, Collections.emptySet());
+  }
+
+  public Set<Character> getCharValues(int slot) {
+    return charValues.getOrDefault(slot, Collections.emptySet());
+  }
+
+  public Set<Short> getShortValues(int slot) {
+    return shortValues.getOrDefault(slot, Collections.emptySet());
+  }
+
+  public Set<Integer> getIntValues(int slot) {
+    return intValues.getOrDefault(slot, Collections.emptySet());
+  }
+
+  public Set<Long> getLongValues(int slot) {
+    return longValues.getOrDefault(slot, Collections.emptySet());
+  }
+
+  public Set<Float> getFloatValues(int slot) {
+    return floatValues.getOrDefault(slot, Collections.emptySet());
+  }
+
+  public Set<Double> getDoubleValues(int slot) {
+    return doubleValues.getOrDefault(slot, Collections.emptySet());
+  }
+
+  public Set<Boolean> getBooleanValues(int slot) {
+    return booleanValues.getOrDefault(slot, Collections.emptySet());
+  }
+
   public void printSlotValues() {
     printSlotValues(byteValues);
     printSlotValues(charValues);
