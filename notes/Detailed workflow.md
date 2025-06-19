@@ -7,4 +7,4 @@
 
 Issues: 
 - Scopes (a given variable might be shadowed by a loop or a branch)
-- Všechno bych chtěl ideálně dělat na úrovni bytecode, ale potřebuji zjistit, jestli to jde a jestli to má smysl 
+- Everything should ideally be done on the level of bytecode, but I need to figure out if that makes sense 
