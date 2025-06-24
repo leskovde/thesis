@@ -6,6 +6,8 @@ include("test-generator-common")
 include("test-generator-java")
 include("runner")
 include("analyzer-disl")
+include("analyzer-common")
+include("analyzer-java")
 
 dependencyResolutionManagement {
 
