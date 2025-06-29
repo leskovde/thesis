@@ -5,7 +5,7 @@
 
   <!-- Public plugin name should be written in Title Case.
        Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-name -->
-  <name>Intellij-plugin</name>
+  <name>SDK: Tool Window Sample</name>
 
   <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
   <vendor url="https://www.yourcompany.com">YourCompany</vendor>
@@ -24,6 +24,8 @@
   <!-- Extension points defined by the plugin.
        Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
   <extensions defaultExtensionNs="com.intellij">
-
+    <toolWindow id="Sample Calendar" secondary="true" icon="AllIcons.Toolwindows.WebToolWindow" anchor="right"
+                factoryClass="cz.cuni.mff.d3s.intellijplugin.DebuggerToolWindowFactory"/>
   </extensions>
+
 </idea-plugin>

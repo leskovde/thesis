@@ -8,6 +8,7 @@ include("runner")
 include("analyzer-disl")
 include("analyzer-common")
 include("analyzer-java")
+include("intellij-plugin")
 
 dependencyResolutionManagement {
 
