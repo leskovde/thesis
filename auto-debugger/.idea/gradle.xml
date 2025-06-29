@@ -9,13 +9,23 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/analyzer" />
+            <option value="$PROJECT_DIR$/analyzer-common" />
             <option value="$PROJECT_DIR$/analyzer-disl" />
+            <option value="$PROJECT_DIR$/analyzer-java" />
             <option value="$PROJECT_DIR$/instrumentor-common" />
             <option value="$PROJECT_DIR$/instrumentor-java" />
+            <option value="$PROJECT_DIR$/model-java" />
             <option value="$PROJECT_DIR$/runner" />
             <option value="$PROJECT_DIR$/test-generator-common" />
             <option value="$PROJECT_DIR$/test-generator-java" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/intellij-plugin" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/intellij-plugin" />
           </set>
         </option>
       </GradleProjectSettings>
