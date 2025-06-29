@@ -1,6 +1,6 @@
 plugins {
     id("java-library")
-    id("io.freefair.lombok")
+    alias(libs.plugins.lombok)
     id("com.gradleup.shadow") version "8.3.5"
 }
 

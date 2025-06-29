@@ -1,6 +1,6 @@
 plugins {
     id("java")
-    id("io.freefair.lombok") version "8.4"
+    alias(libs.plugins.lombok)
 }
 
 group = "cz.cuni.mff.d3s"
@@ -12,8 +12,7 @@ repositories {
 
 dependencies {
     implementation(project(mapOf("path" to ":runner")))
-    testImplementation(platform(libs.junit5.bom))
-    testImplementation(libs.junit5)
+    testImplementation(libs.bundles.junit)
 }
 
 tasks.test {

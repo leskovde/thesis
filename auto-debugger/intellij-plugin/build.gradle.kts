@@ -1,6 +1,8 @@
+import org.jetbrains.intellij.platform.gradle.utils.intelliJPlatformResolver
+
 plugins {
   id("java")
-  id("org.jetbrains.intellij.platform") version "2.6.0"
+  alias(libs.plugins.intelliJPlatform) // IntelliJ Platform Gradle Plugin
 }
 
 group = "cz.cuni.mff.d3s"
@@ -13,14 +15,23 @@ repositories {
   }
 }
 
+// https://platform.jetbrains.com/t/new-intellijplatformresolver-helper-to-control-the-intellij-platform-gradle-plugin-dependency-extraction/2024
+val intelliJPlatformResolver = project.intelliJPlatformResolver()
+
 // Configure Gradle IntelliJ Plugin
 // Read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin.html
 dependencies {
-  intellijPlatform {
-    intellijIdeaCommunity("2025.1")
+  testImplementation(libs.bundles.junit)
+  testImplementation(libs.opentest4j)
+  testImplementation(libs.mockito)
 
-    // Add necessary plugin dependencies for compilation here, example:
-    // bundledPlugin("com.intellij.java")
+  intellijPlatform {
+    local(
+      intelliJPlatformResolver.resolve(
+        type = providers.gradleProperty("platformType"),
+        version = providers.gradleProperty("platformVersion"),
+      )
+    )
   }
 }
 

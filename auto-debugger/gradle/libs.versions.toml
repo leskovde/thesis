@@ -19,7 +19,6 @@ lombok = "8.14"
 opentest4j = { group = "org.opentest4j", name = "opentest4j", version.ref = "opentest4j" }
 log4j = { group = "org.apache.logging.log4j", name = "log4j-slf4j2-impl", version.ref = "log4j" }
 javatuples = { group = "org.javatuples", name = "javatuples", version.ref = "javatuples" }
-junit-core = { group = "junit", name = "junit", version.ref = "junit5" }
 junit-bom = { group = "org.junit", name = "junit-bom", version.ref = "junit5" }
 junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junit5" }
 mockito = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }
@@ -34,4 +33,4 @@ qodana = { id = "org.jetbrains.qodana", version.ref = "qodana" }
 lombok = { id = "io.freefair.lombok", version.ref = "lombok" }
 
 [bundles]
-junit = ["junit-core", "junit-bom", "junit-jupiter"]
+junit = ["junit-jupiter"]

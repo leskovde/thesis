@@ -18,7 +18,7 @@ final class DebuggerToolWindowFactory implements ToolWindowFactory, DumbAware {
 
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
-        CalendarToolWindowContent toolWindowContent = new DebuggerToolWindowContent(toolWindow);
+        DebuggerToolWindowContent toolWindowContent = new DebuggerToolWindowContent(toolWindow);
         Content content = ContentFactory.getInstance().createContent(toolWindowContent.getContentPanel(), "", false);
         toolWindow.getContentManager().addContent(content);
     }

@@ -10,12 +10,11 @@ repositories {
 }
 
 dependencies {
-    implementation("info.picocli:picocli:4.7.6")
+    implementation(libs.picocli)
     implementation(project(mapOf("path" to ":model-java")))
     implementation(project(mapOf("path" to ":instrumentor-common")))
     implementation(project(mapOf("path" to ":instrumentor-java")))
-    testImplementation(platform("org.junit:junit-bom:5.9.1"))
-    testImplementation("org.junit.jupiter:junit-jupiter")
+    testImplementation(libs.bundles.junit)
 }
 
 tasks.test {
