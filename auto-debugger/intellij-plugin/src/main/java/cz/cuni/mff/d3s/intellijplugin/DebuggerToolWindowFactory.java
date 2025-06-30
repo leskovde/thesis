@@ -2,6 +2,7 @@ package cz.cuni.mff.d3s.intellijplugin;
 
 import com.intellij.execution.RunManager;
 import com.intellij.execution.configurations.RunConfiguration;
+import com.intellij.execution.impl.EditConfigurationsDialog;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.DumbAware;
@@ -48,6 +49,7 @@ final class DebuggerToolWindowFactory implements ToolWindowFactory, DumbAware {
         // UI Components
         private final ComboBox<RunConfiguration> runConfigComboBox = new ComboBox<>();
         private final JButton reloadConfigsButton = new JButton("Reload");
+        private final JButton editConfigsButton = new JButton("Edit");
         private final TextFieldWithCompletion targetMethodField;
         private final JButton runAnalysisButton = new JButton("Run Analysis");
         private final JTextArea outputArea = new JTextArea(10, 40);
@@ -92,6 +94,7 @@ final class DebuggerToolWindowFactory implements ToolWindowFactory, DumbAware {
 
             // Add event listeners
             reloadConfigsButton.addActionListener(this::onReloadConfigurations);
+            editConfigsButton.addActionListener(this::onEditConfigurations);
             runAnalysisButton.addActionListener(this::onRunAnalysis);
 
             // Add combo box listener to update run button state
@@ -104,7 +107,13 @@ final class DebuggerToolWindowFactory implements ToolWindowFactory, DumbAware {
         private JPanel createRunConfigPanel() {
             JPanel panel = new JPanel(new BorderLayout());
             panel.add(runConfigComboBox, BorderLayout.CENTER);
-            panel.add(reloadConfigsButton, BorderLayout.EAST);
+
+            // Create button panel for Reload and Edit buttons
+            JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 2, 0));
+            buttonPanel.add(reloadConfigsButton);
+            buttonPanel.add(editConfigsButton);
+            panel.add(buttonPanel, BorderLayout.EAST);
+
             return panel;
         }
 
@@ -125,11 +134,18 @@ final class DebuggerToolWindowFactory implements ToolWindowFactory, DumbAware {
             loadRunConfigurations();
         }
 
+        private void onEditConfigurations(ActionEvent e) {
+            // Open the IDE's run configuration settings using the standard settings dialog
+            EditConfigurationsDialog dialog = new EditConfigurationsDialog(project);
+            dialog.show();
 
+            // Reload configurations after the dialog is closed in case user made changes
+            loadRunConfigurations();
+        }
 
         private void updateRunButtonState() {
             boolean hasConfiguration = runConfigComboBox.getSelectedItem() != null;
-            boolean hasMethod = targetMethodField.getText() != null && !targetMethodField.getText().trim().isEmpty();
+            boolean hasMethod = !targetMethodField.getText().trim().isEmpty();
             runAnalysisButton.setEnabled(hasConfiguration && hasMethod);
         }
 
@@ -137,7 +153,7 @@ final class DebuggerToolWindowFactory implements ToolWindowFactory, DumbAware {
             RunConfiguration selectedConfig = (RunConfiguration) runConfigComboBox.getSelectedItem();
             String methodSignature = targetMethodField.getText();
 
-            if (selectedConfig == null || methodSignature == null || methodSignature.trim().isEmpty()) {
+            if (selectedConfig == null || methodSignature.trim().isEmpty()) {
                 Messages.showErrorDialog(project, "Please select both a run configuration and a target method.", "Missing Selection");
                 return;
             }
@@ -213,7 +229,7 @@ final class DebuggerToolWindowFactory implements ToolWindowFactory, DumbAware {
     }
 
     /**
-     * Completion provider for method signatures with common Java method examples.
+     * Completion provider for method signatures with suggestions.
      */
     private static class MethodCompletionProvider extends TextFieldCompletionProvider {
         private final Project project;
@@ -223,16 +239,41 @@ final class DebuggerToolWindowFactory implements ToolWindowFactory, DumbAware {
             "java.lang.String.toString()",
             "java.lang.String.equals(Object)",
             "java.lang.String.length()",
+            "java.lang.String.substring(int)",
+            "java.lang.String.charAt(int)",
             "java.lang.Object.hashCode()",
             "java.util.List.add(Object)",
             "java.util.List.get(int)",
             "java.util.List.size()",
+            "java.util.List.isEmpty()",
             "java.util.Map.put(Object, Object)",
             "java.util.Map.get(Object)",
+            "java.util.Map.containsKey(Object)",
             "java.io.PrintStream.println(String)",
             "java.lang.System.currentTimeMillis()",
             "java.lang.Math.max(int, int)",
-            "java.lang.Math.min(int, int)"
+            "java.lang.Math.min(int, int)",
+            "java.lang.Math.abs(int)",
+            "java.util.Collections.sort(List)",
+            "java.util.Arrays.asList(Object[])"
+        };
+
+        // Common class patterns for completion
+        private static final String[] COMMON_CLASSES = {
+            "java.lang.String",
+            "java.lang.Object",
+            "java.util.List",
+            "java.util.Map",
+            "java.util.Set",
+            "java.util.ArrayList",
+            "java.util.HashMap",
+            "java.io.File",
+            "java.io.InputStream",
+            "java.io.OutputStream",
+            "java.lang.System",
+            "java.lang.Math",
+            "java.util.Collections",
+            "java.util.Arrays"
         };
 
         public MethodCompletionProvider(Project project) {
@@ -242,15 +283,84 @@ final class DebuggerToolWindowFactory implements ToolWindowFactory, DumbAware {
         @Override
         protected void addCompletionVariants(@NotNull String text, int offset, @NotNull String prefix,
                                            @NotNull CompletionResultSet result) {
-            // Add common method signatures that match the prefix
+
+            // If the prefix contains a dot, try to complete method names
+            if (prefix.contains(".") && !prefix.endsWith(".")) {
+                addMethodCompletions(prefix, result);
+            } else {
+                // Complete class names
+                addClassCompletions(prefix, result);
+            }
+
+            // Always add common method signatures
+            addCommonMethodCompletions(prefix, result);
+
+            // Add example patterns for empty or short prefixes
+            addExamplePatterns(prefix, result);
+        }
+
+        private void addClassCompletions(@NotNull String prefix, @NotNull CompletionResultSet result) {
+            for (String className : COMMON_CLASSES) {
+                if (className.toLowerCase().contains(prefix.toLowerCase())) {
+                    result.addElement(LookupElementBuilder.create(className)
+                        .withTypeText("Java class"));
+                }
+            }
+
+            // Add some project-like patterns
+            if (prefix.isEmpty() || "com".startsWith(prefix.toLowerCase())) {
+                result.addElement(LookupElementBuilder.create("com.example.MyClass")
+                    .withTypeText("Example class"));
+            }
+
+            if (prefix.isEmpty() || prefix.toLowerCase().startsWith("my")) {
+                result.addElement(LookupElementBuilder.create("MyClass")
+                    .withTypeText("Example class"));
+            }
+        }
+
+        private void addMethodCompletions(@NotNull String prefix, @NotNull CompletionResultSet result) {
+            int lastDot = prefix.lastIndexOf('.');
+            String className = prefix.substring(0, lastDot);
+            String methodPrefix = prefix.substring(lastDot + 1);
+
+            // Suggest common method names based on class type
+            String[] methodNames = getCommonMethodsForClass(className);
+            for (String methodName : methodNames) {
+                if (methodName.toLowerCase().startsWith(methodPrefix.toLowerCase())) {
+                    String suggestion = className + "." + methodName + "()";
+                    result.addElement(LookupElementBuilder.create(suggestion)
+                        .withTypeText("Common method"));
+                }
+            }
+        }
+
+        private String[] getCommonMethodsForClass(String className) {
+            if (className.contains("String")) {
+                return new String[]{"toString", "equals", "length", "substring", "charAt", "indexOf", "toLowerCase", "toUpperCase"};
+            } else if (className.contains("List") || className.contains("ArrayList")) {
+                return new String[]{"add", "get", "remove", "size", "isEmpty", "contains", "clear", "indexOf"};
+            } else if (className.contains("Map") || className.contains("HashMap")) {
+                return new String[]{"put", "get", "remove", "containsKey", "containsValue", "size", "isEmpty", "clear"};
+            } else if (className.contains("Set")) {
+                return new String[]{"add", "remove", "contains", "size", "isEmpty", "clear"};
+            } else if (className.contains("File")) {
+                return new String[]{"exists", "isFile", "isDirectory", "getName", "getPath", "length", "delete"};
+            } else {
+                return new String[]{"toString", "equals", "hashCode", "getClass"};
+            }
+        }
+
+        private void addCommonMethodCompletions(@NotNull String prefix, @NotNull CompletionResultSet result) {
             for (String method : COMMON_METHODS) {
                 if (method.toLowerCase().contains(prefix.toLowerCase())) {
                     result.addElement(LookupElementBuilder.create(method)
                         .withTypeText("Common Java method"));
                 }
             }
+        }
 
-            // Add some example patterns
+        private void addExamplePatterns(@NotNull String prefix, @NotNull CompletionResultSet result) {
             if (prefix.isEmpty() || "com".startsWith(prefix.toLowerCase())) {
                 result.addElement(LookupElementBuilder.create("com.example.MyClass.myMethod()")
                     .withTypeText("Example pattern"));
@@ -261,21 +371,9 @@ final class DebuggerToolWindowFactory implements ToolWindowFactory, DumbAware {
                     .withTypeText("Main method pattern"));
             }
 
-            // If the prefix looks like a class name, suggest method completion
-            if (prefix.contains(".") && !prefix.endsWith(".")) {
-                int lastDot = prefix.lastIndexOf('.');
-                String className = prefix.substring(0, lastDot);
-                String methodPrefix = prefix.substring(lastDot + 1);
-
-                // Suggest common method names
-                String[] commonMethodNames = {"toString", "equals", "hashCode", "get", "set", "add", "remove", "size", "isEmpty"};
-                for (String methodName : commonMethodNames) {
-                    if (methodName.toLowerCase().startsWith(methodPrefix.toLowerCase())) {
-                        String suggestion = className + "." + methodName + "()";
-                        result.addElement(LookupElementBuilder.create(suggestion)
-                            .withTypeText("Common method"));
-                    }
-                }
+            if (prefix.isEmpty() || "test".startsWith(prefix.toLowerCase())) {
+                result.addElement(LookupElementBuilder.create("com.example.TestClass.testMethod()")
+                    .withTypeText("Test method pattern"));
             }
         }
     }
