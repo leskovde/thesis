@@ -11,7 +11,8 @@ import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
-import com.intellij.ui.components.JBLabel;
+import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.psi.search.PsiShortNamesCache;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
@@ -20,14 +21,12 @@ import com.intellij.util.TextFieldCompletionProvider;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.codeInsight.completion.CompletionResultSet;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
-import com.intellij.util.ProcessingContext;
 import org.jetbrains.annotations.NotNull;
+import com.intellij.psi.*;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -234,48 +233,6 @@ final class DebuggerToolWindowFactory implements ToolWindowFactory, DumbAware {
     private static class MethodCompletionProvider extends TextFieldCompletionProvider {
         private final Project project;
 
-        // Common method signature examples
-        private static final String[] COMMON_METHODS = {
-            "java.lang.String.toString()",
-            "java.lang.String.equals(Object)",
-            "java.lang.String.length()",
-            "java.lang.String.substring(int)",
-            "java.lang.String.charAt(int)",
-            "java.lang.Object.hashCode()",
-            "java.util.List.add(Object)",
-            "java.util.List.get(int)",
-            "java.util.List.size()",
-            "java.util.List.isEmpty()",
-            "java.util.Map.put(Object, Object)",
-            "java.util.Map.get(Object)",
-            "java.util.Map.containsKey(Object)",
-            "java.io.PrintStream.println(String)",
-            "java.lang.System.currentTimeMillis()",
-            "java.lang.Math.max(int, int)",
-            "java.lang.Math.min(int, int)",
-            "java.lang.Math.abs(int)",
-            "java.util.Collections.sort(List)",
-            "java.util.Arrays.asList(Object[])"
-        };
-
-        // Common class patterns for completion
-        private static final String[] COMMON_CLASSES = {
-            "java.lang.String",
-            "java.lang.Object",
-            "java.util.List",
-            "java.util.Map",
-            "java.util.Set",
-            "java.util.ArrayList",
-            "java.util.HashMap",
-            "java.io.File",
-            "java.io.InputStream",
-            "java.io.OutputStream",
-            "java.lang.System",
-            "java.lang.Math",
-            "java.util.Collections",
-            "java.util.Arrays"
-        };
-
         public MethodCompletionProvider(Project project) {
             this.project = project;
         }
@@ -283,98 +240,94 @@ final class DebuggerToolWindowFactory implements ToolWindowFactory, DumbAware {
         @Override
         protected void addCompletionVariants(@NotNull String text, int offset, @NotNull String prefix,
                                            @NotNull CompletionResultSet result) {
-
-            // If the prefix contains a dot, try to complete method names
+            // If the prefix contains a dot, try to complete method names using PSI
             if (prefix.contains(".") && !prefix.endsWith(".")) {
-                addMethodCompletions(prefix, result);
+                addPsiMethodCompletions(prefix, result);
             } else {
-                // Complete class names
-                addClassCompletions(prefix, result);
+                // Complete class names using PSI
+                addPsiClassCompletions(prefix, result);
             }
-
-            // Always add common method signatures
-            addCommonMethodCompletions(prefix, result);
-
-            // Add example patterns for empty or short prefixes
-            addExamplePatterns(prefix, result);
         }
 
-        private void addClassCompletions(@NotNull String prefix, @NotNull CompletionResultSet result) {
-            for (String className : COMMON_CLASSES) {
-                if (className.toLowerCase().contains(prefix.toLowerCase())) {
-                    result.addElement(LookupElementBuilder.create(className)
-                        .withTypeText("Java class"));
+        private void addPsiClassCompletions(@NotNull String prefix, @NotNull CompletionResultSet result) {
+            try {
+                PsiShortNamesCache cache = PsiShortNamesCache.getInstance(project);
+                GlobalSearchScope scope = GlobalSearchScope.projectScope(project);
+
+                // Get all class names that start with the prefix
+                String[] allClassNames = cache.getAllClassNames();
+                for (String className : allClassNames) {
+                    if (className.toLowerCase().startsWith(prefix.toLowerCase())) {
+                        PsiClass[] classes = cache.getClassesByName(className, scope);
+                        for (PsiClass psiClass : classes) {
+                            String qualifiedName = psiClass.getQualifiedName();
+                            if (qualifiedName != null) {
+                                result.addElement(LookupElementBuilder.create(qualifiedName)
+                                        .withIcon(psiClass.getIcon(0))
+                                        .withTypeText("Class from project"));
+                            }
+                        }
+                    }
                 }
-            }
-
-            // Add some project-like patterns
-            if (prefix.isEmpty() || "com".startsWith(prefix.toLowerCase())) {
-                result.addElement(LookupElementBuilder.create("com.example.MyClass")
-                    .withTypeText("Example class"));
-            }
-
-            if (prefix.isEmpty() || prefix.toLowerCase().startsWith("my")) {
-                result.addElement(LookupElementBuilder.create("MyClass")
-                    .withTypeText("Example class"));
+            } catch (Exception e) {
+                // Fallback to simple completion if PSI access fails
+                LOG.debug("Failed to access PSI for class completion", e);
             }
         }
 
-        private void addMethodCompletions(@NotNull String prefix, @NotNull CompletionResultSet result) {
-            int lastDot = prefix.lastIndexOf('.');
-            String className = prefix.substring(0, lastDot);
-            String methodPrefix = prefix.substring(lastDot + 1);
+        private void addPsiMethodCompletions(@NotNull String prefix, @NotNull CompletionResultSet result) {
+            try {
+                int lastDot = prefix.lastIndexOf('.');
+                String className = prefix.substring(0, lastDot);
+                String methodPrefix = prefix.substring(lastDot + 1);
 
-            // Suggest common method names based on class type
-            String[] methodNames = getCommonMethodsForClass(className);
-            for (String methodName : methodNames) {
-                if (methodName.toLowerCase().startsWith(methodPrefix.toLowerCase())) {
-                    String suggestion = className + "." + methodName + "()";
-                    result.addElement(LookupElementBuilder.create(suggestion)
-                        .withTypeText("Common method"));
+                // Find the class using PSI
+                JavaPsiFacade facade = JavaPsiFacade.getInstance(project);
+                GlobalSearchScope scope = GlobalSearchScope.allScope(project);
+                PsiClass psiClass = facade.findClass(className, scope);
+
+                if (psiClass != null) {
+                    // Get all methods from the class
+                    PsiMethod[] methods = psiClass.getAllMethods();
+                    for (PsiMethod method : methods) {
+                        if (method.getName().toLowerCase().startsWith(methodPrefix.toLowerCase())) {
+                            String methodSignature = buildMethodSignature(method);
+                            result.addElement(LookupElementBuilder.create(methodSignature)
+                                    .withIcon(method.getIcon(0))
+                                    .withTypeText(method.getReturnType() != null ?
+                                            method.getReturnType().getPresentableText() : "void")
+                                    .withTailText(" (" + (method.getContainingClass() != null ?
+                                            method.getContainingClass().getName() : "Unknown") + ")"));
+                        }
+                    }
                 }
+            } catch (Exception e) {
+                LOG.debug("Failed to access PSI for method completion", e);
             }
         }
 
-        private String[] getCommonMethodsForClass(String className) {
-            if (className.contains("String")) {
-                return new String[]{"toString", "equals", "length", "substring", "charAt", "indexOf", "toLowerCase", "toUpperCase"};
-            } else if (className.contains("List") || className.contains("ArrayList")) {
-                return new String[]{"add", "get", "remove", "size", "isEmpty", "contains", "clear", "indexOf"};
-            } else if (className.contains("Map") || className.contains("HashMap")) {
-                return new String[]{"put", "get", "remove", "containsKey", "containsValue", "size", "isEmpty", "clear"};
-            } else if (className.contains("Set")) {
-                return new String[]{"add", "remove", "contains", "size", "isEmpty", "clear"};
-            } else if (className.contains("File")) {
-                return new String[]{"exists", "isFile", "isDirectory", "getName", "getPath", "length", "delete"};
-            } else {
-                return new String[]{"toString", "equals", "hashCode", "getClass"};
-            }
-        }
+        private String buildMethodSignature(PsiMethod method) {
+            StringBuilder signature = new StringBuilder();
 
-        private void addCommonMethodCompletions(@NotNull String prefix, @NotNull CompletionResultSet result) {
-            for (String method : COMMON_METHODS) {
-                if (method.toLowerCase().contains(prefix.toLowerCase())) {
-                    result.addElement(LookupElementBuilder.create(method)
-                        .withTypeText("Common Java method"));
-                }
-            }
-        }
-
-        private void addExamplePatterns(@NotNull String prefix, @NotNull CompletionResultSet result) {
-            if (prefix.isEmpty() || "com".startsWith(prefix.toLowerCase())) {
-                result.addElement(LookupElementBuilder.create("com.example.MyClass.myMethod()")
-                    .withTypeText("Example pattern"));
+            // Add class name
+            PsiClass containingClass = method.getContainingClass();
+            if (containingClass != null) {
+                signature.append(containingClass.getQualifiedName()).append(".");
             }
 
-            if (prefix.isEmpty() || "main".startsWith(prefix.toLowerCase())) {
-                result.addElement(LookupElementBuilder.create("com.example.Main.main(String[])")
-                    .withTypeText("Main method pattern"));
-            }
+            // Add method name
+            signature.append(method.getName());
 
-            if (prefix.isEmpty() || "test".startsWith(prefix.toLowerCase())) {
-                result.addElement(LookupElementBuilder.create("com.example.TestClass.testMethod()")
-                    .withTypeText("Test method pattern"));
+            // Add parameters
+            signature.append("(");
+            PsiParameter[] parameters = method.getParameterList().getParameters();
+            for (int i = 0; i < parameters.length; i++) {
+                if (i > 0) signature.append(", ");
+                signature.append(parameters[i].getType().getPresentableText());
             }
+            signature.append(")");
+
+            return signature.toString();
         }
     }
 }
