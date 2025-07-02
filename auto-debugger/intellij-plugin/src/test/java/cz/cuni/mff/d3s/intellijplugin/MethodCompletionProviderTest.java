@@ -76,5 +76,32 @@ public class MethodCompletionProviderTest extends LightJavaCodeInsightFixtureTes
         return input != null && input.length() >= 0;
     }
 
+    @Test
+    public void testMethodSignatureParsing() {
+        // Test the method signature parsing logic
 
+        // Test invalid signatures - these should return null
+        assertNull(completionProvider.findMethodBySignature(""));
+        assertNull(completionProvider.findMethodBySignature("methodName"));
+        assertNull(completionProvider.findMethodBySignature("com.example.Class.method"));
+
+        // Note: Testing with real PSI would require actual classes in the test project
+        // These tests verify the parsing logic handles invalid input gracefully
+    }
+
+    @Test
+    public void testCompletionProviderBasicFunctionality() {
+        // Test that the completion provider can be instantiated and basic methods work
+        assertNotNull(completionProvider);
+
+        // Test that calling findMethodBySignature doesn't throw exceptions with invalid input
+        try {
+            completionProvider.findMethodBySignature("");
+            completionProvider.findMethodBySignature("invalid");
+            completionProvider.findMethodBySignature("com.example.Class.method");
+            assertTrue(true); // Should reach this point without exceptions
+        } catch (Exception e) {
+            fail("Should not throw exceptions for invalid signatures: " + e.getMessage());
+        }
+    }
 }
