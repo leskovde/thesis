@@ -1,4 +1,5 @@
 import org.jetbrains.intellij.platform.gradle.utils.intelliJPlatformResolver
+import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 
 plugins {
   id("java")
@@ -24,6 +25,7 @@ dependencies {
   testImplementation(libs.bundles.junit)
   testImplementation(libs.opentest4j)
   testImplementation(libs.mockito)
+  testRuntimeOnly("junit:junit:4.13.2")
 
   intellijPlatform {
     local(
@@ -32,6 +34,12 @@ dependencies {
         version = providers.gradleProperty("platformVersion"),
       )
     )
+    intellijIdeaCommunity("2025.1")
+    bundledPlugin("com.intellij.java")
+
+    testFramework(TestFrameworkType.JUnit5)
+    testFramework(TestFrameworkType.Platform)
+    testFramework(TestFrameworkType.Plugin.Java)
   }
 }
 
@@ -55,10 +63,6 @@ intellijPlatform {
   }
 }
 
-tasks {
-  // Set the JVM compatibility versions
-  withType<JavaCompile> {
-    sourceCompatibility = "21"
-    targetCompatibility = "21"
-  }
+tasks.test {
+  useJUnitPlatform()
 }
