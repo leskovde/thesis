@@ -2,7 +2,7 @@ package cz.cuni.mff.d3s.intellijplugin;
 
 import com.intellij.execution.RunManager;
 import com.intellij.execution.configurations.RunConfiguration;
-import com.intellij.execution.impl.EditConfigurationsDialog;
+import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.DumbAware;
@@ -13,6 +13,8 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.PsiShortNamesCache;
+import com.intellij.psi.search.searches.AllClassesSearch;
+import com.intellij.util.Query;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
@@ -135,8 +137,7 @@ final class DebuggerToolWindowFactory implements ToolWindowFactory, DumbAware {
 
         private void onEditConfigurations(ActionEvent e) {
             // Open the IDE's run configuration settings using the standard settings dialog
-            EditConfigurationsDialog dialog = new EditConfigurationsDialog(project);
-            dialog.show();
+            ShowSettingsUtil.getInstance().showSettingsDialog(project, "Run/Debug Configurations");
 
             // Reload configurations after the dialog is closed in case user made changes
             loadRunConfigurations();
@@ -228,9 +229,12 @@ final class DebuggerToolWindowFactory implements ToolWindowFactory, DumbAware {
     }
 
     /**
-     * Completion provider for method signatures with suggestions.
+     * PSI-based completion provider for method signatures with three-stage completion:
+     * 1. Package name completion
+     * 2. Class name completion (with package)
+     * 3. Method name completion from all matching classes
      */
-    private static class MethodCompletionProvider extends TextFieldCompletionProvider {
+    static class MethodCompletionProvider extends TextFieldCompletionProvider {
         private final Project project;
 
         public MethodCompletionProvider(Project project) {
@@ -240,42 +244,129 @@ final class DebuggerToolWindowFactory implements ToolWindowFactory, DumbAware {
         @Override
         protected void addCompletionVariants(@NotNull String text, int offset, @NotNull String prefix,
                                            @NotNull CompletionResultSet result) {
-            // If the prefix contains a dot, try to complete method names using PSI
-            if (prefix.contains(".") && !prefix.endsWith(".")) {
-                addPsiMethodCompletions(prefix, result);
+
+            if (prefix.isEmpty()) {
+                // Show examples for empty input
+                addExamplePatterns(result);
+                return;
+            }
+
+            // TODO: looking for a method after typing a package name does not work properly
+            // Determine completion type based on input pattern
+            if (prefix.contains(".")) {
+                if (isFullyQualifiedClassName(prefix)) {
+                    // Case 3: Method name completion - suggest methods from the specified class
+                    addMethodCompletions(prefix, result);
+                } else {
+                    // Case 1: Package name completion or Case 2: Class completion within package
+                    addPackageAndClassCompletions(prefix, result);
+                }
             } else {
-                // Complete class names using PSI
-                addPsiClassCompletions(prefix, result);
+                // Case 2: Class name completion (without package) - suggest full class names
+                // Case 3: Method name completion - suggest methods from all classes with matching method names
+                addClassNameCompletions(prefix, result);
+                addMethodNameCompletions(prefix, result);
             }
         }
 
-        private void addPsiClassCompletions(@NotNull String prefix, @NotNull CompletionResultSet result) {
+        private boolean isFullyQualifiedClassName(@NotNull String prefix) {
+            // Check if this looks like a fully qualified class name (has dots and ends with a class-like name)
+            if (!prefix.contains(".")) return false;
+
+            int lastDot = prefix.lastIndexOf('.');
+            String lastPart = prefix.substring(lastDot + 1);
+
+            // If the last part starts with uppercase, it's likely a class name
+            return !lastPart.isEmpty() && Character.isUpperCase(lastPart.charAt(0));
+        }
+
+        // TODO: Remove this
+        private void addExamplePatterns(@NotNull CompletionResultSet result) {
+            result.addElement(LookupElementBuilder.create("com.example.MyClass.myMethod()")
+                .withTypeText("Example pattern"));
+            result.addElement(LookupElementBuilder.create("java.lang.String.toString()")
+                .withTypeText("Example pattern"));
+            result.addElement(LookupElementBuilder.create("MyClass")
+                .withTypeText("Type class name"));
+            result.addElement(LookupElementBuilder.create("myMethod")
+                .withTypeText("Type method name"));
+        }
+
+        // Case 1: Package name completion and Case 2: Class completion within package
+        private void addPackageAndClassCompletions(@NotNull String prefix, @NotNull CompletionResultSet result) {
+            try {
+                GlobalSearchScope scope = GlobalSearchScope.projectScope(project);
+                Query<PsiClass> query = AllClassesSearch.search(scope, project);
+
+                query.forEach(psiClass -> {
+                    String qualifiedName = psiClass.getQualifiedName();
+                    if (qualifiedName != null && qualifiedName.toLowerCase().startsWith(prefix.toLowerCase())) {
+                        result.addElement(LookupElementBuilder.create(qualifiedName)
+                            .withIcon(psiClass.getIcon(0))
+                            .withTypeText("Class"));
+                    }
+                    return true;
+                });
+            } catch (Exception e) {
+                LOG.debug("Failed to access PSI for package/class completion", e);
+            }
+        }
+
+        // Case 2: Class name completion (without package) - suggest full class names
+        private void addClassNameCompletions(@NotNull String prefix, @NotNull CompletionResultSet result) {
             try {
                 PsiShortNamesCache cache = PsiShortNamesCache.getInstance(project);
                 GlobalSearchScope scope = GlobalSearchScope.projectScope(project);
 
-                // Get all class names that start with the prefix
                 String[] allClassNames = cache.getAllClassNames();
                 for (String className : allClassNames) {
-                    if (className.toLowerCase().startsWith(prefix.toLowerCase())) {
+                    if (className.toLowerCase().contains(prefix.toLowerCase())) {
                         PsiClass[] classes = cache.getClassesByName(className, scope);
                         for (PsiClass psiClass : classes) {
                             String qualifiedName = psiClass.getQualifiedName();
                             if (qualifiedName != null) {
                                 result.addElement(LookupElementBuilder.create(qualifiedName)
-                                        .withIcon(psiClass.getIcon(0))
-                                        .withTypeText("Class from project"));
+                                    .withIcon(psiClass.getIcon(0))
+                                    .withTypeText("Class")
+                                    .withLookupString(className)); // Allow matching by short name
                             }
                         }
                     }
                 }
             } catch (Exception e) {
-                // Fallback to simple completion if PSI access fails
-                LOG.debug("Failed to access PSI for class completion", e);
+                LOG.debug("Failed to access PSI for class name completion", e);
             }
         }
 
-        private void addPsiMethodCompletions(@NotNull String prefix, @NotNull CompletionResultSet result) {
+        // Case 3: Method name completion - suggest methods from all classes with matching method names
+        private void addMethodNameCompletions(@NotNull String prefix, @NotNull CompletionResultSet result) {
+            try {
+                GlobalSearchScope scope = GlobalSearchScope.projectScope(project);
+                Query<PsiClass> query = AllClassesSearch.search(scope, project);
+
+                query.forEach(psiClass -> {
+                    PsiMethod[] methods = psiClass.getAllMethods();
+                    for (PsiMethod method : methods) {
+                        if (method.getName().toLowerCase().contains(prefix.toLowerCase())) {
+                            String methodSignature = buildMethodSignature(method);
+                            result.addElement(LookupElementBuilder.create(methodSignature)
+                                .withIcon(method.getIcon(0))
+                                .withTypeText(method.getReturnType() != null ?
+                                    method.getReturnType().getPresentableText() : "void")
+                                .withTailText(" (" + (method.getContainingClass() != null ?
+                                    method.getContainingClass().getName() : "Unknown") + ")")
+                                .withLookupString(method.getName())); // Allow matching by method name
+                        }
+                    }
+                    return true;
+                });
+            } catch (Exception e) {
+                LOG.debug("Failed to access PSI for method name completion", e);
+            }
+        }
+
+        // Case 3: Method completion for fully qualified class names
+        private void addMethodCompletions(@NotNull String prefix, @NotNull CompletionResultSet result) {
             try {
                 int lastDot = prefix.lastIndexOf('.');
                 String className = prefix.substring(0, lastDot);
@@ -283,7 +374,7 @@ final class DebuggerToolWindowFactory implements ToolWindowFactory, DumbAware {
 
                 // Find the class using PSI
                 JavaPsiFacade facade = JavaPsiFacade.getInstance(project);
-                GlobalSearchScope scope = GlobalSearchScope.allScope(project);
+                GlobalSearchScope scope = GlobalSearchScope.projectScope(project);
                 PsiClass psiClass = facade.findClass(className, scope);
 
                 if (psiClass != null) {
@@ -293,11 +384,11 @@ final class DebuggerToolWindowFactory implements ToolWindowFactory, DumbAware {
                         if (method.getName().toLowerCase().startsWith(methodPrefix.toLowerCase())) {
                             String methodSignature = buildMethodSignature(method);
                             result.addElement(LookupElementBuilder.create(methodSignature)
-                                    .withIcon(method.getIcon(0))
-                                    .withTypeText(method.getReturnType() != null ?
-                                            method.getReturnType().getPresentableText() : "void")
-                                    .withTailText(" (" + (method.getContainingClass() != null ?
-                                            method.getContainingClass().getName() : "Unknown") + ")"));
+                                .withIcon(method.getIcon(0))
+                                .withTypeText(method.getReturnType() != null ?
+                                    method.getReturnType().getPresentableText() : "void")
+                                .withTailText(" (" + (method.getContainingClass() != null ?
+                                    method.getContainingClass().getName() : "Unknown") + ")"));
                         }
                     }
                 }
@@ -312,7 +403,7 @@ final class DebuggerToolWindowFactory implements ToolWindowFactory, DumbAware {
             // Add class name
             PsiClass containingClass = method.getContainingClass();
             if (containingClass != null) {
-                signature.append(containingClass.getQualifiedName()).append(".");
+                signature.append(containingClass.getQualifiedName()).append("::");
             }
 
             // Add method name
