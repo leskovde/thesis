@@ -33,7 +33,9 @@ import com.intellij.psi.*;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 final class DebuggerToolWindowFactory implements ToolWindowFactory, DumbAware {
@@ -46,7 +48,7 @@ final class DebuggerToolWindowFactory implements ToolWindowFactory, DumbAware {
         toolWindow.getContentManager().addContent(content);
     }
 
-    private static class DebuggerToolWindowContent {
+    static class DebuggerToolWindowContent {
         private final Project project;
         private final ToolWindow toolWindow;
         private final JPanel contentPanel = new JPanel();
@@ -69,6 +71,11 @@ final class DebuggerToolWindowFactory implements ToolWindowFactory, DumbAware {
         // Selected method information
         private PsiMethod selectedMethod = null;
         private String selectedMethodSignature = null;
+
+        // State management for checkboxes
+        private final Map<String, Boolean> fieldSelectionState = new HashMap<>();
+        private final Map<String, Boolean> parameterSelectionState = new HashMap<>();
+        private boolean returnValueSelected = true;
 
         public DebuggerToolWindowContent(Project project, ToolWindow toolWindow) {
             this.project = project;
@@ -233,7 +240,10 @@ final class DebuggerToolWindowFactory implements ToolWindowFactory, DumbAware {
 
         private void validateAndUpdateMethod() {
             String methodText = targetMethodField.getText();
+            LOG.info("Validating method: '" + methodText + "'");
+
             if (methodText.trim().isEmpty()) {
+                LOG.info("Method text is empty, clearing validation");
                 clearMethodValidation();
                 return;
             }
@@ -241,8 +251,11 @@ final class DebuggerToolWindowFactory implements ToolWindowFactory, DumbAware {
             // Parse and validate the method signature
             PsiMethod method = findMethodBySignature(methodText.trim());
             if (method != null) {
+                LOG.info("Method validation successful: " + method.getName() + " in class " +
+                    (method.getContainingClass() != null ? method.getContainingClass().getQualifiedName() : "unknown"));
                 setMethodValid(method);
             } else {
+                LOG.info("Method validation failed: no matching method found for '" + methodText.trim() + "'");
                 setMethodInvalid();
             }
 
@@ -276,10 +289,13 @@ final class DebuggerToolWindowFactory implements ToolWindowFactory, DumbAware {
             runAnalysisButton.setEnabled(hasConfiguration && hasValidMethod);
         }
 
-        private PsiMethod findMethodBySignature(String signature) {
+        public PsiMethod findMethodBySignature(String signature) {
             try {
+                LOG.debug("Parsing method signature: '" + signature + "'");
+
                 // Parse the method signature to extract class and method information
                 if (!signature.contains(".")) {
+                    LOG.debug("Invalid signature format: no dots found");
                     return null; // Invalid format
                 }
 
@@ -287,6 +303,7 @@ final class DebuggerToolWindowFactory implements ToolWindowFactory, DumbAware {
                 int openParen = signature.indexOf('(', lastDot);
 
                 if (openParen == -1) {
+                    LOG.debug("Invalid signature format: no opening parenthesis found");
                     return null; // No parameters specified
                 }
 
@@ -294,33 +311,45 @@ final class DebuggerToolWindowFactory implements ToolWindowFactory, DumbAware {
                 String methodName = signature.substring(lastDot + 1, openParen);
                 String parametersStr = signature.substring(openParen + 1, signature.lastIndexOf(')'));
 
+                LOG.debug("Parsed signature - Class: '" + className + "', Method: '" + methodName + "', Parameters: '" + parametersStr + "'");
+
                 // Find the class using PSI
                 JavaPsiFacade facade = JavaPsiFacade.getInstance(project);
                 GlobalSearchScope scope = GlobalSearchScope.allScope(project);
                 PsiClass psiClass = facade.findClass(className, scope);
 
                 if (psiClass == null) {
+                    LOG.debug("Class not found: " + className);
                     return null;
                 }
 
+                LOG.debug("Found class: " + psiClass.getQualifiedName() + ", searching for method: " + methodName);
+
                 // Find the method with matching name and parameters
+                int methodCount = 0;
                 for (PsiMethod method : psiClass.getAllMethods()) {
+                    methodCount++;
                     if (method.getName().equals(methodName)) {
                         String methodSignature = buildMethodSignature(method);
+                        LOG.debug("Comparing signatures - Expected: '" + signature + "', Found: '" + methodSignature + "'");
                         if (methodSignature.equals(signature)) {
+                            LOG.debug("Method match found!");
                             return method;
                         }
                     }
                 }
 
+                LOG.debug("No matching method found. Searched " + methodCount + " methods in class " + className);
                 return null;
             } catch (Exception e) {
-                LOG.debug("Error parsing method signature: " + signature, e);
+                LOG.warn("Error parsing method signature: " + signature, e);
                 return null;
             }
         }
 
         private void showAdditionalConfig(PsiMethod method) {
+            LOG.info("Showing additional configuration for method: " + method.getName());
+
             // Clear existing content
             additionalConfigPanel.removeAll();
 
@@ -328,6 +357,7 @@ final class DebuggerToolWindowFactory implements ToolWindowFactory, DumbAware {
             PsiClass containingClass = method.getContainingClass();
             if (containingClass != null) {
                 PsiField[] fields = containingClass.getAllFields();
+                LOG.info("Found " + fields.length + " fields in class " + containingClass.getQualifiedName());
                 if (fields.length > 0) {
                     populateFieldsPanel(fields);
                     additionalConfigPanel.add(fieldsPanel);
@@ -336,6 +366,7 @@ final class DebuggerToolWindowFactory implements ToolWindowFactory, DumbAware {
 
             // Add parameters configuration if the method has parameters
             PsiParameter[] parameters = method.getParameterList().getParameters();
+            LOG.info("Found " + parameters.length + " parameters in method " + method.getName());
             if (parameters.length > 0) {
                 populateParametersPanel(parameters);
                 additionalConfigPanel.add(parametersPanel);
@@ -344,14 +375,18 @@ final class DebuggerToolWindowFactory implements ToolWindowFactory, DumbAware {
             // Add return value configuration if the method has a return type
             PsiType returnType = method.getReturnType();
             if (returnType != null && !returnType.equals(PsiType.VOID)) {
+                LOG.info("Method has return type: " + returnType.getPresentableText());
                 populateReturnValuePanel(returnType);
                 additionalConfigPanel.add(returnValuePanel);
+            } else {
+                LOG.info("Method has void return type, not showing return value panel");
             }
 
             // Show the panel and refresh the UI
             additionalConfigPanel.setVisible(true);
             contentPanel.revalidate();
             contentPanel.repaint();
+            LOG.info("Additional configuration panel shown and UI refreshed");
         }
 
         private void hideAdditionalConfig() {
@@ -360,7 +395,9 @@ final class DebuggerToolWindowFactory implements ToolWindowFactory, DumbAware {
             contentPanel.repaint();
         }
 
-        private void populateFieldsPanel(PsiField[] fields) {
+        public void populateFieldsPanel(PsiField[] fields) {
+            LOG.debug("Populating fields panel with " + fields.length + " fields");
+
             // Clear existing content except the label
             fieldsPanel.removeAll();
 
@@ -372,14 +409,30 @@ final class DebuggerToolWindowFactory implements ToolWindowFactory, DumbAware {
             // Create checkboxes for each field
             for (PsiField field : fields) {
                 if (shouldShowField(field)) {
-                    JBCheckBox fieldCheckBox = new JBCheckBox(getFieldDisplayName(field));
-                    fieldCheckBox.setSelected(false); // Default to unselected
+                    String fieldKey = getFieldKey(field);
+                    String displayName = getFieldDisplayName(field);
+                    JBCheckBox fieldCheckBox = new JBCheckBox(displayName);
+
+                    // Restore previous state or use default
+                    boolean isSelected = fieldSelectionState.getOrDefault(fieldKey, false);
+                    fieldCheckBox.setSelected(isSelected);
+                    LOG.debug("Field '" + fieldKey + "' checkbox state: " + isSelected);
+
+                    // Add listener to track state changes
+                    fieldCheckBox.addActionListener(e -> {
+                        boolean selected = fieldCheckBox.isSelected();
+                        fieldSelectionState.put(fieldKey, selected);
+                        LOG.debug("Field '" + fieldKey + "' state changed to: " + selected);
+                    });
+
                     fieldsPanel.add(fieldCheckBox);
                 }
             }
         }
 
-        private void populateParametersPanel(PsiParameter[] parameters) {
+        public void populateParametersPanel(PsiParameter[] parameters) {
+            LOG.debug("Populating parameters panel with " + parameters.length + " parameters");
+
             // Clear existing content except the label
             parametersPanel.removeAll();
 
@@ -391,14 +444,29 @@ final class DebuggerToolWindowFactory implements ToolWindowFactory, DumbAware {
             // Create checkboxes for each parameter
             for (int i = 0; i < parameters.length; i++) {
                 PsiParameter parameter = parameters[i];
+                String paramKey = getParameterKey(parameter, i);
                 String displayName = getParameterDisplayName(parameter, i);
                 JBCheckBox paramCheckBox = new JBCheckBox(displayName);
-                paramCheckBox.setSelected(true); // Default to selected for parameters
+
+                // Restore previous state or use default (true for parameters)
+                boolean isSelected = parameterSelectionState.getOrDefault(paramKey, true);
+                paramCheckBox.setSelected(isSelected);
+                LOG.debug("Parameter '" + paramKey + "' checkbox state: " + isSelected);
+
+                // Add listener to track state changes
+                paramCheckBox.addActionListener(e -> {
+                    boolean selected = paramCheckBox.isSelected();
+                    parameterSelectionState.put(paramKey, selected);
+                    LOG.debug("Parameter '" + paramKey + "' state changed to: " + selected);
+                });
+
                 parametersPanel.add(paramCheckBox);
             }
         }
 
-        private void populateReturnValuePanel(PsiType returnType) {
+        public void populateReturnValuePanel(PsiType returnType) {
+            LOG.debug("Populating return value panel for type: " + returnType.getPresentableText());
+
             // Clear existing content except the label
             returnValuePanel.removeAll();
 
@@ -410,7 +478,17 @@ final class DebuggerToolWindowFactory implements ToolWindowFactory, DumbAware {
             // Create checkbox for return value
             String displayName = "Track return value (" + returnType.getPresentableText() + ")";
             JBCheckBox returnCheckBox = new JBCheckBox(displayName);
-            returnCheckBox.setSelected(true); // Default to selected
+
+            // Restore previous state or use default (true)
+            returnCheckBox.setSelected(returnValueSelected);
+            LOG.debug("Return value checkbox state: " + returnValueSelected);
+
+            // Add listener to track state changes
+            returnCheckBox.addActionListener(e -> {
+                returnValueSelected = returnCheckBox.isSelected();
+                LOG.debug("Return value state changed to: " + returnValueSelected);
+            });
+
             returnValuePanel.add(returnCheckBox);
         }
 
@@ -447,6 +525,20 @@ final class DebuggerToolWindowFactory implements ToolWindowFactory, DumbAware {
             return parameter.getType().getPresentableText() + " " + paramName;
         }
 
+        private String getFieldKey(PsiField field) {
+            PsiClass containingClass = field.getContainingClass();
+            String className = containingClass != null ? containingClass.getQualifiedName() : "unknown";
+            return className + "." + field.getName();
+        }
+
+        private String getParameterKey(PsiParameter parameter, int index) {
+            String paramName = parameter.getName();
+            if (paramName == null || paramName.isEmpty()) {
+                paramName = "param" + index;
+            }
+            return "param_" + index + "_" + paramName + "_" + parameter.getType().getPresentableText();
+        }
+
         private String buildMethodSignature(PsiMethod method) {
             StringBuilder signature = new StringBuilder();
 
@@ -469,6 +561,30 @@ final class DebuggerToolWindowFactory implements ToolWindowFactory, DumbAware {
             signature.append(")");
 
             return signature.toString();
+        }
+
+        // Public methods for testing
+        public PsiMethod getSelectedMethod() {
+            return selectedMethod;
+        }
+
+        public Map<String, Boolean> getFieldSelectionState() {
+            return new HashMap<>(fieldSelectionState);
+        }
+
+        public Map<String, Boolean> getParameterSelectionState() {
+            return new HashMap<>(parameterSelectionState);
+        }
+
+        public boolean isReturnValueSelected() {
+            return returnValueSelected;
+        }
+
+        public void clearSelectionState() {
+            LOG.info("Clearing all selection state");
+            fieldSelectionState.clear();
+            parameterSelectionState.clear();
+            returnValueSelected = true;
         }
 
         private void onRunAnalysis(ActionEvent e) {
@@ -741,6 +857,64 @@ final class DebuggerToolWindowFactory implements ToolWindowFactory, DumbAware {
             signature.append(")");
 
             return signature.toString();
+        }
+
+        public PsiMethod findMethodBySignature(String signature) {
+            try {
+                LOG.debug("MethodCompletionProvider: Parsing method signature: '" + signature + "'");
+
+                // Parse the method signature to extract class and method information
+                if (!signature.contains(".")) {
+                    LOG.debug("Invalid signature format: no dots found");
+                    return null; // Invalid format
+                }
+
+                int lastDot = signature.lastIndexOf('.');
+                int openParen = signature.indexOf('(', lastDot);
+
+                if (openParen == -1) {
+                    LOG.debug("Invalid signature format: no opening parenthesis found");
+                    return null; // No parameters specified
+                }
+
+                String className = signature.substring(0, lastDot);
+                String methodName = signature.substring(lastDot + 1, openParen);
+                String parametersStr = signature.substring(openParen + 1, signature.lastIndexOf(')'));
+
+                LOG.debug("Parsed signature - Class: '" + className + "', Method: '" + methodName + "', Parameters: '" + parametersStr + "'");
+
+                // Find the class using PSI
+                JavaPsiFacade facade = JavaPsiFacade.getInstance(project);
+                GlobalSearchScope scope = GlobalSearchScope.allScope(project);
+                PsiClass psiClass = facade.findClass(className, scope);
+
+                if (psiClass == null) {
+                    LOG.debug("Class not found: " + className);
+                    return null;
+                }
+
+                LOG.debug("Found class: " + psiClass.getQualifiedName() + ", searching for method: " + methodName);
+
+                // Find the method with matching name and parameters
+                int methodCount = 0;
+                for (PsiMethod method : psiClass.getAllMethods()) {
+                    methodCount++;
+                    if (method.getName().equals(methodName)) {
+                        String methodSignature = buildMethodSignature(method);
+                        LOG.debug("Comparing signatures - Expected: '" + signature + "', Found: '" + methodSignature + "'");
+                        if (methodSignature.equals(signature)) {
+                            LOG.debug("Method match found!");
+                            return method;
+                        }
+                    }
+                }
+
+                LOG.debug("No matching method found. Searched " + methodCount + " methods in class " + className);
+                return null;
+            } catch (Exception e) {
+                LOG.warn("Error parsing method signature: " + signature, e);
+                return null;
+            }
         }
     }
 }
