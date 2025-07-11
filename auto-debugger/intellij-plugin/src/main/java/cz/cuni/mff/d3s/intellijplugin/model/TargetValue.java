@@ -1,4 +1,4 @@
-package cz.cuni.mff.d3s.intellijplugin;
+package cz.cuni.mff.d3s.intellijplugin.model;
 
 import java.io.Serializable;
 

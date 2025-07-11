@@ -1,19 +1,21 @@
-package cz.cuni.mff.d3s.intellijplugin;
+package cz.cuni.mff.d3s.intellijplugin.utils;
 
 import com.intellij.codeInsight.completion.CompletionResultSet;
+import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiMethod;
-import com.intellij.psi.PsiParameter;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.PsiShortNamesCache;
 import com.intellij.psi.search.searches.AllClassesSearch;
 import com.intellij.util.Query;
 import com.intellij.util.TextFieldCompletionProvider;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
 
 /**
  * PSI-based completion provider for method signatures with three-stage completion:
@@ -35,21 +37,20 @@ public class MethodCompletionProvider extends TextFieldCompletionProvider {
                                          @NotNull CompletionResultSet result) {
 
         if (prefix.isEmpty()) {
-            // Show examples for empty input
-            addExamplePatterns(result);
+            addClassNameCompletions(prefix, result);
             return;
         }
 
         // TODO: looking for a method after typing a package name does not work properly
         // Determine completion type based on input pattern
         if (prefix.contains(".")) {
-            if (isFullyQualifiedClassName(prefix)) {
+//            if (isFullyQualifiedClassName(prefix)) {
                 // Case 3: Method name completion - suggest methods from the specified class
                 addMethodCompletions(prefix, result);
-            } else {
+//            } else {
                 // Case 1: Package name completion or Case 2: Class completion within package
                 addPackageAndClassCompletions(prefix, result);
-            }
+//            }
         } else {
             // Case 2: Class name completion (without package) - suggest full class names
             // Case 3: Method name completion - suggest methods from all classes with matching method names
@@ -67,18 +68,6 @@ public class MethodCompletionProvider extends TextFieldCompletionProvider {
 
         // If the last part starts with uppercase, it's likely a class name
         return !lastPart.isEmpty() && Character.isUpperCase(lastPart.charAt(0));
-    }
-
-    // TODO: Remove this
-    private void addExamplePatterns(@NotNull CompletionResultSet result) {
-        result.addElement(LookupElementBuilder.create("com.example.MyClass.myMethod()")
-                .withTypeText("Example pattern"));
-        result.addElement(LookupElementBuilder.create("java.lang.String.toString()")
-                .withTypeText("Example pattern"));
-        result.addElement(LookupElementBuilder.create("MyClass")
-                .withTypeText("Type class name"));
-        result.addElement(LookupElementBuilder.create("myMethod")
-                .withTypeText("Type method name"));
     }
 
     // Case 1: Package name completion and Case 2: Class completion within package
@@ -112,6 +101,7 @@ public class MethodCompletionProvider extends TextFieldCompletionProvider {
                 if (className.toLowerCase().contains(prefix.toLowerCase())) {
                     PsiClass[] classes = cache.getClassesByName(className, scope);
                     for (PsiClass psiClass : classes) {
+                        LOG.debug("Found class: " + psiClass.getQualifiedName());
                         String qualifiedName = psiClass.getQualifiedName();
                         if (qualifiedName != null) {
                             result.addElement(LookupElementBuilder.create(qualifiedName)
@@ -136,8 +126,9 @@ public class MethodCompletionProvider extends TextFieldCompletionProvider {
             query.forEach(psiClass -> {
                 PsiMethod[] methods = psiClass.getAllMethods();
                 for (PsiMethod method : methods) {
+                    LOG.debug("Found method: " + method.getName());
                     if (method.getName().toLowerCase().contains(prefix.toLowerCase())) {
-                        String methodSignature = buildMethodSignature(method);
+                        String methodSignature = MethodUtils.buildMethodSignature(method);
                         result.addElement(LookupElementBuilder.create(methodSignature)
                                 .withIcon(method.getIcon(0))
                                 .withTypeText(method.getReturnType() != null ?
@@ -171,7 +162,7 @@ public class MethodCompletionProvider extends TextFieldCompletionProvider {
                 PsiMethod[] methods = psiClass.getAllMethods();
                 for (PsiMethod method : methods) {
                     if (method.getName().toLowerCase().startsWith(methodPrefix.toLowerCase())) {
-                        String methodSignature = buildMethodSignature(method);
+                        String methodSignature = MethodUtils.buildMethodSignature(method);
                         result.addElement(LookupElementBuilder.create(methodSignature)
                                 .withIcon(method.getIcon(0))
                                 .withTypeText(method.getReturnType() != null ?
@@ -183,88 +174,6 @@ public class MethodCompletionProvider extends TextFieldCompletionProvider {
             }
         } catch (Exception e) {
             LOG.debug("Failed to access PSI for method completion", e);
-        }
-    }
-
-    private String buildMethodSignature(PsiMethod method) {
-        StringBuilder signature = new StringBuilder();
-
-        // Add class name
-        PsiClass containingClass = method.getContainingClass();
-        if (containingClass != null) {
-            signature.append(containingClass.getQualifiedName()).append(".");
-        }
-
-        // Add method name
-        signature.append(method.getName());
-
-        // Add parameters
-        signature.append("(");
-        PsiParameter[] parameters = method.getParameterList().getParameters();
-        for (int i = 0; i < parameters.length; i++) {
-            if (i > 0) signature.append(", ");
-            signature.append(parameters[i].getType().getPresentableText());
-        }
-        signature.append(")");
-
-        return signature.toString();
-    }
-
-    public PsiMethod findMethodBySignature(String signature) {
-        try {
-            LOG.debug("MethodCompletionProvider: Parsing method signature: '" + signature + "'");
-
-            // Parse the method signature to extract class and method information
-            if (!signature.contains(".")) {
-                LOG.debug("Invalid signature format: no dots found");
-                return null; // Invalid format
-            }
-
-            int lastDot = signature.lastIndexOf('.');
-            int openParen = signature.indexOf('(', lastDot);
-
-            if (openParen == -1) {
-                LOG.debug("Invalid signature format: no opening parenthesis found");
-                return null; // No parameters specified
-            }
-
-            String className = signature.substring(0, lastDot);
-            String methodName = signature.substring(lastDot + 1, openParen);
-            String parametersStr = signature.substring(openParen + 1, signature.lastIndexOf(')'));
-
-            LOG.debug("Parsed signature - Class: '" + className + "', Method: '" + methodName + "', Parameters: '" + parametersStr + "'");
-
-            // Find the class using PSI
-            JavaPsiFacade facade = JavaPsiFacade.getInstance(project);
-            GlobalSearchScope scope = GlobalSearchScope.allScope(project);
-            PsiClass psiClass = facade.findClass(className, scope);
-
-            if (psiClass == null) {
-                LOG.debug("Class not found: " + className);
-                return null;
-            }
-
-            LOG.debug("Found class: " + psiClass.getQualifiedName() + ", searching for method: " + methodName);
-
-            // Find the method with matching name and parameters
-            int methodCount = 0;
-            for (PsiMethod method : psiClass.getAllMethods()) {
-                methodCount++;
-                if (method.getName().equals(methodName)) {
-                    String methodSignature = buildMethodSignature(method);
-                    LOG.debug("Comparing signatures - Expected: '" + signature + "', Found: '" + methodSignature + "'");
-                    if (methodSignature.equals(signature)) {
-                        LOG.debug("Method match found!");
-                        return method;
-                    }
-                }
-            }
-
-            LOG.debug("No matching method found. Searched " + methodCount + " methods in class " + className);
-            return null;
-        } catch (Exception e) {
-            LOG.warn("Error parsing method signature: " + signature, e);
-            return null;
         }
     }
 }

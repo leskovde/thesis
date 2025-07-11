@@ -1,12 +1,13 @@
-package cz.cuni.mff.d3s.intellijplugin;
+package cz.cuni.mff.d3s.intellijplugin.utils;
 
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiMethod;
-import com.intellij.psi.PsiParameter;
 import com.intellij.psi.search.GlobalSearchScope;
+import cz.cuni.mff.d3s.intellijplugin.model.MethodValidationResult;
+import cz.cuni.mff.d3s.intellijplugin.model.ParsedMethodSignature;
 
 /**
  * Testable method validation logic separated from UI concerns
@@ -101,7 +102,7 @@ public class MethodValidator {
         for (PsiMethod method : psiClass.getAllMethods()) {
             methodCount++;
             if (method.getName().equals(parsed.methodName)) {
-                String methodSignature = buildMethodSignature(method);
+                String methodSignature = MethodUtils.buildMethodSignature(method);
                 LOG.debug("Comparing signatures - Expected: '" + parsed.originalSignature + "', Found: '" + methodSignature + "'");
                 if (methodSignature.equals(parsed.originalSignature)) {
                     LOG.debug("Method match found!");
@@ -112,29 +113,5 @@ public class MethodValidator {
 
         LOG.debug("No matching method found. Searched " + methodCount + " methods in class " + parsed.className);
         return null;
-    }
-
-    private String buildMethodSignature(PsiMethod method) {
-        StringBuilder signature = new StringBuilder();
-
-        // Add class name
-        PsiClass containingClass = method.getContainingClass();
-        if (containingClass != null) {
-            signature.append(containingClass.getQualifiedName()).append(".");
-        }
-
-        // Add method name
-        signature.append(method.getName());
-
-        // Add parameters
-        signature.append("(");
-        PsiParameter[] parameters = method.getParameterList().getParameters();
-        for (int i = 0; i < parameters.length; i++) {
-            if (i > 0) signature.append(", ");
-            signature.append(parameters[i].getType().getPresentableText());
-        }
-        signature.append(")");
-
-        return signature.toString();
     }
 }

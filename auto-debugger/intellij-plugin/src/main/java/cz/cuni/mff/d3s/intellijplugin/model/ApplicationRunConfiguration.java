@@ -1,4 +1,4 @@
-package cz.cuni.mff.d3s.intellijplugin;
+package cz.cuni.mff.d3s.intellijplugin.model;
 
 import java.io.Serializable;
 import java.nio.file.Path;
@@ -12,7 +12,7 @@ import java.util.Map;
  * This class encapsulates all the necessary information required to execute
  * a complete analysis and test generation cycle for a specific debugging target.
  */
-public class RunConfiguration implements Serializable {
+public class ApplicationRunConfiguration implements Serializable {
     private static final long serialVersionUID = 1L;
 
     // Configuration metadata
@@ -37,7 +37,7 @@ public class RunConfiguration implements Serializable {
      *
      * @param name The name of the configuration
      */
-    public RunConfiguration(String name) {
+    public ApplicationRunConfiguration(String name) {
         this.name = name;
         this.description = "";
         this.programArguments = new ArrayList<>();

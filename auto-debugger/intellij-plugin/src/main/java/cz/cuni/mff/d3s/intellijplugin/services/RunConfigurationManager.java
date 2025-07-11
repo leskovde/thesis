@@ -1,4 +1,4 @@
-package cz.cuni.mff.d3s.intellijplugin;
+package cz.cuni.mff.d3s.intellijplugin.services;
 
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.Service;
@@ -6,12 +6,12 @@ import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.xmlb.XmlSerializerUtil;
+import cz.cuni.mff.d3s.intellijplugin.model.ApplicationRunConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Manages run configurations for the auto-debugger.
@@ -50,7 +50,7 @@ public final class RunConfigurationManager implements PersistentStateComponent<R
      *
      * @return The list of run configurations
      */
-    public List<RunConfiguration> getConfigurations() {
+    public List<ApplicationRunConfiguration> getConfigurations() {
         return state.configurations;
     }
 
@@ -60,7 +60,7 @@ public final class RunConfigurationManager implements PersistentStateComponent<R
      * @param name The name of the configuration
      * @return The run configuration, or null if not found
      */
-    public RunConfiguration getConfiguration(String name) {
+    public ApplicationRunConfiguration getConfiguration(String name) {
         return state.configurations.stream()
             .filter(config -> config.getName().equals(name))
             .findFirst()
@@ -72,7 +72,7 @@ public final class RunConfigurationManager implements PersistentStateComponent<R
      *
      * @param configuration The configuration to add
      */
-    public void addConfiguration(RunConfiguration configuration) {
+    public void addConfiguration(ApplicationRunConfiguration configuration) {
         // Remove any existing configuration with the same name
         state.configurations.removeIf(config -> config.getName().equals(configuration.getName()));
         state.configurations.add(configuration);
@@ -103,6 +103,6 @@ public final class RunConfigurationManager implements PersistentStateComponent<R
      * State class for persisting run configurations.
      */
     public static class State {
-        public List<RunConfiguration> configurations = new ArrayList<>();
+        public List<ApplicationRunConfiguration> configurations = new ArrayList<>();
     }
 }

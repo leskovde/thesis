@@ -9,7 +9,6 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.Messages;
-import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBCheckBox;
@@ -18,10 +17,17 @@ import com.intellij.icons.AllIcons;
 import com.intellij.util.textCompletion.TextFieldWithCompletion;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.psi.*;
+import cz.cuni.mff.d3s.intellijplugin.factories.DebuggerToolWindowFactory;
+import cz.cuni.mff.d3s.intellijplugin.model.ApplicationRunConfiguration;
+import cz.cuni.mff.d3s.intellijplugin.model.MethodValidationResult;
+import cz.cuni.mff.d3s.intellijplugin.services.InstrumentationService;
+import cz.cuni.mff.d3s.intellijplugin.utils.MethodCompletionProvider;
+import cz.cuni.mff.d3s.intellijplugin.utils.MethodValidator;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +40,7 @@ public class DebuggerToolWindowContent {
     private final JPanel contentPanel = new JPanel();
 
     // UI Components
-    private final ComboBox<com.intellij.execution.configurations.RunConfiguration> runConfigComboBox = new ComboBox<>();
+    private final ComboBox<RunConfiguration> runConfigComboBox = new ComboBox<>();
     private final JButton reloadConfigsButton = new JButton("Reload");
     private final JButton editConfigsButton = new JButton("Edit");
     private final TextFieldWithCompletion targetMethodField;
@@ -261,64 +267,6 @@ public class DebuggerToolWindowContent {
         runAnalysisButton.setEnabled(hasConfiguration && hasValidMethod);
     }
 
-    public PsiMethod findMethodBySignature(String signature) {
-        try {
-            LOG.debug("Parsing method signature: '" + signature + "'");
-
-            // Parse the method signature to extract class and method information
-            if (!signature.contains(".")) {
-                LOG.debug("Invalid signature format: no dots found");
-                return null; // Invalid format
-            }
-
-            int lastDot = signature.lastIndexOf('.');
-            int openParen = signature.indexOf('(', lastDot);
-
-            if (openParen == -1) {
-                LOG.debug("Invalid signature format: no opening parenthesis found");
-                return null; // No parameters specified
-            }
-
-            String className = signature.substring(0, lastDot);
-            String methodName = signature.substring(lastDot + 1, openParen);
-            String parametersStr = signature.substring(openParen + 1, signature.lastIndexOf(')'));
-
-            LOG.debug("Parsed signature - Class: '" + className + "', Method: '" + methodName + "', Parameters: '" + parametersStr + "'");
-
-            // Find the class using PSI
-            JavaPsiFacade facade = JavaPsiFacade.getInstance(project);
-            GlobalSearchScope scope = GlobalSearchScope.allScope(project);
-            PsiClass psiClass = facade.findClass(className, scope);
-
-            if (psiClass == null) {
-                LOG.debug("Class not found: " + className);
-                return null;
-            }
-
-            LOG.debug("Found class: " + psiClass.getQualifiedName() + ", searching for method: " + methodName);
-
-            // Find the method with matching name and parameters
-            int methodCount = 0;
-            for (PsiMethod method : psiClass.getAllMethods()) {
-                methodCount++;
-                if (method.getName().equals(methodName)) {
-                    String methodSignature = buildMethodSignature(method);
-                    LOG.debug("Comparing signatures - Expected: '" + signature + "', Found: '" + methodSignature + "'");
-                    if (methodSignature.equals(signature)) {
-                        LOG.debug("Method match found!");
-                        return method;
-                    }
-                }
-            }
-
-            LOG.debug("No matching method found. Searched " + methodCount + " methods in class " + className);
-            return null;
-        } catch (Exception e) {
-            LOG.warn("Error parsing method signature: " + signature, e);
-            return null;
-        }
-    }
-
     private void showAdditionalConfig(PsiMethod method) {
         LOG.info("Showing additional configuration for method: " + method.getName());
 
@@ -490,7 +438,7 @@ public class DebuggerToolWindowContent {
 
     private String getParameterDisplayName(PsiParameter parameter, int index) {
         String paramName = parameter.getName();
-        if (paramName == null || paramName.isEmpty()) {
+        if (paramName.isEmpty()) {
             paramName = "param" + index;
         }
 
@@ -505,62 +453,10 @@ public class DebuggerToolWindowContent {
 
     private String getParameterKey(PsiParameter parameter, int index) {
         String paramName = parameter.getName();
-        if (paramName == null || paramName.isEmpty()) {
+        if (paramName.isEmpty()) {
             paramName = "param" + index;
         }
         return "param_" + index + "_" + paramName + "_" + parameter.getType().getPresentableText();
-    }
-
-    private String buildMethodSignature(PsiMethod method) {
-        StringBuilder signature = new StringBuilder();
-
-        // Add class name
-        PsiClass containingClass = method.getContainingClass();
-        if (containingClass != null) {
-            signature.append(containingClass.getQualifiedName()).append(".");
-        }
-
-        // Add method name
-        signature.append(method.getName());
-
-        // Add parameters
-        signature.append("(");
-        PsiParameter[] parameters = method.getParameterList().getParameters();
-        for (int i = 0; i < parameters.length; i++) {
-            if (i > 0) signature.append(", ");
-            signature.append(parameters[i].getType().getPresentableText());
-        }
-        signature.append(")");
-
-        return signature.toString();
-    }
-
-    // Public methods for testing
-    public PsiMethod getSelectedMethod() {
-        return selectedMethod;
-    }
-
-    public Map<String, Boolean> getFieldSelectionState() {
-        return new HashMap<>(fieldSelectionState);
-    }
-
-    public Map<String, Boolean> getParameterSelectionState() {
-        return new HashMap<>(parameterSelectionState);
-    }
-
-    public boolean isReturnValueSelected() {
-        return returnValueSelected;
-    }
-
-    public void clearSelectionState() {
-        LOG.info("Clearing all selection state");
-        fieldSelectionState.clear();
-        parameterSelectionState.clear();
-        returnValueSelected = true;
-    }
-
-    public MethodValidator getMethodValidator() {
-        return methodValidator;
     }
 
     private void setupEventHandlers() {
@@ -598,19 +494,19 @@ public class DebuggerToolWindowContent {
         }
 
         // Create auto-debugger run configuration
-        cz.cuni.mff.d3s.intellijplugin.RunConfiguration autoDebuggerConfig =
+        ApplicationRunConfiguration autoDebuggerConfig =
                 createAutoDebuggerConfiguration(selectedConfig, methodSignature.trim());
 
         // Run the analysis
         runAnalysis(autoDebuggerConfig);
     }
 
-    private cz.cuni.mff.d3s.intellijplugin.RunConfiguration createAutoDebuggerConfiguration(
+    private ApplicationRunConfiguration createAutoDebuggerConfiguration(
             RunConfiguration intellijConfig, String targetMethodSignature) {
 
         String configName = "Auto-Debug: " + intellijConfig.getName();
-        cz.cuni.mff.d3s.intellijplugin.RunConfiguration config =
-                new cz.cuni.mff.d3s.intellijplugin.RunConfiguration(configName);
+        ApplicationRunConfiguration config =
+                new ApplicationRunConfiguration(configName);
 
         config.setDescription("Auto-generated configuration for " + targetMethodSignature);
         config.setTargetMethodReference(targetMethodSignature);
@@ -621,7 +517,7 @@ public class DebuggerToolWindowContent {
         return config;
     }
 
-    private void runAnalysis(cz.cuni.mff.d3s.intellijplugin.RunConfiguration config) {
+    private void runAnalysis(ApplicationRunConfiguration config) {
         outputArea.setText("Starting analysis...\n");
         runAnalysisButton.setEnabled(false);
 
@@ -639,7 +535,7 @@ public class DebuggerToolWindowContent {
                                     appendOutput("Analysis completed successfully!");
                                     if (result != null && !result.isEmpty()) {
                                         appendOutput("Generated files: " + result.stream()
-                                                .map(path -> path.toString())
+                                                .map(Path::toString)
                                                 .collect(Collectors.joining(", ")));
                                     }
                                 }

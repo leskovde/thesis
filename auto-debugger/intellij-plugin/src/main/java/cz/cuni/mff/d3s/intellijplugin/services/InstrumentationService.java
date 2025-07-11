@@ -1,8 +1,9 @@
-package cz.cuni.mff.d3s.intellijplugin;
+package cz.cuni.mff.d3s.intellijplugin.services;
 
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
+import cz.cuni.mff.d3s.intellijplugin.model.ApplicationRunConfiguration;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -52,7 +53,7 @@ public final class InstrumentationService {
      * @return A future that completes with the paths to the generated files
      */
     public CompletableFuture<List<Path>> runInstrumentation(
-            RunConfiguration configuration, 
+            ApplicationRunConfiguration configuration,
             OutputConsumer outputConsumer) {
         
         return CompletableFuture.supplyAsync(() -> {
@@ -116,7 +117,7 @@ public final class InstrumentationService {
      * @param configuration The run configuration
      * @return The command as a list of strings
      */
-    private List<String> buildInstrumentationCommand(RunConfiguration configuration) {
+    private List<String> buildInstrumentationCommand(ApplicationRunConfiguration configuration) {
         List<String> command = new ArrayList<>();
         
         // Add the Java command
