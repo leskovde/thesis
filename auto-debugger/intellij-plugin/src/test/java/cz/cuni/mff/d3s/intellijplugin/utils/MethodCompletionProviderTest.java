@@ -1,22 +1,20 @@
-package cz.cuni.mff.d3s.intellijplugin;
+package cz.cuni.mff.d3s.intellijplugin.utils;
 
-import com.intellij.codeInsight.completion.CompletionType;
 import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase5;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class MethodCompletionProviderTest extends LightJavaCodeInsightFixtureTestCase5 {
 
-    private DebuggerToolWindowFactory.MethodCompletionProvider completionProvider;
+    private MethodCompletionProvider completionProvider;
 
     @BeforeEach
     void setUp() {
     completionProvider =
-        new DebuggerToolWindowFactory.MethodCompletionProvider(getFixture().getProject());
+        new MethodCompletionProvider(getFixture().getProject());
     }
 
     /**
@@ -36,8 +34,8 @@ public class MethodCompletionProviderTest extends LightJavaCodeInsightFixtureTes
     @Test
     void testCompletionProviderWithNullProject() {
         // Test that the completion provider handles null project gracefully
-        DebuggerToolWindowFactory.MethodCompletionProvider provider =
-            new DebuggerToolWindowFactory.MethodCompletionProvider(null);
+        MethodCompletionProvider provider =
+            new MethodCompletionProvider(null);
 
         assertNotNull(provider, "Completion provider should handle null project");
 

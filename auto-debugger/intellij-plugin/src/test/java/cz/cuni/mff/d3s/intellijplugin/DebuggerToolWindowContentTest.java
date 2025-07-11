@@ -13,21 +13,13 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Tests for the DebuggerToolWindowContent functionality including:
- * - Method validation and UI state management
- * - Field, parameter, and return value selection
- * - Checkbox state persistence
- */
 public class DebuggerToolWindowContentTest extends LightJavaCodeInsightFixtureTestCase5 {
 
-    private DebuggerToolWindowFactory.DebuggerToolWindowContent toolWindowContent;
+    private DebuggerToolWindowContent toolWindowContent;
 
     @BeforeEach
     void setUp() {
-        // Create a mock tool window - we'll test the content functionality
-        toolWindowContent = new DebuggerToolWindowFactory.DebuggerToolWindowContent(
-                getFixture().getProject(), null);
+        toolWindowContent = new DebuggerToolWindowContent(getFixture().getProject());
     }
 
     /**
@@ -47,7 +39,7 @@ public class DebuggerToolWindowContentTest extends LightJavaCodeInsightFixtureTe
                 private String privateField;
                 public static final String CONSTANT = "test";
                 protected int protectedField;
-                
+
                 public void simpleMethod() {}
                 public void methodWithParams(String str, int num) {}
                 public String methodWithReturn() { return "test"; }
