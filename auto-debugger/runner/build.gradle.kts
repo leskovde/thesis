@@ -1,5 +1,6 @@
 plugins {
     id("java")
+    alias(libs.plugins.lombok)
 }
 
 group = "cz.cuni.mff.d3s"
@@ -10,10 +11,10 @@ repositories {
 }
 
 dependencies {
-    implementation(libs.picocli)
     implementation(project(mapOf("path" to ":model-java")))
     implementation(project(mapOf("path" to ":instrumentor-common")))
     implementation(project(mapOf("path" to ":instrumentor-java")))
+    implementation(libs.picocli)
     testImplementation(libs.bundles.junit)
 }
 

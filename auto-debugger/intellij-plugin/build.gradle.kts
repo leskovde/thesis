@@ -22,9 +22,14 @@ val intelliJPlatformResolver = project.intelliJPlatformResolver()
 // Configure Gradle IntelliJ Plugin
 // Read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin.html
 dependencies {
+  implementation(project(mapOf("path" to ":model-java")))
+  implementation(project(mapOf("path" to ":instrumentor-common")))
+  implementation(project(mapOf("path" to ":runner")))
+
   testImplementation(libs.bundles.junit)
   testImplementation(libs.opentest4j)
   testImplementation(libs.mockito)
+
   testRuntimeOnly("junit:junit:4.13.2")
 
   intellijPlatform {

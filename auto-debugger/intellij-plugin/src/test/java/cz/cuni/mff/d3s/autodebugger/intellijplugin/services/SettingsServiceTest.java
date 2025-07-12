@@ -1,0 +1,70 @@
+package cz.cuni.mff.d3s.autodebugger.intellijplugin.services;
+
+import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase5;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+/**
+ * Test class for SettingsService functionality.
+ */
+public class SettingsServiceTest extends LightJavaCodeInsightFixtureTestCase5 {
+
+    private SettingsService settingsService;
+
+    @BeforeEach
+    void setUp() {
+        settingsService = SettingsService.getInstance(getFixture().getProject());
+    }
+
+    @Test
+    public void testSettingsServiceBasicOperations() {
+        
+        // Test setting and getting a single value
+        settingsService.setConfigurationValue("test.key", "test.value");
+        assertEquals("test.value", settingsService.getConfigurationValue("test.key"));
+        
+        // Test checking if configuration is set
+        assertTrue(settingsService.isConfigurationSet("test.key"));
+        assertFalse(settingsService.isConfigurationSet("nonexistent.key"));
+        
+        // Test setting multiple values
+        Map<String, String> values = new HashMap<>();
+        values.put("disl.path", "/path/to/disl");
+        values.put("openapi.key", "secret-key");
+        
+        settingsService.setConfigurationValues(values);
+        
+        assertEquals("/path/to/disl", settingsService.getConfigurationValue("disl.path"));
+        assertEquals("secret-key", settingsService.getConfigurationValue("openapi.key"));
+        
+        // Test getting all values
+        Map<String, String> allValues = settingsService.getAllConfigurationValues();
+        assertTrue(allValues.containsKey("disl.path"));
+        assertTrue(allValues.containsKey("openapi.key"));
+        assertEquals("/path/to/disl", allValues.get("disl.path"));
+        assertEquals("secret-key", allValues.get("openapi.key"));
+    }
+
+    @Test
+    public void testEmptyAndNullValues() {
+        
+        // Test null value
+        assertNull(settingsService.getConfigurationValue("nonexistent.key"));
+        assertFalse(settingsService.isConfigurationSet("nonexistent.key"));
+        
+        // Test empty value
+        settingsService.setConfigurationValue("empty.key", "");
+        assertEquals("", settingsService.getConfigurationValue("empty.key"));
+        assertFalse(settingsService.isConfigurationSet("empty.key")); // Empty string should be considered as not set
+        
+        // Test whitespace value
+        settingsService.setConfigurationValue("whitespace.key", "   ");
+        assertEquals("   ", settingsService.getConfigurationValue("whitespace.key"));
+        assertFalse(settingsService.isConfigurationSet("whitespace.key")); // Whitespace should be considered as not set
+    }
+}

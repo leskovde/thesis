@@ -45,6 +45,8 @@
                     serviceImplementation="cz.cuni.mff.d3s.autodebugger.intellijplugin.services.InstrumentationService"/>
     <projectService serviceInterface="cz.cuni.mff.d3s.autodebugger.intellijplugin.services.RunConfigurationManager"
                     serviceImplementation="cz.cuni.mff.d3s.autodebugger.intellijplugin.services.RunConfigurationManager"/>
+    <projectService serviceInterface="cz.cuni.mff.d3s.autodebugger.intellijplugin.services.SettingsService"
+                    serviceImplementation="cz.cuni.mff.d3s.autodebugger.intellijplugin.services.SettingsService"/>
   </extensions>
 
 </idea-plugin>
