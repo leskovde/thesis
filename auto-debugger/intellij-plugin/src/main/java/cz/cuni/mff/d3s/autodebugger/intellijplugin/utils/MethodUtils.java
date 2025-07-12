@@ -3,12 +3,11 @@ package cz.cuni.mff.d3s.autodebugger.intellijplugin.utils;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiParameter;
-import cz.cuni.mff.d3s.autodebugger.intellijplugin.model.MethodSignature;
-import cz.cuni.mff.d3s.autodebugger.intellijplugin.model.SignatureState;
+import cz.cuni.mff.d3s.autodebugger.model.java.parsing.MethodSignature;
+import cz.cuni.mff.d3s.autodebugger.model.java.parsing.SignatureState;
+import cz.cuni.mff.d3s.autodebugger.model.java.parsing.JavaMethodSignatureParser;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class MethodUtils {
@@ -49,120 +48,26 @@ public class MethodUtils {
     }
 
     public static MethodSignature parseMethodSignature(String signature) {
-        SignatureState state = detectSignatureState(signature);
-        if (state != SignatureState.FULL_METHOD) {
-            // Return a minimal object for non-full signatures
-            return new MethodSignature(
-                    state == SignatureState.CLASS_ONLY || state == SignatureState.PACKAGE_ONLY
-                            ? signature
-                            : "",
-                    state == SignatureState.METHOD_NAME_ONLY
-                            ? signature
-                            : "",
-                    Collections.emptyList(),
-                    signature,
-                    state
-            );
-        }
-
-        String sig = signature.trim();
-        String beforeParams = sig.substring(0, sig.indexOf('(')).trim();
-        String paramsBody = extractParamsBody(sig);
-
-        String className = extractClassName(beforeParams);
-        String methodName = extractMethodName(beforeParams);
-        List<String> paramTypes = parseParameterTypes(paramsBody);
-
-        return new MethodSignature(
-                className,
-                methodName,
-                paramTypes,
-                signature,
-                SignatureState.FULL_METHOD
-        );
+        return JavaMethodSignatureParser.parseMethodSignature(signature);
     }
 
-    /**
-     * Utility to determine the SignatureState of a given signature string.
-     */
     public static SignatureState detectSignatureState(String sig) {
-        if (sig == null || sig.trim().isEmpty()) {
-            return SignatureState.EMPTY;
-        }
-        String trimmed = sig.trim();
-        int open = trimmed.indexOf('(');
-        int close = trimmed.lastIndexOf(')');
-        boolean hasParen = (open >= 0 && close > open);
-
-        if (!hasParen) {
-            if (trimmed.contains(".")) {
-                String first = trimmed.substring(0, trimmed.indexOf('.'));
-                return Character.isLowerCase(first.charAt(0))
-                        ? SignatureState.PACKAGE_ONLY
-                        : SignatureState.CLASS_ONLY;
-            }
-            return SignatureState.METHOD_NAME_ONLY;
-        }
-
-        if (close != trimmed.length() - 1) {
-            return SignatureState.INVALID;
-        }
-        String beforeParams = trimmed.substring(0, open);
-        if (!beforeParams.contains(".")) {
-            return SignatureState.INVALID;
-        }
-        return SignatureState.FULL_METHOD;
+        return JavaMethodSignatureParser.detectSignatureState(sig);
     }
 
     public static String extractClassName(String beforeParams) {
-        int dot = beforeParams.lastIndexOf('.');
-        return beforeParams.substring(0, dot);
+        return JavaMethodSignatureParser.extractClassName(beforeParams);
     }
 
     public static String extractMethodName(String beforeParams) {
-        int dot = beforeParams.lastIndexOf('.');
-        return beforeParams.substring(dot + 1);
+        return JavaMethodSignatureParser.extractMethodName(beforeParams);
     }
 
     public static String extractParamsBody(String sig) {
-        int open = sig.indexOf('(');
-        int close = sig.lastIndexOf(')');
-        return sig.substring(open + 1, close).trim();
+        return JavaMethodSignatureParser.extractParamsBody(sig);
     }
 
-    /**
-     * Utility to parse a parameter list string into a list of type strings,
-     * correctly handling nested generics by tracking angle-bracket depth.
-     */
     public static List<String> parseParameterTypes(String paramsBody) {
-        if (paramsBody == null || paramsBody.isEmpty()) {
-            return Collections.emptyList();
-        }
-        List<String> types = new ArrayList<>();
-        StringBuilder token = new StringBuilder();
-        int depth = 0;
-        for (int i = 0; i < paramsBody.length(); i++) {
-            char c = paramsBody.charAt(i);
-            if (c == '<') {
-                depth++;
-                token.append(c);
-            } else if (c == '>') {
-                depth--;
-                token.append(c);
-            } else if (c == ',' && depth == 0) {
-                String t = token.toString().trim();
-                if (!t.isEmpty()) {
-                    types.add(t);
-                }
-                token.setLength(0);
-            } else {
-                token.append(c);
-            }
-        }
-        String last = token.toString().trim();
-        if (!last.isEmpty()) {
-            types.add(last);
-        }
-        return types;
+        return JavaMethodSignatureParser.parseParameterTypes(paramsBody);
     }
 }

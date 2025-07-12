@@ -13,7 +13,8 @@ import com.intellij.psi.search.searches.AllClassesSearch;
 import com.intellij.util.Query;
 import com.intellij.util.TextFieldCompletionProvider;
 import org.jetbrains.annotations.NotNull;
-import cz.cuni.mff.d3s.autodebugger.intellijplugin.model.SignatureState;
+import cz.cuni.mff.d3s.autodebugger.model.java.parsing.SignatureState;
+import cz.cuni.mff.d3s.autodebugger.model.java.parsing.JavaMethodSignatureParser;
 
 /**
  * PSI-based completion provider for method signatures with three-stage completion:
@@ -33,7 +34,7 @@ public class MethodCompletionProvider extends TextFieldCompletionProvider {
     @Override
     protected void addCompletionVariants(@NotNull String text, int offset, @NotNull String prefix,
                                          @NotNull CompletionResultSet result) {
-        SignatureState state = MethodUtils.parseMethodSignature(prefix).getState();
+        SignatureState state = JavaMethodSignatureParser.parseMethodSignature(prefix).getState();
         switch (state) {
             case EMPTY, PACKAGE_ONLY -> addPackageAndClassCompletions(prefix, result);
             case CLASS_ONLY -> {

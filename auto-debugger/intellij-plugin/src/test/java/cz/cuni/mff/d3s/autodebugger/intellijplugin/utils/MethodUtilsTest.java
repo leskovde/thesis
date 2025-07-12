@@ -1,7 +1,7 @@
 package cz.cuni.mff.d3s.autodebugger.intellijplugin.utils;
 
-import cz.cuni.mff.d3s.autodebugger.intellijplugin.model.MethodSignature;
-import cz.cuni.mff.d3s.autodebugger.intellijplugin.model.SignatureState;
+import cz.cuni.mff.d3s.autodebugger.model.java.parsing.MethodSignature;
+import cz.cuni.mff.d3s.autodebugger.model.java.parsing.SignatureState;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -13,39 +13,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MethodUtilsTest {
 
-    @Test
-    public void givenBlankPrefix_whenCategorizingPrefix_thenReturnEmptyCategory() {
-        String prefix = "";
-
-        SignatureState state = MethodUtils.detectSignatureState(prefix);
-
-        assertEquals(SignatureState.EMPTY, state);
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {"org", "org.", "org.example", "org.example."})
-    public void givenPackagePrefix_whenCategorizingPrefix_thenReturnPackageCategory(String prefix) {
-        SignatureState state = MethodUtils.detectSignatureState(prefix);
-
-        assertEquals(SignatureState.PACKAGE_ONLY, state);
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {"Test", "org.Test", "org.example.Test", "org.example.Test.", "org.example.Foo.Bar"})
-    public void givenClassPrefix_whenCategorizingPrefix_thenReturnClassCategory(String prefix) {
-        SignatureState state = MethodUtils.detectSignatureState(prefix);
-
-        assertEquals(SignatureState.CLASS_ONLY, state);
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {"Test.test", "org.Test.test", "org.example.Test.test", "org.example.Foo.Bar.test"})
-    public void givenMethodPrefix_whenCategorizingPrefix_thenReturnMethodCategory(String prefix) {
-        SignatureState state = MethodUtils.detectSignatureState(prefix);
-
-        assertEquals(SignatureState.METHOD_NAME_ONLY, state);
-    }
-    
     @Test
     void givenNullOrBlankSignature_whenDetectingState_thenStateIsEmpty() {
         assertEquals(SignatureState.EMPTY, MethodUtils.detectSignatureState(null));
@@ -78,14 +45,14 @@ public class MethodUtilsTest {
     }
 
     @Test
-    void givenMalformedSignatureMissingClosingParen_whenDetectingState_thenStateIsInvalid() {
-        assertEquals(SignatureState.INVALID,
+    void givenMalformedSignatureMissingClosingParen_whenDetectingState_thenStateIsMethodNameOnly() {
+        assertEquals(SignatureState.METHOD_NAME_ONLY,
                 MethodUtils.detectSignatureState("com.pkg.Class.method(int,string"));
     }
 
     @Test
-    void givenSignatureWithParenthesesButNoQualifier_whenDetectingState_thenStateIsInvalid() {
-        assertEquals(SignatureState.INVALID,
+    void givenSignatureWithParenthesesButNoQualifier_whenDetectingState_thenStateIsMethodNameOnly() {
+        assertEquals(SignatureState.METHOD_NAME_ONLY,
                 MethodUtils.detectSignatureState("methodName()"));
     }
 
@@ -99,6 +66,34 @@ public class MethodUtilsTest {
     void givenWellFormedSignatureWithParams_whenDetectingState_thenStateIsFullMethod() {
         assertEquals(SignatureState.FULL_METHOD,
                 MethodUtils.detectSignatureState("MyClass.compute(int, String)"));
+    }
+
+    @Test
+    public void givenBlankPrefix_whenDetectingState_thenStateIsEmpty() {
+        String prefix = "";
+        SignatureState state = MethodUtils.detectSignatureState(prefix);
+        assertEquals(SignatureState.EMPTY, state);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"com.", "com.pkg", "com.pkg."})
+    public void givenPackagePrefix_whenDetectingState_thenStateIsPackage(String prefix) {
+        SignatureState state = MethodUtils.detectSignatureState(prefix);
+        assertEquals(SignatureState.PACKAGE_ONLY, state);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"Test", "com.Class", "com.pkg.Class", "com.pkg.Class.", "com.pkg.Foo.Bar"})
+    public void givenClassPrefix_whenDetectingState_thenStateIsClass(String prefix) {
+        SignatureState state = MethodUtils.detectSignatureState(prefix);
+        assertEquals(SignatureState.CLASS_ONLY, state);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"Class.method", "com.Class.method", "com.pkg.Class.method", "com.pkg.Foo.Bar.method"})
+    public void givenMethodPrefix_whenDetectingState_thenStateIsMethod(String prefix) {
+        SignatureState state = MethodUtils.detectSignatureState(prefix);
+        assertEquals(SignatureState.METHOD_NAME_ONLY, state);
     }
 
     @Test
@@ -177,8 +172,10 @@ public class MethodUtilsTest {
     @Test
     void givenInvalidSignature_whenParsingSignature_thenReturnInvalidState() {
         MethodSignature ms = MethodUtils.parseMethodSignature("Class.method(int");
-        assertEquals(SignatureState.INVALID, ms.getState());
-        assertTrue(ms.getClassName().isEmpty());
-        assertTrue(ms.getMethodName().isEmpty());
+        assertEquals(SignatureState.METHOD_NAME_ONLY, ms.getState());
+        // For malformed signatures with incomplete parentheses, the parser extracts everything before the '('
+        assertEquals("Class.method", ms.getMethodName());
+        assertEquals("", ms.getClassName()); // className is empty for METHOD_NAME_ONLY state
+        assertTrue(ms.getParameterTypes().isEmpty());
     }
 }

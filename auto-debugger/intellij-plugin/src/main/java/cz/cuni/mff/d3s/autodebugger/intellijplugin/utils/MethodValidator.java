@@ -6,9 +6,10 @@ import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.search.GlobalSearchScope;
-import cz.cuni.mff.d3s.autodebugger.intellijplugin.model.MethodSignature;
+import cz.cuni.mff.d3s.autodebugger.model.java.parsing.MethodSignature;
+import cz.cuni.mff.d3s.autodebugger.model.java.parsing.SignatureState;
+import cz.cuni.mff.d3s.autodebugger.model.java.parsing.JavaMethodSignatureParser;
 import cz.cuni.mff.d3s.autodebugger.intellijplugin.model.MethodValidationResult;
-import cz.cuni.mff.d3s.autodebugger.intellijplugin.model.SignatureState;
 
 /**
  * Testable method validation logic separated from UI concerns
@@ -32,7 +33,7 @@ public class MethodValidator {
         }
 
         try {
-            MethodSignature parsed = MethodUtils.parseMethodSignature(signature.trim());
+            MethodSignature parsed = JavaMethodSignatureParser.parseMethodSignature(signature.trim());
             if (parsed.getState() == SignatureState.INVALID) {
                 return new MethodValidationResult(false, "Invalid signature format", null);
             }
