@@ -1,48 +1,55 @@
 package cz.cuni.mff.d3s.autodebugger.runner;
 
 import cz.cuni.mff.d3s.autodebugger.model.java.Trace;
-import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.*;
-import cz.cuni.mff.d3s.autodebugger.instrumentor.java.DiSLInstrumentor;
-import java.nio.file.Path;
-import java.util.List;
+import cz.cuni.mff.d3s.autodebugger.instrumentor.common.Instrumentor;
+import cz.cuni.mff.d3s.autodebugger.runner.model.ModelBuilder;
 import picocli.CommandLine;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class Main {
   public static void main(String[] args) {
-    Arguments arguments = new Arguments();
-    new CommandLine(arguments).parseArgs(args);
+    try {
+      // Parse command line arguments
+      Arguments arguments = new Arguments();
+      CommandLine commandLine = new CommandLine(arguments);
+      commandLine.parseArgs(args);
 
-    // TODO: Select the implementation based on the language
-    DiSLInstrumentor instrumentor =
-        DiSLInstrumentor.builder()
-            .applicationJarPath(Path.of("test.jar"))
-            .method(
-                new MethodIdentifier(
-                    MethodIdentifierParameters.builder()
-                        .ownerClassIdentifier(
-                            new ClassIdentifier(
-                                ClassIdentifierParameters.builder()
-                                    .packageIdentifier(PackageIdentifier.DEFAULT_PACKAGE)
-                                    .className("Test")
-                                    .build()))
-                        .methodName("test")
-                        .returnType("void")
-                        .build()))
-            .exportedValues(
-                List.of(
-                    new ArgumentIdentifier(
-                        ArgumentIdentifierParameters.builder()
-                            .argumentSlot(0)
-                            .variableType("int")
-                            .build()),
-                    new ArgumentIdentifier(
-                        ArgumentIdentifierParameters.builder()
-                            .argumentSlot(1)
-                            .variableType("int")
-                            .build())))
-            .build();
-    var resultPaths = instrumentor.runInstrumentation();
-    new Trace();
+      // Check if help was requested
+      if (commandLine.isUsageHelpRequested()) {
+        commandLine.usage(System.out);
+        return;
+      }
+
+      log.info("Starting auto-debugger with arguments:");
+      log.info("  Application JAR: {}", arguments.applicationJarPath);
+      log.info("  Source code path: {}", arguments.sourceCodePath);
+      log.info("  Target method: {}", arguments.targetMethodReference);
+      log.info("  Target parameters: {}", arguments.targetParameters);
+      log.info("  Target fields: {}", arguments.targetFields);
+
+      // Build the instrumentor using the new pipeline
+      Instrumentor instrumentor = ModelBuilder.buildInstrumentor(arguments);
+
+      // Run instrumentation
+      log.info("Running instrumentation...");
+      var resultPaths = instrumentor.runInstrumentation();
+
+      log.info("Instrumentation completed. Result paths: {}", resultPaths);
+
+      // Initialize trace (placeholder for future trace processing)
+      new Trace();
+
+    } catch (CommandLine.ParameterException e) {
+      log.error("Invalid command line arguments: {}", e.getMessage());
+      System.err.println("Error: " + e.getMessage());
+      new CommandLine(new Arguments()).usage(System.err);
+      System.exit(1);
+    } catch (Exception e) {
+      log.error("Failed to run auto-debugger", e);
+      System.err.println("Error: " + e.getMessage());
+      System.exit(1);
+    }
   }
 }
 
