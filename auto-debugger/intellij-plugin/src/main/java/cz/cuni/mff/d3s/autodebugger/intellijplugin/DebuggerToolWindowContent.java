@@ -17,7 +17,6 @@ import com.intellij.icons.AllIcons;
 import com.intellij.util.textCompletion.TextFieldWithCompletion;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.psi.*;
-import cz.cuni.mff.d3s.autodebugger.intellijplugin.dialogs.SettingsDialog;
 import cz.cuni.mff.d3s.autodebugger.intellijplugin.factories.DebuggerToolWindowFactory;
 import cz.cuni.mff.d3s.autodebugger.intellijplugin.model.ApplicationRunConfiguration;
 import cz.cuni.mff.d3s.autodebugger.intellijplugin.model.MethodValidationResult;
@@ -44,7 +43,6 @@ public class DebuggerToolWindowContent {
     private final ComboBox<RunConfiguration> runConfigComboBox = new ComboBox<>();
     private final JButton reloadConfigsButton = new JButton("Reload");
     private final JButton editConfigsButton = new JButton("Edit");
-    private final JButton settingsButton = new JButton("Settings");
     private final TextFieldWithCompletion targetMethodField;
     private final JBLabel methodValidationLabel = new JBLabel();
     private final JButton runAnalysisButton = new JButton("Run Analysis");
@@ -112,11 +110,10 @@ public class DebuggerToolWindowContent {
         JPanel panel = new JPanel(new BorderLayout());
         panel.add(runConfigComboBox, BorderLayout.CENTER);
 
-        // Create a button panel for Reload, Edit, and Settings buttons
+        // Create a button panel for Reload and Edit buttons
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 2, 0));
         buttonPanel.add(reloadConfigsButton);
         buttonPanel.add(editConfigsButton);
-        buttonPanel.add(settingsButton);
         panel.add(buttonPanel, BorderLayout.EAST);
 
         return panel;
@@ -209,12 +206,6 @@ public class DebuggerToolWindowContent {
 
         // Reload configurations after the dialog is closed in case user made changes
         loadRunConfigurations();
-    }
-
-    private void onOpenSettings(ActionEvent e) {
-        // Open the auto-debugger settings dialog
-        SettingsDialog dialog = new SettingsDialog(project);
-        dialog.show();
     }
 
     private void validateAndUpdateMethod() {
@@ -472,7 +463,6 @@ public class DebuggerToolWindowContent {
         // Add button event handlers
         reloadConfigsButton.addActionListener(this::onReloadConfigurations);
         editConfigsButton.addActionListener(this::onEditConfigurations);
-        settingsButton.addActionListener(this::onOpenSettings);
         runAnalysisButton.addActionListener(this::onRunAnalysis);
 
         // Add combo box listener to update run button state
