@@ -44,8 +44,8 @@ public class DebuggerToolWindowContent {
 
     // UI Components
     private final ComboBox<RunConfiguration> runConfigComboBox = new ComboBox<>();
-    private final JButton reloadConfigsButton = new JButton("Reload");
-    private final JButton editConfigsButton = new JButton("Edit");
+    private final JButton reloadConfigsButton = new JButton(AllIcons.Actions.Refresh);
+    private final JButton editConfigsButton = new JButton(AllIcons.Actions.Edit);
     private final TextFieldWithCompletion targetMethodField;
     private final JBLabel methodValidationLabel = new JBLabel();
     private final ComboBox<TestGenerationStrategy> testGenerationStrategyComboBox = new ComboBox<>();
@@ -119,7 +119,7 @@ public class DebuggerToolWindowContent {
         panel.add(runConfigComboBox, BorderLayout.CENTER);
 
         // Create a button panel for Reload and Edit buttons
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 2, 0));
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 2, 5));
         buttonPanel.add(reloadConfigsButton);
         buttonPanel.add(editConfigsButton);
         panel.add(buttonPanel, BorderLayout.EAST);
@@ -141,7 +141,7 @@ public class DebuggerToolWindowContent {
     private void initializeAdditionalConfigPanels() {
         // Set up the main additional config panel
         additionalConfigPanel.setLayout(new BoxLayout(additionalConfigPanel, BoxLayout.Y_AXIS));
-        additionalConfigPanel.setBorder(JBUI.Borders.empty(10, 0));
+        additionalConfigPanel.setBorder(JBUI.Borders.empty(10));
 
         // Initialize sub-panels
         initializeFieldsPanel();
@@ -502,6 +502,10 @@ public class DebuggerToolWindowContent {
     }
 
     private void setupEventHandlers() {
+        // Configure button tooltips and styling
+        configureToolbarButton(reloadConfigsButton, "Reload run configurations");
+        configureToolbarButton(editConfigsButton, "Edit run configurations");
+
         // Add button event handlers
         reloadConfigsButton.addActionListener(this::onReloadConfigurations);
         editConfigsButton.addActionListener(this::onEditConfigurations);
@@ -520,6 +524,38 @@ public class DebuggerToolWindowContent {
 
         // Initially disable run button
         runAnalysisButton.setEnabled(false);
+    }
+
+    /**
+     * Configures a button to look like an IntelliJ toolbar button.
+     */
+    private void configureToolbarButton(JButton button, String tooltip) {
+        button.setToolTipText(tooltip);
+        button.setBorderPainted(false);
+        button.setContentAreaFilled(false);
+        button.setFocusPainted(false);
+        button.setOpaque(false);
+
+        // Set preferred size to make it compact
+        Dimension size = new Dimension(22, 22);
+        button.setPreferredSize(size);
+        button.setMinimumSize(size);
+        button.setMaximumSize(size);
+
+        // Add hover effect
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                button.setContentAreaFilled(true);
+                button.setBorderPainted(true);
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                button.setContentAreaFilled(false);
+                button.setBorderPainted(false);
+            }
+        });
     }
 
     public JPanel getContentPanel() {
