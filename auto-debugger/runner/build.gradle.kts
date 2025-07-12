@@ -1,5 +1,6 @@
 plugins {
     id("java")
+    id("application")
     alias(libs.plugins.lombok)
 }
 
@@ -15,9 +16,14 @@ dependencies {
     implementation(project(mapOf("path" to ":instrumentor-common")))
     implementation(project(mapOf("path" to ":instrumentor-java")))
     implementation(libs.picocli)
+    implementation(libs.log4j)
     testImplementation(libs.bundles.junit)
 }
 
 tasks.test {
     useJUnitPlatform()
+}
+
+application {
+    mainClass.set("cz.cuni.mff.d3s.autodebugger.runner.Main")
 }
