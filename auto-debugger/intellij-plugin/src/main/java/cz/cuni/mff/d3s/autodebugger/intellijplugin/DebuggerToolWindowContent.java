@@ -24,6 +24,8 @@ import cz.cuni.mff.d3s.autodebugger.intellijplugin.services.InstrumentationServi
 import cz.cuni.mff.d3s.autodebugger.intellijplugin.services.OutputService;
 import cz.cuni.mff.d3s.autodebugger.intellijplugin.utils.MethodCompletionProvider;
 import cz.cuni.mff.d3s.autodebugger.intellijplugin.utils.MethodValidator;
+import cz.cuni.mff.d3s.autodebugger.runner.strategies.TestGenerationStrategy;
+import cz.cuni.mff.d3s.autodebugger.runner.strategies.TestGenerationStrategyProvider;
 
 import javax.swing.*;
 import java.awt.*;
@@ -82,6 +84,7 @@ public class DebuggerToolWindowContent {
         initializeUI();
         setupEventHandlers();
         loadRunConfigurations();
+        loadTestGenerationStrategies();
     }
 
     private void initializeUI() {
@@ -91,6 +94,7 @@ public class DebuggerToolWindowContent {
         JPanel formPanel = FormBuilder.createFormBuilder()
                 .addLabeledComponent("Run configuration:", createRunConfigPanel())
                 .addLabeledComponent("Target method:", createMethodSelectionPanel())
+                .addLabeledComponent("Test generation strategy:", testGenerationStrategyComboBox)
                 .addComponent(additionalConfigPanel)
                 .addComponent(runAnalysisButton)
                 .getPanel();
@@ -197,6 +201,40 @@ public class DebuggerToolWindowContent {
 
         // Enable the run button if we have both configuration and method
         updateRunButtonState();
+    }
+
+    private void loadTestGenerationStrategies() {
+        LOG.info("Loading test generation strategies from runner module");
+
+        testGenerationStrategyComboBox.removeAllItems();
+
+        try {
+            List<TestGenerationStrategy> strategies = TestGenerationStrategyProvider.getAvailableStrategies();
+            LOG.info("Found " + strategies.size() + " test generation strategies");
+
+            for (TestGenerationStrategy strategy : strategies) {
+                testGenerationStrategyComboBox.addItem(strategy);
+                LOG.debug("Added strategy: " + strategy.getDisplayName());
+            }
+
+            // Select the default strategy
+            TestGenerationStrategy defaultStrategy = TestGenerationStrategyProvider.getDefaultStrategy();
+            if (defaultStrategy != null) {
+                testGenerationStrategyComboBox.setSelectedItem(defaultStrategy);
+                LOG.info("Selected default strategy: " + defaultStrategy.getDisplayName());
+            }
+
+        } catch (Exception e) {
+            LOG.error("Failed to load test generation strategies", e);
+            // Add a fallback strategy in case of error
+            TestGenerationStrategy fallback = new TestGenerationStrategy(
+                "fallback",
+                "Basic Test Generation",
+                "Fallback strategy when others fail to load",
+                true
+            );
+            testGenerationStrategyComboBox.addItem(fallback);
+        }
     }
 
     private void onReloadConfigurations(ActionEvent e) {
@@ -490,18 +528,26 @@ public class DebuggerToolWindowContent {
     private void onRunAnalysis(ActionEvent e) {
         RunConfiguration selectedConfig = (RunConfiguration) runConfigComboBox.getSelectedItem();
         String methodSignature = targetMethodField.getText();
+        TestGenerationStrategy selectedStrategy = (TestGenerationStrategy) testGenerationStrategyComboBox.getSelectedItem();
 
         if (selectedConfig == null || methodSignature.trim().isEmpty()) {
             Messages.showErrorDialog(project, "Please select both a run configuration and a target method.", "Missing Selection");
             return;
         }
 
+        if (selectedStrategy == null) {
+            Messages.showErrorDialog(project, "Please select a test generation strategy.", "Missing Selection");
+            return;
+        }
+
+        LOG.info("Starting analysis with strategy: " + selectedStrategy.getDisplayName());
+
         // Create auto-debugger run configuration
         ApplicationRunConfiguration autoDebuggerConfig =
                 createAutoDebuggerConfiguration(selectedConfig, methodSignature.trim());
 
-        // Run the analysis
-        runAnalysis(autoDebuggerConfig);
+        // Run the analysis with the selected strategy
+        runAnalysis(autoDebuggerConfig, selectedStrategy);
     }
 
     private ApplicationRunConfiguration createAutoDebuggerConfiguration(
