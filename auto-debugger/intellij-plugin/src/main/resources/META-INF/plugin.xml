@@ -38,13 +38,13 @@
   <extensions defaultExtensionNs="com.intellij">
     <!-- Tool Window for Auto-Debugger interface -->
     <toolWindow id="Auto-Debugger" secondary="true" icon="AllIcons.Toolwindows.ToolWindowDebugger" anchor="right"
-                factoryClass="cz.cuni.mff.d3s.intellijplugin.factories.DebuggerToolWindowFactory"/>
+                factoryClass="cz.cuni.mff.d3s.autodebugger.intellijplugin.factories.DebuggerToolWindowFactory"/>
     
     <!-- Project-level services -->
-    <projectService serviceInterface="cz.cuni.mff.d3s.intellijplugin.services.InstrumentationService"
-                    serviceImplementation="cz.cuni.mff.d3s.intellijplugin.services.InstrumentationService"/>
-    <projectService serviceInterface="cz.cuni.mff.d3s.intellijplugin.services.RunConfigurationManager"
-                    serviceImplementation="cz.cuni.mff.d3s.intellijplugin.services.RunConfigurationManager"/>
+    <projectService serviceInterface="cz.cuni.mff.d3s.autodebugger.intellijplugin.services.InstrumentationService"
+                    serviceImplementation="cz.cuni.mff.d3s.autodebugger.intellijplugin.services.InstrumentationService"/>
+    <projectService serviceInterface="cz.cuni.mff.d3s.autodebugger.intellijplugin.services.RunConfigurationManager"
+                    serviceImplementation="cz.cuni.mff.d3s.autodebugger.intellijplugin.services.RunConfigurationManager"/>
   </extensions>
 
 </idea-plugin>

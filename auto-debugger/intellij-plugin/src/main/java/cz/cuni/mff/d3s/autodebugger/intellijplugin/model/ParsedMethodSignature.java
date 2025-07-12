@@ -1,4 +1,4 @@
-package cz.cuni.mff.d3s.intellijplugin.model;
+package cz.cuni.mff.d3s.autodebugger.intellijplugin.model;
 
 /**
  * Data class for parsed method signature components

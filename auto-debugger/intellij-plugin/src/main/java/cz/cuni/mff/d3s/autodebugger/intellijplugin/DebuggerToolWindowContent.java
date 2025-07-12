@@ -1,4 +1,4 @@
-package cz.cuni.mff.d3s.intellijplugin;
+package cz.cuni.mff.d3s.autodebugger.intellijplugin;
 
 import com.intellij.execution.RunManager;
 import com.intellij.execution.configurations.RunConfiguration;
@@ -17,12 +17,12 @@ import com.intellij.icons.AllIcons;
 import com.intellij.util.textCompletion.TextFieldWithCompletion;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.psi.*;
-import cz.cuni.mff.d3s.intellijplugin.factories.DebuggerToolWindowFactory;
-import cz.cuni.mff.d3s.intellijplugin.model.ApplicationRunConfiguration;
-import cz.cuni.mff.d3s.intellijplugin.model.MethodValidationResult;
-import cz.cuni.mff.d3s.intellijplugin.services.InstrumentationService;
-import cz.cuni.mff.d3s.intellijplugin.utils.MethodCompletionProvider;
-import cz.cuni.mff.d3s.intellijplugin.utils.MethodValidator;
+import cz.cuni.mff.d3s.autodebugger.intellijplugin.factories.DebuggerToolWindowFactory;
+import cz.cuni.mff.d3s.autodebugger.intellijplugin.model.ApplicationRunConfiguration;
+import cz.cuni.mff.d3s.autodebugger.intellijplugin.model.MethodValidationResult;
+import cz.cuni.mff.d3s.autodebugger.intellijplugin.services.InstrumentationService;
+import cz.cuni.mff.d3s.autodebugger.intellijplugin.utils.MethodCompletionProvider;
+import cz.cuni.mff.d3s.autodebugger.intellijplugin.utils.MethodValidator;
 
 import javax.swing.*;
 import java.awt.*;

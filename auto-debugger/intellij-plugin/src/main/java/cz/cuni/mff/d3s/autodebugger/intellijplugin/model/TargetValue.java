@@ -1,4 +1,4 @@
-package cz.cuni.mff.d3s.intellijplugin.model;
+package cz.cuni.mff.d3s.autodebugger.intellijplugin.model;
 
 import java.io.Serializable;
 

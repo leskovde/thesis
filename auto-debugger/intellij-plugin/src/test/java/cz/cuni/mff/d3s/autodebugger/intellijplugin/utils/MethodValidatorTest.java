@@ -1,4 +1,4 @@
-package cz.cuni.mff.d3s.intellijplugin.utils;
+package cz.cuni.mff.d3s.autodebugger.intellijplugin.utils;
 
 import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase5;
 import org.junit.jupiter.api.BeforeEach;

@@ -1,9 +1,9 @@
-package cz.cuni.mff.d3s.intellijplugin.services;
+package cz.cuni.mff.d3s.autodebugger.intellijplugin.services;
 
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
-import cz.cuni.mff.d3s.intellijplugin.model.ApplicationRunConfiguration;
+import cz.cuni.mff.d3s.autodebugger.intellijplugin.model.ApplicationRunConfiguration;
 
 import java.io.BufferedReader;
 import java.io.IOException;

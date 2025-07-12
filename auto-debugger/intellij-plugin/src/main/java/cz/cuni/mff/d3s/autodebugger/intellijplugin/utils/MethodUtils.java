@@ -1,4 +1,4 @@
-package cz.cuni.mff.d3s.intellijplugin.utils;
+package cz.cuni.mff.d3s.autodebugger.intellijplugin.utils;
 
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiMethod;

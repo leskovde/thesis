@@ -1,4 +1,4 @@
-package cz.cuni.mff.d3s.intellijplugin.utils;
+package cz.cuni.mff.d3s.autodebugger.intellijplugin.utils;
 
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
@@ -6,8 +6,8 @@ import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.search.GlobalSearchScope;
-import cz.cuni.mff.d3s.intellijplugin.model.MethodValidationResult;
-import cz.cuni.mff.d3s.intellijplugin.model.ParsedMethodSignature;
+import cz.cuni.mff.d3s.autodebugger.intellijplugin.model.MethodValidationResult;
+import cz.cuni.mff.d3s.autodebugger.intellijplugin.model.ParsedMethodSignature;
 
 /**
  * Testable method validation logic separated from UI concerns
