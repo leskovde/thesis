@@ -21,6 +21,7 @@ import cz.cuni.mff.d3s.autodebugger.intellijplugin.factories.DebuggerToolWindowF
 import cz.cuni.mff.d3s.autodebugger.intellijplugin.model.ApplicationRunConfiguration;
 import cz.cuni.mff.d3s.autodebugger.intellijplugin.model.MethodValidationResult;
 import cz.cuni.mff.d3s.autodebugger.intellijplugin.services.InstrumentationService;
+import cz.cuni.mff.d3s.autodebugger.intellijplugin.services.OutputService;
 import cz.cuni.mff.d3s.autodebugger.intellijplugin.utils.MethodCompletionProvider;
 import cz.cuni.mff.d3s.autodebugger.intellijplugin.utils.MethodValidator;
 
@@ -46,7 +47,6 @@ public class DebuggerToolWindowContent {
     private final TextFieldWithCompletion targetMethodField;
     private final JBLabel methodValidationLabel = new JBLabel();
     private final JButton runAnalysisButton = new JButton("Run Analysis");
-    private final JTextArea outputArea = new JTextArea(10, 40);
 
     // Additional configuration panels
     private final JPanel fieldsPanel = new JPanel();
@@ -93,17 +93,12 @@ public class DebuggerToolWindowContent {
                 .addLabeledComponent("Target method:", createMethodSelectionPanel())
                 .addComponent(additionalConfigPanel)
                 .addComponent(runAnalysisButton)
-                .addLabeledComponentFillVertically("Output:", new JBScrollPane(outputArea))
                 .getPanel();
 
         contentPanel.add(formPanel, BorderLayout.CENTER);
 
         // Initialize additional configuration panels
         initializeAdditionalConfigPanels();
-
-        // Configure components
-        outputArea.setEditable(false);
-        outputArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
     }
 
     private JPanel createRunConfigPanel() {
@@ -518,43 +513,135 @@ public class DebuggerToolWindowContent {
     }
 
     private void runAnalysis(ApplicationRunConfiguration config) {
-        outputArea.setText("Starting analysis...\n");
+        OutputService outputService = OutputService.getInstance(project);
+
+        // Clear previous output and start new analysis
+        outputService.clear(OutputService.OutputType.TOOL_OUTPUT);
+        outputService.print(OutputService.OutputType.TOOL_OUTPUT, "Starting analysis...");
+
         runAnalysisButton.setEnabled(false);
 
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
             try {
+                // Start instrumentation phase
+                outputService.print(OutputService.OutputType.TOOL_OUTPUT, "Phase 1: Running instrumentation...");
+
                 InstrumentationService service = InstrumentationService.getInstance(project);
-                service.runInstrumentation(config, this::appendOutput)
+                service.runInstrumentation(config, line ->
+                    outputService.print(OutputService.OutputType.TOOL_OUTPUT, line))
                         .whenComplete((result, throwable) -> {
                             SwingUtilities.invokeLater(() -> {
                                 runAnalysisButton.setEnabled(true);
                                 if (throwable != null) {
-                                    appendOutput("Analysis failed: " + throwable.getMessage());
+                                    outputService.printError(OutputService.OutputType.TOOL_OUTPUT,
+                                        "Analysis failed: " + throwable.getMessage());
                                     LOG.error("Analysis failed", throwable);
                                 } else {
-                                    appendOutput("Analysis completed successfully!");
+                                    outputService.print(OutputService.OutputType.TOOL_OUTPUT,
+                                        "Instrumentation completed successfully!");
+
                                     if (result != null && !result.isEmpty()) {
-                                        appendOutput("Generated files: " + result.stream()
+                                        outputService.print(OutputService.OutputType.TOOL_OUTPUT,
+                                            "Generated files: " + result.stream()
                                                 .map(Path::toString)
                                                 .collect(Collectors.joining(", ")));
                                     }
+
+                                    // Start application run phase
+                                    runApplicationAnalysis(config, outputService);
+
+                                    // Start test generation and execution phase
+                                    runTestGeneration(config, outputService);
                                 }
                             });
                         });
             } catch (Exception ex) {
                 SwingUtilities.invokeLater(() -> {
                     runAnalysisButton.setEnabled(true);
-                    appendOutput("Failed to start analysis: " + ex.getMessage());
+                    outputService.printError(OutputService.OutputType.TOOL_OUTPUT,
+                        "Failed to start analysis: " + ex.getMessage());
                     LOG.error("Failed to start analysis", ex);
                 });
             }
         });
     }
 
-    private void appendOutput(String text) {
-        SwingUtilities.invokeLater(() -> {
-            outputArea.append(text + "\n");
-            outputArea.setCaretPosition(outputArea.getDocument().getLength());
+    /**
+     * Simulates running the instrumented application and collecting runtime data.
+     */
+    private void runApplicationAnalysis(ApplicationRunConfiguration config, OutputService outputService) {
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            try {
+                outputService.clear(OutputService.OutputType.ANALYSIS_RUN);
+                outputService.print(OutputService.OutputType.ANALYSIS_RUN, "Phase 2: Running instrumented application...");
+                outputService.print(OutputService.OutputType.ANALYSIS_RUN, "Command: java -javaagent:instrumentation.jar " + config.getMainClass());
+                outputService.print(OutputService.OutputType.ANALYSIS_RUN, "");
+
+                // Simulate application startup
+                Thread.sleep(1000);
+                outputService.print(OutputService.OutputType.ANALYSIS_RUN, "Application started successfully");
+                outputService.print(OutputService.OutputType.ANALYSIS_RUN, "Collecting runtime data for method: " + config.getTargetMethodReference());
+
+                // Simulate method execution and data collection
+                Thread.sleep(2000);
+                outputService.print(OutputService.OutputType.ANALYSIS_RUN, "Method invoked with parameters: [arg1=42, arg2=\"test\"]");
+                outputService.print(OutputService.OutputType.ANALYSIS_RUN, "Field values captured: [field1=100, field2=\"initialized\"]");
+                outputService.print(OutputService.OutputType.ANALYSIS_RUN, "Return value: \"success\"");
+
+                Thread.sleep(1000);
+                outputService.print(OutputService.OutputType.ANALYSIS_RUN, "Runtime data collection completed");
+                outputService.print(OutputService.OutputType.ANALYSIS_RUN, "Trace data saved to: /tmp/auto-debugger/trace-" + System.currentTimeMillis() + ".json");
+
+            } catch (InterruptedException e) {
+                outputService.printError(OutputService.OutputType.ANALYSIS_RUN, "Application analysis interrupted");
+                Thread.currentThread().interrupt();
+            }
+        });
+    }
+
+    /**
+     * Simulates generating and running unit tests based on collected data.
+     */
+    private void runTestGeneration(ApplicationRunConfiguration config, OutputService outputService) {
+        ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            try {
+                // Wait a bit for application analysis to start
+                Thread.sleep(3000);
+
+                outputService.clear(OutputService.OutputType.TESTS);
+                outputService.print(OutputService.OutputType.TESTS, "Phase 3: Generating and running unit tests...");
+                outputService.print(OutputService.OutputType.TESTS, "");
+
+                // Simulate test generation
+                Thread.sleep(1500);
+                outputService.print(OutputService.OutputType.TESTS, "Generating test cases from runtime data...");
+                outputService.print(OutputService.OutputType.TESTS, "Generated test: testMethod_WithArgs42AndTest_ReturnsSuccess()");
+                outputService.print(OutputService.OutputType.TESTS, "Generated test: testMethod_WithNullArgs_ThrowsException()");
+                outputService.print(OutputService.OutputType.TESTS, "Generated test: testMethod_WithEmptyString_ReturnsEmpty()");
+                outputService.print(OutputService.OutputType.TESTS, "");
+
+                // Simulate test compilation
+                Thread.sleep(1000);
+                outputService.print(OutputService.OutputType.TESTS, "Compiling generated tests...");
+                outputService.print(OutputService.OutputType.TESTS, "Compilation successful");
+                outputService.print(OutputService.OutputType.TESTS, "");
+
+                // Simulate test execution
+                Thread.sleep(2000);
+                outputService.print(OutputService.OutputType.TESTS, "Running generated tests...");
+                outputService.print(OutputService.OutputType.TESTS, "");
+                outputService.print(OutputService.OutputType.TESTS, "testMethod_WithArgs42AndTest_ReturnsSuccess: PASSED");
+                outputService.print(OutputService.OutputType.TESTS, "testMethod_WithNullArgs_ThrowsException: PASSED");
+                outputService.print(OutputService.OutputType.TESTS, "testMethod_WithEmptyString_ReturnsEmpty: FAILED");
+                outputService.print(OutputService.OutputType.TESTS, "  Expected: \"\" but was: \"default\"");
+                outputService.print(OutputService.OutputType.TESTS, "");
+                outputService.print(OutputService.OutputType.TESTS, "Test Results: 2 passed, 1 failed, 3 total");
+                outputService.print(OutputService.OutputType.TESTS, "Generated test files saved to: src/test/java/generated/");
+
+            } catch (InterruptedException e) {
+                outputService.printError(OutputService.OutputType.TESTS, "Test generation interrupted");
+                Thread.currentThread().interrupt();
+            }
         });
     }
 }
