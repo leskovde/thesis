@@ -3,6 +3,7 @@ import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 
 plugins {
   id("java")
+  alias(libs.plugins.lombok)
   alias(libs.plugins.intelliJPlatform) // IntelliJ Platform Gradle Plugin
 }
 

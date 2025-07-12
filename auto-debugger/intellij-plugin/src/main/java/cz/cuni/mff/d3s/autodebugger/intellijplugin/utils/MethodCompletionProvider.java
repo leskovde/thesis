@@ -1,7 +1,6 @@
 package cz.cuni.mff.d3s.autodebugger.intellijplugin.utils;
 
 import com.intellij.codeInsight.completion.CompletionResultSet;
-import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
@@ -14,8 +13,7 @@ import com.intellij.psi.search.searches.AllClassesSearch;
 import com.intellij.util.Query;
 import com.intellij.util.TextFieldCompletionProvider;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.ArrayList;
+import cz.cuni.mff.d3s.autodebugger.intellijplugin.model.SignatureState;
 
 /**
  * PSI-based completion provider for method signatures with three-stage completion:
@@ -35,39 +33,19 @@ public class MethodCompletionProvider extends TextFieldCompletionProvider {
     @Override
     protected void addCompletionVariants(@NotNull String text, int offset, @NotNull String prefix,
                                          @NotNull CompletionResultSet result) {
-
-        if (prefix.isEmpty()) {
-            addClassNameCompletions(prefix, result);
-            return;
+        SignatureState state = MethodUtils.parseMethodSignature(prefix).getState();
+        switch (state) {
+            case EMPTY, PACKAGE_ONLY -> addPackageAndClassCompletions(prefix, result);
+            case CLASS_ONLY -> {
+                // Nested classes can be present, let's list them alongside methods
+                addClassNameCompletions(prefix, result);
+                addMethodNameCompletions(prefix, result);
+            }
+            case METHOD_NAME_ONLY, FULL_METHOD ->  addMethodNameCompletions(prefix, result);
+            case INVALID ->
+                // Do nothing, invalid state
+                LOG.debug("Invalid signature state, not completing: " + prefix);
         }
-
-        // TODO: looking for a method after typing a package name does not work properly
-        // Determine completion type based on input pattern
-        if (prefix.contains(".")) {
-//            if (isFullyQualifiedClassName(prefix)) {
-                // Case 3: Method name completion - suggest methods from the specified class
-                addMethodCompletions(prefix, result);
-//            } else {
-                // Case 1: Package name completion or Case 2: Class completion within package
-                addPackageAndClassCompletions(prefix, result);
-//            }
-        } else {
-            // Case 2: Class name completion (without package) - suggest full class names
-            // Case 3: Method name completion - suggest methods from all classes with matching method names
-            addClassNameCompletions(prefix, result);
-            addMethodNameCompletions(prefix, result);
-        }
-    }
-
-    private boolean isFullyQualifiedClassName(@NotNull String prefix) {
-        // Check if this looks like a fully qualified class name (has dots and ends with a class-like name)
-        if (!prefix.contains(".")) return false;
-
-        int lastDot = prefix.lastIndexOf('.');
-        String lastPart = prefix.substring(lastDot + 1);
-
-        // If the last part starts with uppercase, it's likely a class name
-        return !lastPart.isEmpty() && Character.isUpperCase(lastPart.charAt(0));
     }
 
     // Case 1: Package name completion and Case 2: Class completion within package
@@ -90,7 +68,7 @@ public class MethodCompletionProvider extends TextFieldCompletionProvider {
         }
     }
 
-    // Case 2: Class name completion (without package) - suggest full class names
+    // Case 2: Class name completion (without a package) - suggest full class names
     private void addClassNameCompletions(@NotNull String prefix, @NotNull CompletionResultSet result) {
         try {
             PsiShortNamesCache cache = PsiShortNamesCache.getInstance(project);
