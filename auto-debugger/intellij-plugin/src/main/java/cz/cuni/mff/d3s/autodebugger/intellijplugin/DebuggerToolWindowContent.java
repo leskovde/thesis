@@ -48,6 +48,7 @@ public class DebuggerToolWindowContent {
     private final JButton editConfigsButton = new JButton("Edit");
     private final TextFieldWithCompletion targetMethodField;
     private final JBLabel methodValidationLabel = new JBLabel();
+    private final ComboBox<TestGenerationStrategy> testGenerationStrategyComboBox = new ComboBox<>();
     private final JButton runAnalysisButton = new JButton("Run Analysis");
 
     // Additional configuration panels
