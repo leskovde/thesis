@@ -40,6 +40,10 @@ dependencies {
     testFramework(TestFrameworkType.JUnit5)
     testFramework(TestFrameworkType.Platform)
     testFramework(TestFrameworkType.Plugin.Java)
+
+    configurations.all {
+      exclude(group = "org.apache.logging.log4j", module = "log4j-slf4j2-impl")
+    }
   }
 }
 
