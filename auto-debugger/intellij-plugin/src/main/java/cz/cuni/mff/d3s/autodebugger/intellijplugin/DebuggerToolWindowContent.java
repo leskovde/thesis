@@ -95,7 +95,15 @@ public class DebuggerToolWindowContent {
                 .addComponent(runAnalysisButton)
                 .getPanel();
 
-        contentPanel.add(formPanel, BorderLayout.CENTER);
+        // Wrap the form panel to ensure proper spacing and alignment
+        JPanel wrapperPanel = new JPanel(new BorderLayout());
+        wrapperPanel.add(formPanel, BorderLayout.NORTH);
+
+        // Add some padding around the form
+        wrapperPanel.setBorder(JBUI.Borders.empty(10));
+
+        // Add the wrapper panel to the top (NORTH) instead of CENTER to prevent vertical centering
+        contentPanel.add(wrapperPanel, BorderLayout.NORTH);
 
         // Initialize additional configuration panels
         initializeAdditionalConfigPanels();
