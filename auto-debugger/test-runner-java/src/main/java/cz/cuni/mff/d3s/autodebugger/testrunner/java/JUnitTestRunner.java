@@ -126,7 +126,7 @@ public class JUnitTestRunner implements TestRunner {
             URLClassLoader testClassLoader = createTestClassLoader(compiledClass);
             
             // Execute the test using JUnit Platform
-            TestExecutionListener listener = new TestExecutionListener();
+            AutoDebuggerTestExecutionListener listener = new AutoDebuggerTestExecutionListener();
             
             Launcher launcher = LauncherFactory.create();
             LauncherDiscoveryRequest request = LauncherDiscoveryRequestBuilder.request()
@@ -211,7 +211,7 @@ public class JUnitTestRunner implements TestRunner {
         return fileName.substring(0, fileName.lastIndexOf('.'));
     }
     
-    private List<ExecutionTrace> collectExecutionTraces(Path testFile, TestExecutionListener listener) {
+    private List<ExecutionTrace> collectExecutionTraces(Path testFile, AutoDebuggerTestExecutionListener listener) {
         // Implementation would collect traces from instrumentation
         // This is a placeholder for the actual trace collection logic
         log.info("Collecting execution traces for test: {}", testFile);
