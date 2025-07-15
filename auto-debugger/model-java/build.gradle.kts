@@ -11,6 +11,7 @@ repositories {
 }
 
 dependencies {
+    implementation(libs.log4j)
     testImplementation(libs.bundles.junit)
 }
 
