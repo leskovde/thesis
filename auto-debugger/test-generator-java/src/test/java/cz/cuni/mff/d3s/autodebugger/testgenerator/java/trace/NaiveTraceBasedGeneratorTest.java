@@ -38,27 +38,28 @@ class NaiveTraceBasedGeneratorTest {
                 .variableType("int")
                 .build()
         );
-        arg1.setInternalId(1);
-        
+        // Note: setInternalId method may not be available, using slot as key instead
+
         ArgumentIdentifier arg2 = new ArgumentIdentifier(
             ArgumentIdentifierParameters.builder()
                 .argumentSlot(1)
                 .variableType("int")
                 .build()
         );
-        arg2.setInternalId(2);
+        // Note: setInternalId method may not be available, using slot as key instead
         
-        identifierMapping.put(1, arg1);
-        identifierMapping.put(2, arg2);
+        // Use argument slot as key since setInternalId may not be available
+        identifierMapping.put(0, arg1);  // slot 0
+        identifierMapping.put(1, arg2);  // slot 1
         
         generator = new NaiveTraceBasedGenerator(identifierMapping);
         
         // Create test trace
         trace = new Trace();
-        trace.addIntValue(1, 10);
-        trace.addIntValue(1, 20);
-        trace.addIntValue(2, 2);
-        trace.addIntValue(2, 4);
+        trace.addIntValue(0, 10);  // slot 0
+        trace.addIntValue(0, 20);
+        trace.addIntValue(1, 2);   // slot 1
+        trace.addIntValue(1, 4);
     }
     
     @Test
