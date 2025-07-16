@@ -1,4 +1,4 @@
-package cz.cuni.mff.d3s.autodebugger.model.java.identifiers;
+package cz.cuni.mff.d3s.autodebugger.model.common.identifiers;
 
 import java.io.Serializable;
 

@@ -1,7 +1,7 @@
-package cz.cuni.mff.d3s.autodebugger.model.java;
+package cz.cuni.mff.d3s.autodebugger.model.common;
 
-import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.ExportableValue;
-import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.MethodIdentifier;
+import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.ExportableValue;
+import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.Identifier;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -33,7 +33,7 @@ public interface RunConfiguration {
      * 
      * @return Method identifier for the target method
      */
-    MethodIdentifier getTargetMethod();
+    Identifier getTargetMethod();
     
     /**
      * Gets the list of exportable values (parameters, fields, etc.) that should be tracked.
@@ -41,13 +41,6 @@ public interface RunConfiguration {
      * @return List of exportable values to track during execution
      */
     List<ExportableValue> getExportableValues();
-    
-    /**
-     * Gets the programming language for this configuration.
-     * 
-     * @return Programming language (e.g., "java", "python")
-     */
-    String getLanguage();
     
     /**
      * Gets additional classpath entries needed for compilation and execution.
