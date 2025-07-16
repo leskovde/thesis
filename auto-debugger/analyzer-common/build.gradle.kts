@@ -1,5 +1,5 @@
 plugins {
-    id("java")
+    id("java-library")
 }
 
 group = "cz.cuni.mff.d3s"
@@ -10,6 +10,7 @@ repositories {
 }
 
 dependencies {
+    api(project(mapOf("path" to ":model-java")))
     testImplementation(libs.bundles.junit)
 }
 

@@ -1,5 +1,6 @@
 plugins {
-    id("java")
+    id("java-library")
+    alias(libs.plugins.lombok)
 }
 
 group = "cz.cuni.mff.d3s"
@@ -10,6 +11,9 @@ repositories {
 }
 
 dependencies {
+    implementation(project(mapOf("path" to ":model-java")))
+    implementation(project(mapOf("path" to ":analyzer-common")))
+    implementation(libs.log4j)
     testImplementation(libs.bundles.junit)
 }
 
