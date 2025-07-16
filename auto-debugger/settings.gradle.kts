@@ -1,6 +1,7 @@
 rootProject.name = "auto-debugger"
 include("instrumentor-common")
 include("instrumentor-java")
+include("model-common")
 include("model-java")
 include("test-generator-common")
 include("test-generator-java")
