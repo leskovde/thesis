@@ -11,6 +11,7 @@ repositories {
 }
 
 dependencies {
+    implementation(project(mapOf("path" to ":model-common")))
     implementation(project(mapOf("path" to ":model-java")))
     implementation(libs.log4j)
     testImplementation(libs.bundles.junit)
