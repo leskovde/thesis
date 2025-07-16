@@ -1,7 +1,7 @@
 package cz.cuni.mff.d3s.autodebugger.instrumentor.java.factories;
 
 import cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling.JavaReturnValue;
-import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.ReturnValueIdentifier;
+import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.JavaReturnValueIdentifier;
 import lombok.Getter;
 
 public class ReturnValueExportFactory extends ExportableValueFactory {
@@ -11,7 +11,7 @@ public class ReturnValueExportFactory extends ExportableValueFactory {
     private ReturnValueExportFactory() {
     }
 
-    public JavaReturnValue createExportable(ReturnValueIdentifier identifier) {
+    public JavaReturnValue createExportable(JavaReturnValueIdentifier identifier) {
         return new JavaReturnValue(identifier);
     }
 }

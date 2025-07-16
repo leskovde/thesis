@@ -2,7 +2,7 @@ package cz.cuni.mff.d3s.autodebugger.analyzer.java;
 
 import cz.cuni.mff.d3s.autodebugger.analyzer.common.Analyzer;
 import cz.cuni.mff.d3s.autodebugger.model.common.RunConfiguration;
-import cz.cuni.mff.d3s.autodebugger.model.java.Trace;
+import cz.cuni.mff.d3s.autodebugger.model.common.trace.Trace;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedReader;

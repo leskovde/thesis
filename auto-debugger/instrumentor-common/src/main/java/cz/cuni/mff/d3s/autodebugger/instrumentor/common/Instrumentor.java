@@ -2,7 +2,7 @@ package cz.cuni.mff.d3s.autodebugger.instrumentor.common;
 
 import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.ExportableValue;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.Identifier;
-import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.MethodIdentifier;
+import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.MethodIdentifier;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;

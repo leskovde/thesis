@@ -47,7 +47,7 @@ public class DiSLModel extends Model {
     classBuilder.imports(imports);
     List<JavaValue> exports = new ArrayList<>();
     for (var identifier : instrumentor.getExportedValues()) {
-      if (identifier instanceof ValueIdentifier valueIdentifier) {
+      if (identifier instanceof JavaValueIdentifier valueIdentifier) {
         exports.add(ExportableValueFactory.createFrom(valueIdentifier));
         getImport(valueIdentifier)
             .ifPresent(i -> imports.add(new JavaPackageImport(i)));
@@ -60,10 +60,10 @@ public class DiSLModel extends Model {
         MethodIdentifierParameters.builder()
             .returnType("void")
             .ownerClassIdentifier(
-                new ClassIdentifier(
+                new JavaClassIdentifier(
                     ClassIdentifierParameters.builder()
                         .className("DiSLClass")
-                        .packageIdentifier(PackageIdentifier.DEFAULT_PACKAGE)
+                        .packageIdentifier(JavaPackageIdentifier.DEFAULT_PACKAGE)
                         .build()))
             .parameterTypes(List.of("DynamicContext"))
             .build();
@@ -92,9 +92,9 @@ public class DiSLModel extends Model {
     return addIndentation(result);
   }
 
-  private Optional<PackageIdentifier> getImport(
-      ValueIdentifier valueIdentifier) {
-    if (valueIdentifier instanceof FieldIdentifier fieldIdentifier) {
+  private Optional<JavaPackageIdentifier> getImport(
+      JavaValueIdentifier valueIdentifier) {
+    if (valueIdentifier instanceof JavaFieldIdentifier fieldIdentifier) {
       return Optional.of(fieldIdentifier.getOwnerClassIdentifier().getAsImportablePackage());
     }
     return Optional.empty();
