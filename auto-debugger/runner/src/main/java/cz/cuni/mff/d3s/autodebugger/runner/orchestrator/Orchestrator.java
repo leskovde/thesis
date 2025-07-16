@@ -3,7 +3,7 @@ package cz.cuni.mff.d3s.autodebugger.runner.orchestrator;
 import cz.cuni.mff.d3s.autodebugger.analyzer.common.Analyzer;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.common.Instrumentor;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.common.modelling.Model;
-import cz.cuni.mff.d3s.autodebugger.model.java.RunConfiguration;
+import cz.cuni.mff.d3s.autodebugger.model.common.RunConfiguration;
 import cz.cuni.mff.d3s.autodebugger.runner.args.TargetLanguage;
 import cz.cuni.mff.d3s.autodebugger.runner.args.Arguments;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.common.TestGenerator;

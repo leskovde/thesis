@@ -1,6 +1,6 @@
 package cz.cuni.mff.d3s.autodebugger.testrunner.common;
 
-import cz.cuni.mff.d3s.autodebugger.model.java.RunConfiguration;
+import cz.cuni.mff.d3s.autodebugger.model.common.RunConfiguration;
 
 import java.nio.file.Path;
 import java.util.List;

@@ -7,9 +7,9 @@ import cz.cuni.mff.d3s.autodebugger.instrumentor.common.modelling.Model;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.java.DiSLInstrumentor;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling.DiSLModel;
 import cz.cuni.mff.d3s.autodebugger.model.java.JavaRunConfiguration;
-import cz.cuni.mff.d3s.autodebugger.model.java.RunConfiguration;
+import cz.cuni.mff.d3s.autodebugger.model.common.RunConfiguration;
 import cz.cuni.mff.d3s.autodebugger.runner.args.TargetLanguage;
-import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.ExportableValue;
+import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.ExportableValue;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.MethodIdentifier;
 import cz.cuni.mff.d3s.autodebugger.runner.args.Arguments;
 import cz.cuni.mff.d3s.autodebugger.runner.parsing.MethodSignatureParsingStrategy;
@@ -41,7 +41,7 @@ public class JavaOrchestrator implements Orchestrator {
         
         try {
             // Get the Java parsing strategy
-            MethodSignatureParsingStrategy strategy = MethodSignatureParsingStrategyFactory.getStrategy(LANGUAGE.getIdentifier());
+            MethodSignatureParsingStrategy strategy = MethodSignatureParsingStrategyFactory.getStrategy(LANGUAGE);
             
             // Parse paths
             Path applicationPath = Path.of(args.applicationJarPath);
