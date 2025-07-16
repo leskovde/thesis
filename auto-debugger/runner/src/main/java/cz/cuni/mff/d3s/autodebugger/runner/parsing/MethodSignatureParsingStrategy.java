@@ -1,7 +1,7 @@
 package cz.cuni.mff.d3s.autodebugger.runner.parsing;
 
 import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.ExportableValue;
-import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.MethodIdentifier;
+import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.MethodIdentifier;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.common.Instrumentor;
 
 import java.nio.file.Path;
