@@ -8,6 +8,9 @@ public class Arguments {
     @CommandLine.Option(names = { "-j", "--jar" }, paramLabel = "JAR", description = "Path to the application JAR file", required = true)
     public String applicationJarPath;
 
+    @CommandLine.Option(names = { "-c", "--classpath" }, paramLabel = "CLASSPATH", description = "Additional classpath entries (separated by ':')", split = ":")
+    public List<String> classpath;
+
     @CommandLine.Option(names = { "-s", "--source" }, paramLabel = "SOURCE", description = "Path to the target application's source code", required = true)
     public String sourceCodePath;
 
@@ -33,7 +36,7 @@ public class Arguments {
      */
     public static class TargetLanguageConverter implements CommandLine.ITypeConverter<TargetLanguage> {
         @Override
-        public TargetLanguage convert(String value) throws Exception {
+        public TargetLanguage convert(String value) {
             return TargetLanguage.fromIdentifier(value);
         }
     }

@@ -50,13 +50,6 @@ public interface RunConfiguration {
     List<ExportableValue> getExportableValues();
     
     /**
-     * Gets additional classpath entries needed for compilation and execution.
-     * 
-     * @return List of classpath entries
-     */
-    List<Path> getClasspathEntries();
-    
-    /**
      * Gets the output directory where generated files should be placed.
      * 
      * @return Output directory path
