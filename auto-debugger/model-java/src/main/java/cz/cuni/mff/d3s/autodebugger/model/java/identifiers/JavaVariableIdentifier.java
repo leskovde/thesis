@@ -6,11 +6,11 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class VariableIdentifier extends ValueIdentifier {
+public class JavaVariableIdentifier extends JavaValueIdentifier {
     private String variableName;
     private String variableType;
 
-    public VariableIdentifier(VariableIdentifierParameters parameters) {
+    public JavaVariableIdentifier(VariableIdentifierParameters parameters) {
         super(ValueType.VARIABLE);
         this.variableName = parameters.variableName;
         this.variableType = parameters.variableType;
@@ -19,6 +19,11 @@ public class VariableIdentifier extends ValueIdentifier {
     @Override
     public String getName() {
         return variableName;
+    }
+
+    @Override
+    public int getInternalId() {
+        throw new UnsupportedOperationException("Not implemented");
     }
 
     public String getType() {

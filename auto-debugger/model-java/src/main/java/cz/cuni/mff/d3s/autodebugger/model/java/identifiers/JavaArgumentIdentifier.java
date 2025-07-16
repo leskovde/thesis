@@ -9,11 +9,11 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class ArgumentIdentifier extends ValueIdentifier implements ExportableValue {
+public class JavaArgumentIdentifier extends JavaValueIdentifier implements ExportableValue {
     private int internalId;
     private int argumentSlot;
 
-    public ArgumentIdentifier(ArgumentIdentifierParameters parameters) {
+    public JavaArgumentIdentifier(ArgumentIdentifierParameters parameters) {
         super(ValueType.ARGUMENT);
         this.internalId = IdentifierFactory.getNextId();
         this.argumentSlot = parameters.argumentSlot;

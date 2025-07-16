@@ -4,17 +4,17 @@ import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.Identifier;
 import lombok.Getter;
 
 @Getter
-public class ClassIdentifier implements Identifier {
+public class JavaClassIdentifier implements Identifier {
   private final String className;
-  private final PackageIdentifier packageIdentifier;
+  private final JavaPackageIdentifier packageIdentifier;
 
-  public ClassIdentifier(ClassIdentifierParameters parameters) {
+  public JavaClassIdentifier(ClassIdentifierParameters parameters) {
     this.className = parameters.className;
     this.packageIdentifier = parameters.packageIdentifier;
   }
 
-  public PackageIdentifier getAsImportablePackage() {
-    return new PackageIdentifier(packageIdentifier.getPackageName() + "." + className);
+  public JavaPackageIdentifier getAsImportablePackage() {
+    return new JavaPackageIdentifier(packageIdentifier.getPackageName() + "." + className);
   }
 
   @Override

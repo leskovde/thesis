@@ -4,5 +4,4 @@ import java.io.Serializable;
 
 public interface ExportableValue extends Serializable {
     int getInternalId();
-    String getType();
 }

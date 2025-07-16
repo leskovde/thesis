@@ -8,12 +8,12 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class FieldIdentifier extends ValueIdentifier implements ExportableValue {
+public class JavaFieldIdentifier extends JavaValueIdentifier implements ExportableValue {
     private int internalId;
     private String fieldName;
-    private ClassIdentifier ownerClassIdentifier;
+    private JavaClassIdentifier ownerClassIdentifier;
 
-    public FieldIdentifier(FieldIdentifierParameters parameters) {
+    public JavaFieldIdentifier(FieldIdentifierParameters parameters) {
         super(ValueType.FIELD);
         this.internalId = IdentifierFactory.getNextId();
         this.fieldName = parameters.variableName;
