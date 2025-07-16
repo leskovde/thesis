@@ -37,13 +37,6 @@ public interface Analyzer {
     Trace runAnalysis(Path instrumentationPath, String[] runtimeArguments);
     
     /**
-     * Gets the language supported by this analyzer.
-     * 
-     * @return Programming language (e.g., "java", "python")
-     */
-    String getSupportedLanguage();
-    
-    /**
      * Validates that the analyzer can process the given instrumentation.
      * 
      * @param instrumentationPath Path to the instrumented application
