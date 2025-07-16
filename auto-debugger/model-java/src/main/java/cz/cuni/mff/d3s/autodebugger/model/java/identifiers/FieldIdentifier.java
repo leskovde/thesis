@@ -1,5 +1,6 @@
 package cz.cuni.mff.d3s.autodebugger.model.java.identifiers;
 
+import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.ExportableValue;
 import cz.cuni.mff.d3s.autodebugger.model.java.enums.ValueType;
 import cz.cuni.mff.d3s.autodebugger.model.java.factories.IdentifierFactory;
 import lombok.Getter;

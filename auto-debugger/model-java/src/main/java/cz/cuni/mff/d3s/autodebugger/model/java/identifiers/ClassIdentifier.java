@@ -1,5 +1,6 @@
 package cz.cuni.mff.d3s.autodebugger.model.java.identifiers;
 
+import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.Identifier;
 import lombok.Getter;
 
 @Getter
