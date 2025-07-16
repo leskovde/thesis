@@ -11,7 +11,7 @@ repositories {
 }
 
 dependencies {
-    api(project(mapOf("path" to ":model-java")))
+    implementation(project(mapOf("path" to ":model-common")))
     testImplementation(libs.bundles.junit)
 }
 

@@ -12,8 +12,9 @@ repositories {
 }
 
 dependencies {
-    api(project(mapOf("path" to ":test-runner-common")))
-    api(project(mapOf("path" to ":model-java")))
+    implementation(project(mapOf("path" to ":test-runner-common")))
+    implementation(project(mapOf("path" to ":model-common")))
+    implementation(project(mapOf("path" to ":model-java")))
     implementation(libs.log4j)
 
     // JUnit Platform for test execution
