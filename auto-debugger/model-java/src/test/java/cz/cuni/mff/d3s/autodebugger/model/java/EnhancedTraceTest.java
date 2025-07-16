@@ -1,13 +1,9 @@
 package cz.cuni.mff.d3s.autodebugger.model.java;
 
-import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.ArgumentIdentifier;
-import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.ArgumentIdentifierParameters;
-import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.ClassIdentifier;
-import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.ClassIdentifierParameters;
+import cz.cuni.mff.d3s.autodebugger.model.common.trace.EnhancedTrace;
+import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.*;
+import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.JavaClassIdentifier;
 import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.ExportableValue;
-import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.FieldIdentifier;
-import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.FieldIdentifierParameters;
-import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.PackageIdentifier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -28,21 +24,21 @@ class EnhancedTraceTest {
         trace = new EnhancedTrace();
         
         // Create test identifiers
-        argIdentifier = new ArgumentIdentifier(
+        argIdentifier = new JavaArgumentIdentifier(
             ArgumentIdentifierParameters.builder()
                 .argumentSlot(0)
                 .variableType("int")
                 .build()
         );
         
-        ClassIdentifier testClass = new ClassIdentifier(
+        JavaClassIdentifier testClass = new JavaClassIdentifier(
             ClassIdentifierParameters.builder()
                 .className("TestClass")
-                .packageIdentifier(PackageIdentifier.DEFAULT_PACKAGE)
+                .packageIdentifier(JavaPackageIdentifier.DEFAULT_PACKAGE)
                 .build()
         );
 
-        fieldIdentifier = new FieldIdentifier(
+        fieldIdentifier = new JavaFieldIdentifier(
             FieldIdentifierParameters.builder()
                 .variableName("testField")
                 .ownerClassIdentifier(testClass)

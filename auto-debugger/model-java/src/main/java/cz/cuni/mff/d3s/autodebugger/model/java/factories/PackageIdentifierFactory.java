@@ -1,6 +1,6 @@
 package cz.cuni.mff.d3s.autodebugger.model.java.factories;
 
-import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.PackageIdentifier;
+import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.JavaPackageIdentifier;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.PackageIdentifierParameters;
 import lombok.Getter;
 
@@ -11,11 +11,11 @@ public class PackageIdentifierFactory extends IdentifierFactory {
     private PackageIdentifierFactory() {
     }
 
-    public PackageIdentifier createIdentifier(PackageIdentifierParameters parameters) {
-        return new PackageIdentifier(parameters.packageName);
+    public JavaPackageIdentifier createIdentifier(PackageIdentifierParameters parameters) {
+        return new JavaPackageIdentifier(parameters.packageName);
     }
 
-    public PackageIdentifier generateIdentifier() {
-        return new PackageIdentifier("generatedPackage" + getNextId());
+    public JavaPackageIdentifier generateIdentifier() {
+        return new JavaPackageIdentifier("generatedPackage" + getNextId());
     }
 }

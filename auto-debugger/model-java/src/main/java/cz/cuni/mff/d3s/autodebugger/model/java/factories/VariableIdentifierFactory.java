@@ -1,6 +1,6 @@
 package cz.cuni.mff.d3s.autodebugger.model.java.factories;
 
-import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.VariableIdentifier;
+import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.JavaVariableIdentifier;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.VariableIdentifierParameters;
 import lombok.Getter;
 
@@ -11,16 +11,12 @@ public class VariableIdentifierFactory extends IdentifierFactory {
     private VariableIdentifierFactory() {
     }
 
-    public VariableIdentifier createIdentifier(VariableIdentifierParameters parameters) {
-//        return VariableIdentifier.builder()
-//                .variableName(name.substring(name.lastIndexOf(':') + 1))
-//                .variableType(name.substring(0, name.lastIndexOf(':')))
-//                .build();
-        return new VariableIdentifier(parameters);
+    public JavaVariableIdentifier createIdentifier(VariableIdentifierParameters parameters) {
+        return new JavaVariableIdentifier(parameters);
     }
 
-    public VariableIdentifier generateIdentifier(VariableIdentifierParameters parameters) {
+    public JavaVariableIdentifier generateIdentifier(VariableIdentifierParameters parameters) {
         parameters.variableName = "generatedVariable" + getNextId();
-        return new VariableIdentifier(parameters);
+        return new JavaVariableIdentifier(parameters);
     }
 }
