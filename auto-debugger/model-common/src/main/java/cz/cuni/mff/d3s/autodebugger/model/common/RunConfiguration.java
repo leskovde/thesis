@@ -13,7 +13,14 @@ import java.util.List;
  * for different programming languages.
  */
 public interface RunConfiguration {
-    
+
+    /**
+     * Gets the target language for this run configuration.
+     *
+     * @return Target language enum value
+     */
+    TargetLanguage getLanguage();
+
     /**
      * Gets the path to the application JAR or executable file.
      * 
