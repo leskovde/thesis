@@ -1,6 +1,6 @@
 package cz.cuni.mff.d3s.autodebugger.runner.parsing;
 
-import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.ExportableValue;
+import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.ExportableValue;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.MethodIdentifier;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.common.Instrumentor;
 
@@ -12,13 +12,6 @@ import java.util.List;
  * for different programming languages.
  */
 public interface MethodSignatureParsingStrategy {
-    
-    /**
-     * Gets the language this strategy supports.
-     * 
-     * @return The programming language name (e.g., "java", "python", "javascript")
-     */
-    String getLanguage();
     
     /**
      * Parses a method reference string and creates a MethodIdentifier.

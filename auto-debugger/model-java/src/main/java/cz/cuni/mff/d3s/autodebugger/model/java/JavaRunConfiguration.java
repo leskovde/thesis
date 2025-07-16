@@ -1,6 +1,6 @@
 package cz.cuni.mff.d3s.autodebugger.model.java;
 
-import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.ExportableValue;
+import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.ExportableValue;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.MethodIdentifier;
 import lombok.Builder;
 import lombok.Getter;

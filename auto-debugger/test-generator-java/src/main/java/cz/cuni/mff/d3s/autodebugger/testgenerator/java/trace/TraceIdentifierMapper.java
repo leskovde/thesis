@@ -2,7 +2,7 @@ package cz.cuni.mff.d3s.autodebugger.testgenerator.java.trace;
 
 import cz.cuni.mff.d3s.autodebugger.model.java.Trace;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.ArgumentIdentifier;
-import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.ExportableValue;
+import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.ExportableValue;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;

@@ -2,7 +2,7 @@ package cz.cuni.mff.d3s.autodebugger.testgenerator.java.trace;
 
 import cz.cuni.mff.d3s.autodebugger.model.java.Trace;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.ArgumentIdentifier;
-import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.ExportableValue;
+import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.ExportableValue;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.FieldIdentifier;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.common.*;
 import lombok.extern.slf4j.Slf4j;
@@ -13,7 +13,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Naive trace-based test generator that creates simple unit tests

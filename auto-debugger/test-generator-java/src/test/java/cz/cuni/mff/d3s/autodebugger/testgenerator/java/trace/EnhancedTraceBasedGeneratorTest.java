@@ -5,7 +5,7 @@ import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.ArgumentIdentifier;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.ArgumentIdentifierParameters;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.ClassIdentifier;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.ClassIdentifierParameters;
-import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.ExportableValue;
+import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.ExportableValue;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.FieldIdentifier;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.FieldIdentifierParameters;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.PackageIdentifier;

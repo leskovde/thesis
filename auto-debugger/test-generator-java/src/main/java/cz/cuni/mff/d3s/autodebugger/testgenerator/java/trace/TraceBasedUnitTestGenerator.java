@@ -1,7 +1,7 @@
 package cz.cuni.mff.d3s.autodebugger.testgenerator.java.trace;
 
 import cz.cuni.mff.d3s.autodebugger.model.java.Trace;
-import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.ExportableValue;
+import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.ExportableValue;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.common.TraceBasedGenerator;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.common.UnitTestGenerator;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.common.TestGenerationContext;

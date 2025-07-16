@@ -28,11 +28,6 @@ public class JavaMethodSignatureParsingStrategy implements MethodSignatureParsin
     private static final Pattern FIELD_PATTERN = Pattern.compile("^([^:]+):([^:]+)$");
     
     @Override
-    public String getLanguage() {
-        return "java";
-    }
-    
-    @Override
     public MethodIdentifier parseMethodReference(String methodReference) {
         log.debug("Parsing Java method reference: {}", methodReference);
         
