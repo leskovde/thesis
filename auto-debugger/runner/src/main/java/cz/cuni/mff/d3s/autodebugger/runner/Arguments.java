@@ -19,6 +19,9 @@ public class Arguments {
     @CommandLine.Option(names = { "-f", "--fields" }, paramLabel = "FIELDS", description = "Target class fields (format: type:name)", split = ",")
     public List<String> targetFields;
 
+    @CommandLine.Option(names = { "-l", "--language" }, paramLabel = "LANGUAGE", description = "Programming language (e.g., java, python)", defaultValue = "java")
+    public String language;
+
     @CommandLine.Option(names = { "-h", "--help" }, usageHelp = true, description = "display a help message")
     private boolean helpRequested = false;
 }
