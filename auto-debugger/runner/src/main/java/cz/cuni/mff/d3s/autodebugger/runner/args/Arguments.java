@@ -1,4 +1,4 @@
-package cz.cuni.mff.d3s.autodebugger.runner;
+package cz.cuni.mff.d3s.autodebugger.runner.args;
 
 import picocli.CommandLine;
 import java.util.List;
@@ -19,9 +19,21 @@ public class Arguments {
     @CommandLine.Option(names = { "-f", "--fields" }, paramLabel = "FIELDS", description = "Target class fields (format: type:name)", split = ",")
     public List<String> targetFields;
 
-    @CommandLine.Option(names = { "-l", "--language" }, paramLabel = "LANGUAGE", description = "Programming language (e.g., java, python)", defaultValue = "java")
-    public String language;
+    @CommandLine.Option(names = { "-l", "--language" }, paramLabel = "LANGUAGE",
+                        description = "Programming language. Supported: ${COMPLETION-CANDIDATES}",
+                        defaultValue = "java", converter = TargetLanguageConverter.class)
+    public TargetLanguage language;
 
     @CommandLine.Option(names = { "-h", "--help" }, usageHelp = true, description = "display a help message")
     private boolean helpRequested = false;
+
+    /**
+     * Custom converter for TargetLanguage enum to work with picocli.
+     */
+    public static class TargetLanguageConverter implements CommandLine.ITypeConverter<TargetLanguage> {
+        @Override
+        public TargetLanguage convert(String value) throws Exception {
+            return TargetLanguage.fromIdentifier(value);
+        }
+    }
 }
