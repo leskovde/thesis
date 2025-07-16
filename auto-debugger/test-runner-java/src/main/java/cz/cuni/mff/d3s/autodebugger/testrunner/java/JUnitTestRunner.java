@@ -1,5 +1,6 @@
 package cz.cuni.mff.d3s.autodebugger.testrunner.java;
 
+import cz.cuni.mff.d3s.autodebugger.model.java.RunConfiguration;
 import cz.cuni.mff.d3s.autodebugger.testrunner.common.*;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.platform.engine.discovery.DiscoverySelectors;
@@ -34,6 +35,15 @@ public class JUnitTestRunner implements TestRunner {
     }
     
     @Override
+    public void configure(RunConfiguration configuration) {
+        // Convert RunConfiguration to TestRunnerConfiguration
+        // This is a temporary adapter until we fully migrate to the new API
+        this.configuration = TestRunnerConfiguration.builder()
+                .workingDirectory(configuration.getOutputDirectory())
+                .build();
+        log.info("Configured test runner with working directory: {}", configuration.getOutputDirectory());
+    }
+
     public void configure(TestRunnerConfiguration config) {
         this.configuration = config;
         log.info("Configured test runner with working directory: {}", config.getWorkingDirectory());
