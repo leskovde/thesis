@@ -7,5 +7,5 @@ import lombok.Builder;
 @AllArgsConstructor
 public class ClassIdentifierParameters {
     public String className;
-    public PackageIdentifier packageIdentifier;
+    public JavaPackageIdentifier packageIdentifier;
 }

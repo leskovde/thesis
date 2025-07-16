@@ -1,9 +1,9 @@
 package cz.cuni.mff.d3s.autodebugger.testgenerator.java.trace;
 
-import cz.cuni.mff.d3s.autodebugger.model.java.EnhancedTrace;
-import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.ArgumentIdentifier;
+import cz.cuni.mff.d3s.autodebugger.model.common.trace.EnhancedTrace;
+import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.JavaArgumentIdentifier;
 import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.ExportableValue;
-import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.FieldIdentifier;
+import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.JavaFieldIdentifier;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.common.TestGenerationContext;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.common.TestNamingStrategy;
 import lombok.extern.slf4j.Slf4j;
@@ -119,7 +119,7 @@ public class EnhancedTraceBasedGenerator {
         
         // Look for events where ArgumentIdentifiers have values
         Set<ExportableValue> argumentIdentifiers = trace.getTrackedIdentifiers().stream()
-                .filter(id -> id instanceof ArgumentIdentifier)
+                .filter(id -> id instanceof JavaArgumentIdentifier)
                 .collect(Collectors.toSet());
         
         if (argumentIdentifiers.isEmpty()) {
@@ -157,9 +157,9 @@ public class EnhancedTraceBasedGenerator {
             ExportableValue identifier = entry.getKey();
             Object value = entry.getValue();
             
-            if (identifier instanceof ArgumentIdentifier) {
+            if (identifier instanceof JavaArgumentIdentifier) {
                 arguments.put(identifier, value);
-            } else if (identifier instanceof FieldIdentifier) {
+            } else if (identifier instanceof JavaFieldIdentifier) {
                 fields.put(identifier, value);
             }
         }
@@ -257,7 +257,7 @@ public class EnhancedTraceBasedGenerator {
         
         // Set up field values
         for (Map.Entry<ExportableValue, Object> field : scenario.fields.entrySet()) {
-            if (field.getKey() instanceof FieldIdentifier fieldId) {
+            if (field.getKey() instanceof JavaFieldIdentifier fieldId) {
                 sb.append("        // TODO: Set field ").append(fieldId.getFieldName())
                   .append(" to ").append(formatValueForComment(field.getValue())).append("\n");
             }
@@ -305,7 +305,7 @@ public class EnhancedTraceBasedGenerator {
         
         // Add arguments from the scenario
         List<String> args = scenario.arguments.entrySet().stream()
-                .filter(entry -> entry.getKey() instanceof ArgumentIdentifier)
+                .filter(entry -> entry.getKey() instanceof JavaArgumentIdentifier)
                 .map(entry -> formatValueForCode(entry.getValue()))
                 .collect(Collectors.toList());
         

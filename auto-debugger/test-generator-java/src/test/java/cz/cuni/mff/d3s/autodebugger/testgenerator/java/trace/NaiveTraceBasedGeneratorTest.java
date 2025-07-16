@@ -1,7 +1,7 @@
 package cz.cuni.mff.d3s.autodebugger.testgenerator.java.trace;
 
-import cz.cuni.mff.d3s.autodebugger.model.java.Trace;
-import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.ArgumentIdentifier;
+import cz.cuni.mff.d3s.autodebugger.model.common.trace.Trace;
+import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.JavaArgumentIdentifier;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.ArgumentIdentifierParameters;
 import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.ExportableValue;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.common.TestGenerationContext;
@@ -32,7 +32,7 @@ class NaiveTraceBasedGeneratorTest {
         // Create test identifier mapping
         identifierMapping = new HashMap<>();
         
-        ArgumentIdentifier arg1 = new ArgumentIdentifier(
+        JavaArgumentIdentifier arg1 = new JavaArgumentIdentifier(
             ArgumentIdentifierParameters.builder()
                 .argumentSlot(0)
                 .variableType("int")
@@ -40,7 +40,7 @@ class NaiveTraceBasedGeneratorTest {
         );
         // Note: setInternalId method may not be available, using slot as key instead
 
-        ArgumentIdentifier arg2 = new ArgumentIdentifier(
+        JavaArgumentIdentifier arg2 = new JavaArgumentIdentifier(
             ArgumentIdentifierParameters.builder()
                 .argumentSlot(1)
                 .variableType("int")

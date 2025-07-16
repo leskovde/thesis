@@ -1,7 +1,7 @@
 package cz.cuni.mff.d3s.autodebugger.runner.model;
 
 import cz.cuni.mff.d3s.autodebugger.instrumentor.common.Instrumentor;
-import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.*;
+import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.MethodIdentifier;
 import cz.cuni.mff.d3s.autodebugger.runner.args.Arguments;
 import cz.cuni.mff.d3s.autodebugger.runner.parsing.MethodSignatureParsingStrategy;
 import cz.cuni.mff.d3s.autodebugger.runner.parsing.MethodSignatureParsingStrategyFactory;

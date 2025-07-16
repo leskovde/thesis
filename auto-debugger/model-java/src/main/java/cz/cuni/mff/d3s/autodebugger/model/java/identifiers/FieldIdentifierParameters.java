@@ -4,5 +4,5 @@ import lombok.experimental.SuperBuilder;
 
 @SuperBuilder
 public class FieldIdentifierParameters extends ExportableValueIdentifierParameters {
-    public final ClassIdentifier ownerClassIdentifier;
+    public final JavaClassIdentifier ownerClassIdentifier;
 }

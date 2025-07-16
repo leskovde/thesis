@@ -2,6 +2,7 @@ package cz.cuni.mff.d3s.autodebugger.runner.parsing;
 
 import cz.cuni.mff.d3s.autodebugger.instrumentor.common.Instrumentor;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.java.DiSLInstrumentor;
+import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.MethodIdentifier;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.*;
 import cz.cuni.mff.d3s.autodebugger.model.java.parsing.JavaMethodSignatureParser;
 import cz.cuni.mff.d3s.autodebugger.model.java.parsing.MethodSignature;
@@ -39,12 +40,12 @@ public class JavaMethodSignatureParsingStrategy implements MethodSignatureParsin
         }
         
         // Create package identifier
-        PackageIdentifier packageIdentifier = signature.isInDefaultPackage() ? 
-            PackageIdentifier.DEFAULT_PACKAGE : 
-            new PackageIdentifier(signature.getPackageName());
+        JavaPackageIdentifier packageIdentifier = signature.isInDefaultPackage() ?
+            JavaPackageIdentifier.DEFAULT_PACKAGE :
+            new JavaPackageIdentifier(signature.getPackageName());
         
         // Create class identifier
-        ClassIdentifier classIdentifier = new ClassIdentifier(
+        JavaClassIdentifier classIdentifier = new JavaClassIdentifier(
             ClassIdentifierParameters.builder()
                 .packageIdentifier(packageIdentifier)
                 .className(signature.getSimpleClassName())
@@ -82,7 +83,7 @@ public class JavaMethodSignatureParsingStrategy implements MethodSignatureParsin
                 continue;
             }
             
-            ArgumentIdentifier argumentIdentifier = parseParameter(parameterString, i);
+            JavaArgumentIdentifier argumentIdentifier = parseParameter(parameterString, i);
             exportableValues.add(argumentIdentifier);
             
             log.debug("Converted parameter '{}' to ArgumentIdentifier with slot {} and type {}", 
@@ -99,7 +100,7 @@ public class JavaMethodSignatureParsingStrategy implements MethodSignatureParsin
         }
         
         List<ExportableValue> exportableValues = new ArrayList<>();
-        ClassIdentifier ownerClass = methodIdentifier.getOwnerClassIdentifier();
+        JavaClassIdentifier ownerClass = methodIdentifier.getOwnerClassIdentifier();
         
         for (String fieldString : targetFields) {
             fieldString = fieldString.trim();
@@ -107,7 +108,7 @@ public class JavaMethodSignatureParsingStrategy implements MethodSignatureParsin
                 continue;
             }
             
-            FieldIdentifier fieldIdentifier = parseField(fieldString, ownerClass);
+            JavaFieldIdentifier fieldIdentifier = parseField(fieldString, ownerClass);
             exportableValues.add(fieldIdentifier);
             
             log.debug("Converted field '{}' to FieldIdentifier with name {} and type {}", 
@@ -151,7 +152,7 @@ public class JavaMethodSignatureParsingStrategy implements MethodSignatureParsin
     /**
      * Parses a single parameter string into an ArgumentIdentifier.
      */
-    private ArgumentIdentifier parseParameter(String parameterString, int defaultSlot) {
+    private JavaArgumentIdentifier parseParameter(String parameterString, int defaultSlot) {
         Matcher matcher = PARAMETER_PATTERN.matcher(parameterString);
         
         if (!matcher.matches()) {
@@ -174,7 +175,7 @@ public class JavaMethodSignatureParsingStrategy implements MethodSignatureParsin
         
         type = normalizeType(type);
         
-        return new ArgumentIdentifier(
+        return new JavaArgumentIdentifier(
             ArgumentIdentifierParameters.builder()
                 .argumentSlot(slot)
                 .variableType(type)
@@ -185,7 +186,7 @@ public class JavaMethodSignatureParsingStrategy implements MethodSignatureParsin
     /**
      * Parses a single field string into a FieldIdentifier.
      */
-    private FieldIdentifier parseField(String fieldString, ClassIdentifier ownerClass) {
+    private JavaFieldIdentifier parseField(String fieldString, JavaClassIdentifier ownerClass) {
         Matcher matcher = FIELD_PATTERN.matcher(fieldString);
         
         if (!matcher.matches()) {
@@ -196,7 +197,7 @@ public class JavaMethodSignatureParsingStrategy implements MethodSignatureParsin
         String type = normalizeType(matcher.group(1));
         String name = matcher.group(2);
         
-        return new FieldIdentifier(
+        return new JavaFieldIdentifier(
             FieldIdentifierParameters.builder()
                 .variableType(type)
                 .variableName(name)

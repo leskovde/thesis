@@ -1,16 +1,11 @@
 package cz.cuni.mff.d3s.autodebugger.testgenerator.java;
 
-import cz.cuni.mff.d3s.autodebugger.model.java.EnhancedTrace;
-import cz.cuni.mff.d3s.autodebugger.model.java.Trace;
+import cz.cuni.mff.d3s.autodebugger.model.common.trace.EnhancedTrace;
+import cz.cuni.mff.d3s.autodebugger.model.common.trace.Trace;
 import cz.cuni.mff.d3s.autodebugger.model.java.TraceAdapter;
-import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.ArgumentIdentifier;
-import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.ArgumentIdentifierParameters;
-import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.ClassIdentifier;
-import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.ClassIdentifierParameters;
+import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.*;
+import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.JavaArgumentIdentifier;
 import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.ExportableValue;
-import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.FieldIdentifier;
-import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.FieldIdentifierParameters;
-import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.PackageIdentifier;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.common.TestGenerationContext;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.common.TestNamingStrategy;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.java.trace.EnhancedTraceBasedGenerator;
@@ -44,28 +39,28 @@ class EnhancedWorkflowIntegrationTest {
         // Create identifier mapping
         identifierMapping = new HashMap<>();
         
-        ArgumentIdentifier arg1 = new ArgumentIdentifier(
+        JavaArgumentIdentifier arg1 = new JavaArgumentIdentifier(
             ArgumentIdentifierParameters.builder()
                 .argumentSlot(0)
                 .variableType("int")
                 .build()
         );
         
-        ArgumentIdentifier arg2 = new ArgumentIdentifier(
+        JavaArgumentIdentifier arg2 = new JavaArgumentIdentifier(
             ArgumentIdentifierParameters.builder()
                 .argumentSlot(1)
                 .variableType("int")
                 .build()
         );
         
-        ClassIdentifier calculatorClass = new ClassIdentifier(
+        JavaClassIdentifier calculatorClass = new JavaClassIdentifier(
             ClassIdentifierParameters.builder()
                 .className("Calculator")
-                .packageIdentifier(PackageIdentifier.DEFAULT_PACKAGE)
+                .packageIdentifier(JavaPackageIdentifier.DEFAULT_PACKAGE)
                 .build()
         );
 
-        FieldIdentifier field1 = new FieldIdentifier(
+        JavaFieldIdentifier field1 = new JavaFieldIdentifier(
             FieldIdentifierParameters.builder()
                 .variableName("operationCount")
                 .ownerClassIdentifier(calculatorClass)

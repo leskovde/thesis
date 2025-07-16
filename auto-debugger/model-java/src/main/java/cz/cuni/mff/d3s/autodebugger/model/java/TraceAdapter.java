@@ -1,5 +1,7 @@
 package cz.cuni.mff.d3s.autodebugger.model.java;
 
+import cz.cuni.mff.d3s.autodebugger.model.common.trace.EnhancedTrace;
+import cz.cuni.mff.d3s.autodebugger.model.common.trace.Trace;
 import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.ExportableValue;
 import lombok.extern.slf4j.Slf4j;
 
@@ -56,8 +58,8 @@ public class TraceAdapter {
      * Converts values from a specific slot in the legacy trace to the enhanced trace.
      */
     private static int convertSlotValues(Trace legacyTrace, EnhancedTrace enhancedTrace,
-                                       Integer slot, ExportableValue identifier, 
-                                       String type, int startEventIndex) {
+                                         Integer slot, ExportableValue identifier,
+                                         String type, int startEventIndex) {
         int currentEventIndex = startEventIndex;
         
         switch (type.toLowerCase()) {

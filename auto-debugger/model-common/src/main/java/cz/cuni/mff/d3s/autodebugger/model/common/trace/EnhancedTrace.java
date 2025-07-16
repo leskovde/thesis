@@ -1,4 +1,4 @@
-package cz.cuni.mff.d3s.autodebugger.model.java;
+package cz.cuni.mff.d3s.autodebugger.model.common.trace;
 
 import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.ExportableValue;
 import lombok.extern.slf4j.Slf4j;

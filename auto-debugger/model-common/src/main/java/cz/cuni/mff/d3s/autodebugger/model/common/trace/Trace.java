@@ -1,4 +1,4 @@
-package cz.cuni.mff.d3s.autodebugger.model.java;
+package cz.cuni.mff.d3s.autodebugger.model.common.trace;
 
 import java.util.*;
 

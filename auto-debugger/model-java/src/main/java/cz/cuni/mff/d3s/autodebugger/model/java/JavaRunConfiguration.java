@@ -2,8 +2,8 @@ package cz.cuni.mff.d3s.autodebugger.model.java;
 
 import cz.cuni.mff.d3s.autodebugger.model.common.RunConfiguration;
 import cz.cuni.mff.d3s.autodebugger.model.common.TargetLanguage;
-import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.ExportableValue;
-import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.MethodIdentifier;
+import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.JavaMethodIdentifier;
+import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.JavaValueIdentifier;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Singular;
@@ -25,10 +25,10 @@ public class JavaRunConfiguration implements RunConfiguration {
 
     private final Path applicationPath;
     private final Path sourceCodePath;
-    private final MethodIdentifier targetMethod;
+    private final JavaMethodIdentifier targetMethod;
     
     @Singular
-    private final List<ExportableValue> exportableValues;
+    private final List<JavaValueIdentifier> exportableValues;
     
     @Singular("classpathEntry")
     private final List<Path> classpathEntries;
@@ -88,8 +88,8 @@ public class JavaRunConfiguration implements RunConfiguration {
     public static JavaRunConfiguration fromArguments(
             Path applicationPath,
             Path sourceCodePath, 
-            MethodIdentifier targetMethod,
-            List<ExportableValue> exportableValues) {
+            JavaMethodIdentifier targetMethod,
+            List<JavaValueIdentifier> exportableValues) {
         
         return JavaRunConfiguration.builder()
                 .applicationPath(applicationPath)
@@ -112,8 +112,8 @@ public class JavaRunConfiguration implements RunConfiguration {
     public static JavaRunConfiguration fromArgumentsWithClasspath(
             Path applicationPath,
             Path sourceCodePath,
-            MethodIdentifier targetMethod,
-            List<ExportableValue> exportableValues,
+            JavaMethodIdentifier targetMethod,
+            List<JavaValueIdentifier> exportableValues,
             List<Path> classpathEntries) {
         
         JavaRunConfigurationBuilder builder = JavaRunConfiguration.builder()

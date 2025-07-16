@@ -1,7 +1,7 @@
 package cz.cuni.mff.d3s.autodebugger.testgenerator.java.trace;
 
-import cz.cuni.mff.d3s.autodebugger.model.java.Trace;
-import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.ArgumentIdentifier;
+import cz.cuni.mff.d3s.autodebugger.model.common.trace.Trace;
+import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.JavaArgumentIdentifier;
 import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.ExportableValue;
 import lombok.extern.slf4j.Slf4j;
 
@@ -36,7 +36,7 @@ public class TraceIdentifierMapper {
 
     public ExportableValue getExportableValue(int id) {
         var value = identifierMapping.get(id);
-        if (value instanceof ArgumentIdentifier arg) {
+        if (value instanceof JavaArgumentIdentifier arg) {
             log.info("Argument identifier: {}, {}, {}, {}", arg.getArgumentSlot(), arg.getInternalId(), arg.getType(), arg.getName());
         }
         return value;

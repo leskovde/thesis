@@ -1,9 +1,9 @@
 package cz.cuni.mff.d3s.autodebugger.testgenerator.java.trace;
 
-import cz.cuni.mff.d3s.autodebugger.model.java.Trace;
-import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.ArgumentIdentifier;
+import cz.cuni.mff.d3s.autodebugger.model.common.trace.Trace;
+import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.JavaArgumentIdentifier;
 import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.ExportableValue;
-import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.FieldIdentifier;
+import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.JavaFieldIdentifier;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.common.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -62,14 +62,14 @@ public class NaiveTraceBasedGenerator implements TraceBasedGenerator {
         List<TestScenario> scenarios = new ArrayList<>();
         
         // Get all argument and field identifiers
-        Map<Integer, ArgumentIdentifier> arguments = new HashMap<>();
-        Map<Integer, FieldIdentifier> fields = new HashMap<>();
+        Map<Integer, JavaArgumentIdentifier> arguments = new HashMap<>();
+        Map<Integer, JavaFieldIdentifier> fields = new HashMap<>();
         
         for (Integer slot : mapper.getSlots()) {
             ExportableValue value = mapper.getExportableValue(slot);
-            if (value instanceof ArgumentIdentifier arg) {
+            if (value instanceof JavaArgumentIdentifier arg) {
                 arguments.put(slot, arg);
-            } else if (value instanceof FieldIdentifier field) {
+            } else if (value instanceof JavaFieldIdentifier field) {
                 fields.put(slot, field);
             }
         }
@@ -95,13 +95,13 @@ public class NaiveTraceBasedGenerator implements TraceBasedGenerator {
         return scenarios;
     }
     
-    private List<Map<Integer, Object>> generateArgumentCombinations(Map<Integer, ArgumentIdentifier> arguments, 
+    private List<Map<Integer, Object>> generateArgumentCombinations(Map<Integer, JavaArgumentIdentifier> arguments,
                                                                    TraceIdentifierMapper mapper) {
         List<Map<Integer, Object>> combinations = new ArrayList<>();
         
         // Get all possible values for each argument
         Map<Integer, List<Object>> argumentValues = new HashMap<>();
-        for (Map.Entry<Integer, ArgumentIdentifier> entry : arguments.entrySet()) {
+        for (Map.Entry<Integer, JavaArgumentIdentifier> entry : arguments.entrySet()) {
             Integer slot = entry.getKey();
             Set<?> values = mapper.getSlotValues(slot);
             argumentValues.put(slot, new ArrayList<>(values));
@@ -144,11 +144,11 @@ public class NaiveTraceBasedGenerator implements TraceBasedGenerator {
         }
     }
     
-    private Map<Integer, Object> extractFieldValues(Map<Integer, FieldIdentifier> fields, 
+    private Map<Integer, Object> extractFieldValues(Map<Integer, JavaFieldIdentifier> fields,
                                                    TraceIdentifierMapper mapper) {
         Map<Integer, Object> fieldValues = new HashMap<>();
         
-        for (Map.Entry<Integer, FieldIdentifier> entry : fields.entrySet()) {
+        for (Map.Entry<Integer, JavaFieldIdentifier> entry : fields.entrySet()) {
             Integer slot = entry.getKey();
             Set<?> values = mapper.getSlotValues(slot);
             if (!values.isEmpty()) {
@@ -223,7 +223,7 @@ public class NaiveTraceBasedGenerator implements TraceBasedGenerator {
         // Set up field values if any
         for (Map.Entry<Integer, Object> field : scenario.fieldValues.entrySet()) {
             ExportableValue fieldId = identifierMapping.get(field.getKey());
-            if (fieldId instanceof FieldIdentifier fieldIdentifier) {
+            if (fieldId instanceof JavaFieldIdentifier fieldIdentifier) {
                 sb.append("        // TODO: Set field ").append(fieldIdentifier.getFieldName())
                   .append(" to ").append(field.getValue()).append("\n");
             }
@@ -278,7 +278,7 @@ public class NaiveTraceBasedGenerator implements TraceBasedGenerator {
         List<String> args = new ArrayList<>();
         for (Map.Entry<Integer, Object> arg : scenario.argumentValues.entrySet()) {
             ExportableValue argId = identifierMapping.get(arg.getKey());
-            if (argId instanceof ArgumentIdentifier) {
+            if (argId instanceof JavaArgumentIdentifier) {
                 args.add(formatValueForCode(arg.getValue()));
             }
         }

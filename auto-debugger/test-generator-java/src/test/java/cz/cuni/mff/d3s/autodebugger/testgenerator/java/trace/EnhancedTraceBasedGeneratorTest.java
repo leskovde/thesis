@@ -1,14 +1,9 @@
 package cz.cuni.mff.d3s.autodebugger.testgenerator.java.trace;
 
-import cz.cuni.mff.d3s.autodebugger.model.java.EnhancedTrace;
-import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.ArgumentIdentifier;
-import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.ArgumentIdentifierParameters;
-import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.ClassIdentifier;
-import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.ClassIdentifierParameters;
+import cz.cuni.mff.d3s.autodebugger.model.common.trace.EnhancedTrace;
+import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.*;
+import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.JavaArgumentIdentifier;
 import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.ExportableValue;
-import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.FieldIdentifier;
-import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.FieldIdentifierParameters;
-import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.PackageIdentifier;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.common.TestGenerationContext;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.common.TestNamingStrategy;
 import org.junit.jupiter.api.BeforeEach;
@@ -59,14 +54,14 @@ class EnhancedTraceBasedGeneratorTest {
     @Test
     void testGenerateTestsWithSimpleTrace() {
         // Create test identifiers
-        ExportableValue arg1 = new ArgumentIdentifier(
+        ExportableValue arg1 = new JavaArgumentIdentifier(
             ArgumentIdentifierParameters.builder()
                 .argumentSlot(0)
                 .variableType("int")
                 .build()
         );
         
-        ExportableValue arg2 = new ArgumentIdentifier(
+        ExportableValue arg2 = new JavaArgumentIdentifier(
             ArgumentIdentifierParameters.builder()
                 .argumentSlot(1)
                 .variableType("int")
@@ -111,21 +106,21 @@ class EnhancedTraceBasedGeneratorTest {
     @Test
     void testGenerateTestsWithComplexTrace() {
         // Create identifiers for a more complex scenario
-        ExportableValue arg1 = new ArgumentIdentifier(
+        ExportableValue arg1 = new JavaArgumentIdentifier(
             ArgumentIdentifierParameters.builder()
                 .argumentSlot(0)
                 .variableType("int")
                 .build()
         );
         
-        ClassIdentifier calculatorClass = new ClassIdentifier(
+        JavaClassIdentifier calculatorClass = new JavaClassIdentifier(
             ClassIdentifierParameters.builder()
                 .className("Calculator")
-                .packageIdentifier(PackageIdentifier.DEFAULT_PACKAGE)
+                .packageIdentifier(JavaPackageIdentifier.DEFAULT_PACKAGE)
                 .build()
         );
 
-        ExportableValue field1 = new FieldIdentifier(
+        ExportableValue field1 = new JavaFieldIdentifier(
             FieldIdentifierParameters.builder()
                 .variableName("counter")
                 .ownerClassIdentifier(calculatorClass)
@@ -164,7 +159,7 @@ class EnhancedTraceBasedGeneratorTest {
     @Test
     void testGenerateTestsWithDifferentNamingStrategies() {
         // Setup trace data
-        ExportableValue arg1 = new ArgumentIdentifier(
+        ExportableValue arg1 = new JavaArgumentIdentifier(
             ArgumentIdentifierParameters.builder()
                 .argumentSlot(0)
                 .variableType("int")
@@ -214,7 +209,7 @@ class EnhancedTraceBasedGeneratorTest {
     @Test
     void testGenerateTestsWithMaxTestCountLimit() {
         // Create a trace with many events
-        ExportableValue arg1 = new ArgumentIdentifier(
+        ExportableValue arg1 = new JavaArgumentIdentifier(
             ArgumentIdentifierParameters.builder()
                 .argumentSlot(0)
                 .variableType("int")
@@ -261,7 +256,7 @@ class EnhancedTraceBasedGeneratorTest {
     
     @Test
     void testGenerateTestsWithMetadata() {
-        ExportableValue arg1 = new ArgumentIdentifier(
+        ExportableValue arg1 = new JavaArgumentIdentifier(
             ArgumentIdentifierParameters.builder()
                 .argumentSlot(0)
                 .variableType("String")
