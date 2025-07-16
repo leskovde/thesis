@@ -2,8 +2,8 @@ package cz.cuni.mff.d3s.autodebugger.runner.orchestrator;
 
 import cz.cuni.mff.d3s.autodebugger.analyzer.common.Analyzer;
 import cz.cuni.mff.d3s.autodebugger.analyzer.java.JavaAnalyzer;
-import cz.cuni.mff.d3s.autodebugger.model.java.RunConfiguration;
-import cz.cuni.mff.d3s.autodebugger.runner.args.TargetLanguage;
+import cz.cuni.mff.d3s.autodebugger.model.common.RunConfiguration;
+import cz.cuni.mff.d3s.autodebugger.model.common.TargetLanguage;
 import cz.cuni.mff.d3s.autodebugger.runner.args.Arguments;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

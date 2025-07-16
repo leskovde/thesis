@@ -1,6 +1,6 @@
 package cz.cuni.mff.d3s.autodebugger.runner.orchestrator;
 
-import cz.cuni.mff.d3s.autodebugger.runner.args.TargetLanguage;
+import cz.cuni.mff.d3s.autodebugger.model.common.TargetLanguage;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.EnumMap;

@@ -8,7 +8,7 @@ import cz.cuni.mff.d3s.autodebugger.instrumentor.java.DiSLInstrumentor;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling.DiSLModel;
 import cz.cuni.mff.d3s.autodebugger.model.java.JavaRunConfiguration;
 import cz.cuni.mff.d3s.autodebugger.model.common.RunConfiguration;
-import cz.cuni.mff.d3s.autodebugger.runner.args.TargetLanguage;
+import cz.cuni.mff.d3s.autodebugger.model.common.TargetLanguage;
 import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.ExportableValue;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.MethodIdentifier;
 import cz.cuni.mff.d3s.autodebugger.runner.args.Arguments;

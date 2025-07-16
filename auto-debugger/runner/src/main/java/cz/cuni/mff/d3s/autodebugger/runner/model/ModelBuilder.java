@@ -2,7 +2,7 @@ package cz.cuni.mff.d3s.autodebugger.runner.model;
 
 import cz.cuni.mff.d3s.autodebugger.instrumentor.common.Instrumentor;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.*;
-import cz.cuni.mff.d3s.autodebugger.runner.Arguments;
+import cz.cuni.mff.d3s.autodebugger.runner.args.Arguments;
 import cz.cuni.mff.d3s.autodebugger.runner.parsing.MethodSignatureParsingStrategy;
 import cz.cuni.mff.d3s.autodebugger.runner.parsing.MethodSignatureParsingStrategyFactory;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +38,6 @@ public class ModelBuilder {
 
         // Get the appropriate parsing strategy based on the application type
         MethodSignatureParsingStrategy strategy = MethodSignatureParsingStrategyFactory.getStrategyForApplication(applicationPath);
-        log.info("Using {} parsing strategy", strategy.getLanguage());
 
         // Validate configuration for this language
         strategy.validateConfiguration(applicationPath, sourceCodePath);
@@ -58,7 +57,6 @@ public class ModelBuilder {
         // Create the instrumentor using the strategy
         Instrumentor instrumentor = strategy.createInstrumentor(applicationPath, sourceCodePath, methodIdentifier, exportableValues);
 
-        log.info("Successfully built {} instrumentor for method: {}", strategy.getLanguage(), arguments.targetMethodReference);
         log.debug("Instrumentor configuration: app={}, method={}, exportedValues={}",
                  applicationPath, methodIdentifier.getName(), exportableValues.size());
 

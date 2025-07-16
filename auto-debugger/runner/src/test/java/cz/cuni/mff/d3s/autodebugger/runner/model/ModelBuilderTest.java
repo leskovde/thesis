@@ -1,7 +1,7 @@
 package cz.cuni.mff.d3s.autodebugger.runner.model;
 
 import cz.cuni.mff.d3s.autodebugger.instrumentor.common.Instrumentor;
-import cz.cuni.mff.d3s.autodebugger.runner.Arguments;
+import cz.cuni.mff.d3s.autodebugger.runner.args.Arguments;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 

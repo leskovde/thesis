@@ -1,5 +1,7 @@
 package cz.cuni.mff.d3s.autodebugger.model.java;
 
+import cz.cuni.mff.d3s.autodebugger.model.common.RunConfiguration;
+import cz.cuni.mff.d3s.autodebugger.model.common.TargetLanguage;
 import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.ExportableValue;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.MethodIdentifier;
 import lombok.Builder;
@@ -20,7 +22,7 @@ import java.util.List;
 @Getter
 @Slf4j
 public class JavaRunConfiguration implements RunConfiguration {
-    
+
     private final Path applicationPath;
     private final Path sourceCodePath;
     private final MethodIdentifier targetMethod;
@@ -33,10 +35,10 @@ public class JavaRunConfiguration implements RunConfiguration {
     
     @Builder.Default
     private final Path outputDirectory = Path.of("auto-debugger-output");
-    
+
     @Builder.Default
-    private final String language = "java";
-    
+    private final TargetLanguage language = TargetLanguage.JAVA;
+
     @Override
     public void validate() {
         log.debug("Validating Java run configuration");

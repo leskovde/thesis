@@ -1,4 +1,4 @@
-package cz.cuni.mff.d3s.autodebugger.runner.args;
+package cz.cuni.mff.d3s.autodebugger.model.common;
 
 import lombok.Getter;
 
