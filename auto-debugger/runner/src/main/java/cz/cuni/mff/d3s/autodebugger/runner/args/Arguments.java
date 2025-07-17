@@ -39,6 +39,10 @@ public class Arguments {
                         defaultValue = "trace-based-basic")
     public String testGenerationStrategy;
 
+    @CommandLine.Option(names = { "-k", "--api-key" }, paramLabel = "API_KEY",
+                        description = "API key for LLM services (can also be set via ANTHROPIC_API_KEY environment variable)")
+    public String apiKey;
+
     @CommandLine.Option(names = { "-h", "--help" }, usageHelp = true, description = "display a help message")
     private boolean helpRequested = false;
 

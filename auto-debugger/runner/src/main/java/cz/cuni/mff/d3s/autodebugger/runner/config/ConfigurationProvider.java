@@ -27,9 +27,9 @@ public class ConfigurationProvider {
                 ""
             ),
             new ConfigurationField(
-                "openapi.key",
-                "OpenAPI Key",
-                "API key for OpenAPI services used in test generation",
+                "anthropic.key",
+                "Anthropic API Key",
+                "API key for Anthropic Claude services used in LLM-based test generation",
                 ConfigurationField.FieldType.PASSWORD,
                 true,
                 ""
