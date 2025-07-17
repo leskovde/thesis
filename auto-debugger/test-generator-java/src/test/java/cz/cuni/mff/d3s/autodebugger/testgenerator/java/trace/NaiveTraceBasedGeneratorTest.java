@@ -3,7 +3,7 @@ package cz.cuni.mff.d3s.autodebugger.testgenerator.java.trace;
 import cz.cuni.mff.d3s.autodebugger.model.common.trace.Trace;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.JavaArgumentIdentifier;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.ArgumentIdentifierParameters;
-import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.ExportableValue;
+import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.JavaValueIdentifier;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.common.TestGenerationContext;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.common.TestNamingStrategy;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,7 +24,7 @@ class NaiveTraceBasedGeneratorTest {
     Path tempDir;
     
     private NaiveTraceBasedGenerator generator;
-    private Map<Integer, ExportableValue> identifierMapping;
+    private Map<Integer, JavaValueIdentifier> identifierMapping;
     private Trace trace;
     
     @BeforeEach

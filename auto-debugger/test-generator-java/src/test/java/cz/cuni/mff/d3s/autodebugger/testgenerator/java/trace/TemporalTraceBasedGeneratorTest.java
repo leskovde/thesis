@@ -1,6 +1,6 @@
 package cz.cuni.mff.d3s.autodebugger.testgenerator.java.trace;
 
-import cz.cuni.mff.d3s.autodebugger.model.common.trace.EnhancedTrace;
+import cz.cuni.mff.d3s.autodebugger.model.common.trace.TemporalTrace;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.*;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.JavaArgumentIdentifier;
 import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.ExportableValue;
@@ -16,19 +16,19 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class EnhancedTraceBasedGeneratorTest {
+class TemporalTraceBasedGeneratorTest {
     
     @TempDir
     Path tempDir;
     
-    private EnhancedTraceBasedGenerator generator;
-    private EnhancedTrace trace;
+    private TemporalTraceBasedGenerator generator;
+    private TemporalTrace trace;
     private TestGenerationContext context;
     
     @BeforeEach
     void setUp() {
-        generator = new EnhancedTraceBasedGenerator();
-        trace = new EnhancedTrace();
+        generator = new TemporalTraceBasedGenerator();
+        trace = new TemporalTrace();
         
         context = TestGenerationContext.builder()
                 .targetMethodSignature("Calculator.divide(int, int)")

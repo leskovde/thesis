@@ -1,6 +1,6 @@
 package cz.cuni.mff.d3s.autodebugger.instrumentor.java;
 
-import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.ExportableValue;
+import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.JavaValueIdentifier;
 
 import java.util.Map;
 
@@ -17,7 +17,7 @@ public class CollectorMethodRegistry {
             "java.lang.String", "collectString"
     );
 
-    public static String getCollectorMethodName(ExportableValue value) {
+    public static String getCollectorMethodName(JavaValueIdentifier value) {
         return collectorMethods.getOrDefault(value.getType(), "collectObject");
     }
 }

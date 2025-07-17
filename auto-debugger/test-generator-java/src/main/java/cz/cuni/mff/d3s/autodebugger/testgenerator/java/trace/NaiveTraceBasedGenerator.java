@@ -4,6 +4,7 @@ import cz.cuni.mff.d3s.autodebugger.model.common.trace.Trace;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.JavaArgumentIdentifier;
 import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.ExportableValue;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.JavaFieldIdentifier;
+import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.JavaValueIdentifier;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.common.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -21,10 +22,10 @@ import java.util.*;
 @Slf4j
 public class NaiveTraceBasedGenerator implements TraceBasedGenerator {
     
-    private final Map<Integer, ExportableValue> identifierMapping;
+    private final Map<Integer, JavaValueIdentifier> identifierMapping;
     private TestGenerationContext context;
     
-    public NaiveTraceBasedGenerator(Map<Integer, ExportableValue> identifierMapping) {
+    public NaiveTraceBasedGenerator(Map<Integer, JavaValueIdentifier> identifierMapping) {
         this.identifierMapping = identifierMapping;
     }
     

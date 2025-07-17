@@ -13,7 +13,8 @@ repositories {
 
 dependencies {
     api(project(mapOf("path" to ":test-generator-common")))
-    api(project(mapOf("path" to ":model-java")))
+    implementation(project(mapOf("path" to ":model-common")))
+    implementation(project(mapOf("path" to ":model-java")))
     implementation(libs.log4j)
     testImplementation(libs.bundles.junit)
 }

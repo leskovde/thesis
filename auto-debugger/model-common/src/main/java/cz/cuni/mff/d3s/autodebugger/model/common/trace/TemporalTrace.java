@@ -8,15 +8,13 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Enhanced Trace implementation following the specification in trace.tex.
- * This class stores runtime data as a three-dimensional structure mapping
+ * Temporal Trace stores runtime data as a three-dimensional structure mapping
  * variables (ExportableValue) at specific execution points (event indices) to their values.
- * 
  * The design uses the Facade pattern to hide the complexity of the internal
  * map-of-maps structure and provides efficient queries for test generation.
  */
 @Slf4j
-public class EnhancedTrace implements Serializable {
+public class TemporalTrace implements Serializable {
     
     /**
      * Core data structure: Map<ExportableValue, NavigableMap<Integer, Object>>
@@ -35,7 +33,7 @@ public class EnhancedTrace implements Serializable {
      */
     private final Map<String, Object> metadata;
     
-    public EnhancedTrace() {
+    public TemporalTrace() {
         this.traceData = new ConcurrentHashMap<>();
         this.nextEventIndex = 0;
         this.metadata = new HashMap<>();
@@ -50,7 +48,7 @@ public class EnhancedTrace implements Serializable {
      */
     public void addValue(ExportableValue identifier, int eventIndex, Object value) {
         log.debug("Adding value for identifier {} at event {}: {}", 
-                 identifier.getType(), eventIndex, value);
+                 identifier, eventIndex, value);
         
         traceData.computeIfAbsent(identifier, k -> new TreeMap<>())
                  .put(eventIndex, value);
@@ -88,7 +86,7 @@ public class EnhancedTrace implements Serializable {
         NavigableMap<Integer, Object> variableHistory = traceData.get(identifier);
 
         if (variableHistory == null || variableHistory.isEmpty()) {
-            log.debug("No history found for identifier: {}", identifier.getType());
+            log.debug("No history found for identifier: {}", identifier);
             return Optional.empty();
         }
 
@@ -97,12 +95,12 @@ public class EnhancedTrace implements Serializable {
         
         if (floorEntry == null) {
             log.debug("No value found at or before event {} for identifier: {}", 
-                     eventIndex, identifier.getType());
+                     eventIndex, identifier);
             return Optional.empty();
         }
         
         log.debug("Found value for identifier {} at event {}: {}", 
-                 identifier.getType(), floorEntry.getKey(), floorEntry.getValue());
+                 identifier, floorEntry.getKey(), floorEntry.getValue());
         return Optional.of(floorEntry.getValue());
     }
     
@@ -234,7 +232,7 @@ public class EnhancedTrace implements Serializable {
      */
     public String getSummary() {
         StringBuilder sb = new StringBuilder();
-        sb.append("EnhancedTrace Summary:\n");
+        sb.append("TemporalTrace Summary:\n");
         sb.append("  - Tracked variables: ").append(getTrackedVariableCount()).append("\n");
         sb.append("  - Total events: ").append(getTotalEventCount()).append("\n");
         

@@ -1,6 +1,6 @@
 package cz.cuni.mff.d3s.autodebugger.testgenerator.java;
 
-import cz.cuni.mff.d3s.autodebugger.model.common.trace.EnhancedTrace;
+import cz.cuni.mff.d3s.autodebugger.model.common.trace.TemporalTrace;
 import cz.cuni.mff.d3s.autodebugger.model.common.trace.Trace;
 import cz.cuni.mff.d3s.autodebugger.model.java.TraceAdapter;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.*;
@@ -8,7 +8,7 @@ import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.JavaArgumentIdentifie
 import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.ExportableValue;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.common.TestGenerationContext;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.common.TestNamingStrategy;
-import cz.cuni.mff.d3s.autodebugger.testgenerator.java.trace.EnhancedTraceBasedGenerator;
+import cz.cuni.mff.d3s.autodebugger.testgenerator.java.trace.TemporalTraceBasedGenerator;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.java.trace.NaiveTraceBasedGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,14 +24,14 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Integration test demonstrating the enhanced test generation workflow
- * using the new EnhancedTrace implementation and improved generators.
+ * using the new TemporalTrace implementation and improved generators.
  */
 class EnhancedWorkflowIntegrationTest {
     
     @TempDir
     Path tempDir;
     
-    private Map<Integer, ExportableValue> identifierMapping;
+    private Map<Integer, JavaValueIdentifier> identifierMapping;
     private TestGenerationContext context;
     
     @BeforeEach
@@ -87,7 +87,7 @@ class EnhancedWorkflowIntegrationTest {
     }
     
     @Test
-    void testLegacyToEnhancedTraceConversion() {
+    void testLegacyToTemporalTraceConversion() {
         // 1. Create a legacy trace (simulating existing data)
         Trace legacyTrace = new Trace();
         legacyTrace.addIntValue(0, 10);  // arg1
@@ -98,7 +98,7 @@ class EnhancedWorkflowIntegrationTest {
         legacyTrace.addIntValue(2, 2);
         
         // 2. Convert to enhanced trace
-        EnhancedTrace enhancedTrace = TraceAdapter.convertToEnhanced(legacyTrace, identifierMapping);
+        TemporalTrace enhancedTrace = TraceAdapter.convertToEnhanced(legacyTrace, identifierMapping);
         
         // 3. Verify conversion
         assertNotNull(enhancedTrace);
@@ -114,12 +114,12 @@ class EnhancedWorkflowIntegrationTest {
     }
     
     @Test
-    void testEnhancedTraceBasedGeneration() {
+    void testTemporalTraceBasedGeneration() {
         // 1. Create an enhanced trace with temporal data
-        EnhancedTrace enhancedTrace = createRealisticEnhancedTrace();
+        TemporalTrace enhancedTrace = createRealisticTemporalTrace();
         
         // 2. Generate tests using enhanced generator
-        EnhancedTraceBasedGenerator enhancedGenerator = new EnhancedTraceBasedGenerator();
+        TemporalTraceBasedGenerator enhancedGenerator = new TemporalTraceBasedGenerator();
         List<Path> enhancedFiles = enhancedGenerator.generateTests(enhancedTrace, context);
         
         // 3. Verify enhanced generation results
@@ -159,13 +159,13 @@ class EnhancedWorkflowIntegrationTest {
         legacyTrace.addIntValue(0, 15);
         legacyTrace.addIntValue(1, 3);
         
-        EnhancedTrace enhancedTrace = TraceAdapter.convertToEnhanced(legacyTrace, identifierMapping);
+        TemporalTrace enhancedTrace = TraceAdapter.convertToEnhanced(legacyTrace, identifierMapping);
         
         // 2. Generate tests with both approaches
         NaiveTraceBasedGenerator naiveGenerator = new NaiveTraceBasedGenerator(identifierMapping);
         List<Path> naiveFiles = naiveGenerator.generateTests(legacyTrace, context);
         
-        EnhancedTraceBasedGenerator enhancedGenerator = new EnhancedTraceBasedGenerator();
+        TemporalTraceBasedGenerator enhancedGenerator = new TemporalTraceBasedGenerator();
         List<Path> enhancedFiles = enhancedGenerator.generateTests(enhancedTrace, context);
         
         // 3. Compare results
@@ -174,8 +174,8 @@ class EnhancedWorkflowIntegrationTest {
         
         if (!naiveFiles.isEmpty() && !enhancedFiles.isEmpty()) {
             try {
-                String naiveContent = Files.readString(naiveFiles.get(0));
-                String enhancedContent = Files.readString(enhancedFiles.get(0));
+                String naiveContent = Files.readString(naiveFiles.getFirst());
+                String enhancedContent = Files.readString(enhancedFiles.getFirst());
                 
                 // Both should generate valid test classes
                 assertTrue(naiveContent.contains("@Test"));
@@ -198,7 +198,7 @@ class EnhancedWorkflowIntegrationTest {
     @Test
     void testSyntheticTraceGeneration() {
         // 1. Create synthetic trace for testing
-        EnhancedTrace syntheticTrace = TraceAdapter.createSyntheticTrace(identifierMapping);
+        TemporalTrace syntheticTrace = TraceAdapter.createSyntheticTrace(identifierMapping);
         
         // 2. Verify synthetic trace properties
         assertNotNull(syntheticTrace);
@@ -207,7 +207,7 @@ class EnhancedWorkflowIntegrationTest {
         assertEquals(true, syntheticTrace.getMetadata("synthetic"));
         
         // 3. Generate tests from synthetic trace
-        EnhancedTraceBasedGenerator generator = new EnhancedTraceBasedGenerator();
+        TemporalTraceBasedGenerator generator = new TemporalTraceBasedGenerator();
         List<Path> generatedFiles = generator.generateTests(syntheticTrace, context);
         
         // 4. Verify generation works with synthetic data
@@ -220,7 +220,7 @@ class EnhancedWorkflowIntegrationTest {
     @Test
     void testTraceTemporalQueries() {
         // 1. Create a trace with temporal evolution
-        EnhancedTrace trace = new EnhancedTrace();
+        TemporalTrace trace = new TemporalTrace();
         ExportableValue counter = identifierMapping.get(2); // field1
         
         // Simulate counter evolution over time
@@ -249,8 +249,8 @@ class EnhancedWorkflowIntegrationTest {
     /**
      * Creates a realistic enhanced trace simulating a complex execution scenario.
      */
-    private EnhancedTrace createRealisticEnhancedTrace() {
-        EnhancedTrace trace = new EnhancedTrace();
+    private TemporalTrace createRealisticTemporalTrace() {
+        TemporalTrace trace = new TemporalTrace();
         
         ExportableValue arg1 = identifierMapping.get(0);
         ExportableValue arg2 = identifierMapping.get(1);

@@ -2,7 +2,7 @@ package cz.cuni.mff.d3s.autodebugger.testgenerator.java.trace;
 
 import cz.cuni.mff.d3s.autodebugger.model.common.trace.Trace;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.JavaArgumentIdentifier;
-import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.ExportableValue;
+import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.JavaValueIdentifier;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
@@ -11,12 +11,10 @@ import java.util.function.Function;
 
 @Slf4j
 public class TraceIdentifierMapper {
-    private final Trace trace;
-    private final Map<Integer, ExportableValue> identifierMapping;
+    private final Map<Integer, JavaValueIdentifier> identifierMapping;
     private final Map<String, Function<Integer, Set<?>>> valueGetters;
 
-    public TraceIdentifierMapper(Trace trace, Map<Integer, ExportableValue> identifierMapping) {
-        this.trace = trace;
+    public TraceIdentifierMapper(Trace trace, Map<Integer, JavaValueIdentifier> identifierMapping) {
         this.identifierMapping = identifierMapping;
         this.valueGetters = Map.of(
                 "byte", trace::getByteValues,
@@ -34,7 +32,7 @@ public class TraceIdentifierMapper {
         return identifierMapping.keySet();
     }
 
-    public ExportableValue getExportableValue(int id) {
+    public JavaValueIdentifier getExportableValue(int id) {
         var value = identifierMapping.get(id);
         if (value instanceof JavaArgumentIdentifier arg) {
             log.info("Argument identifier: {}, {}, {}, {}", arg.getArgumentSlot(), arg.getInternalId(), arg.getType(), arg.getName());

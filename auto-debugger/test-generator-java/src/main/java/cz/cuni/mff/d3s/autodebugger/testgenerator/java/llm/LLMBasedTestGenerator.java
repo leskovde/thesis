@@ -1,8 +1,9 @@
 package cz.cuni.mff.d3s.autodebugger.testgenerator.java.llm;
 
-import cz.cuni.mff.d3s.autodebugger.model.java.Trace;
-import cz.cuni.mff.d3s.autodebugger.model.java.EnhancedTrace;
 import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.ExportableValue;
+import cz.cuni.mff.d3s.autodebugger.model.common.trace.TemporalTrace;
+import cz.cuni.mff.d3s.autodebugger.model.common.trace.Trace;
+import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.JavaValueIdentifier;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.common.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -91,10 +92,10 @@ public class LLMBasedTestGenerator implements LLMBasedGenerator {
     }
 
     /**
-     * Enhanced method that generates tests from an EnhancedTrace with temporal information.
+     * Enhanced method that generates tests from an TemporalTrace with temporal information.
      * This provides richer context to the LLM for generating more sophisticated tests.
      */
-    public List<Path> generateTests(EnhancedTrace enhancedTrace, Path sourceCodePath, TestGenerationContext context) {
+    public List<Path> generateTests(TemporalTrace enhancedTrace, Path sourceCodePath, TestGenerationContext context) {
         log.info("Generating LLM-based tests from enhanced trace for method: {}", context.getTargetMethodSignature());
 
         if (llmConfig == null) {
@@ -155,16 +156,16 @@ public class LLMBasedTestGenerator implements LLMBasedGenerator {
     }
     
     /**
-     * Builds enhanced prompt context from an EnhancedTrace with temporal information.
+     * Builds enhanced prompt context from an TemporalTrace with temporal information.
      */
-    private LLMPromptContext buildEnhancedPromptContext(EnhancedTrace enhancedTrace, String sourceCode, TestGenerationContext context) {
+    private LLMPromptContext buildEnhancedPromptContext(TemporalTrace enhancedTrace, String sourceCode, TestGenerationContext context) {
         return LLMPromptContext.builder()
                 .sourceCode(sourceCode)
                 .targetMethodSignature(context.getTargetMethodSignature())
                 .targetClassName(context.getTargetClassName())
                 .packageName(context.getPackageName())
                 .testFramework(context.getTestFramework())
-                .traceData(formatEnhancedTraceData(enhancedTrace))
+                .traceData(formatTemporalTraceData(enhancedTrace))
                 .maxTestCount(context.getMaxTestCount())
                 .generateEdgeCases(context.isGenerateEdgeCases())
                 .generateNegativeTests(context.isGenerateNegativeTests())
@@ -199,23 +200,20 @@ public class LLMBasedTestGenerator implements LLMBasedGenerator {
     }
 
     /**
-     * Formats EnhancedTrace data for LLM consumption with temporal context.
+     * Formats TemporalTrace data for LLM consumption with temporal context.
      */
-    private String formatEnhancedTraceData(EnhancedTrace trace) {
+    private String formatTemporalTraceData(TemporalTrace trace) {
         StringBuilder sb = new StringBuilder();
         sb.append("Enhanced Runtime Trace Data with Temporal Information:\n");
         sb.append("// ").append(trace.getSummary().replace("\n", "\n// ")).append("\n\n");
 
         // Get event range for context
         Optional<int[]> eventRange = trace.getEventIndexRange();
-        if (eventRange.isPresent()) {
-            int[] range = eventRange.get();
-            sb.append("// Execution timeline: events ").append(range[0]).append(" to ").append(range[1]).append("\n\n");
-        }
+        eventRange.ifPresent(range -> sb.append("// Execution timeline: events ").append(range[0]).append(" to ").append(range[1]).append("\n\n"));
 
         // Format variable histories
         for (ExportableValue identifier : trace.getTrackedIdentifiers()) {
-            sb.append("// Variable: ").append(identifier.getType()).append("\n");
+            sb.append("// Variable: ").append(((JavaValueIdentifier)identifier).getType()).append("\n");
 
             var values = trace.getValues(identifier);
             if (values.size() <= 10) {
@@ -251,7 +249,8 @@ public class LLMBasedTestGenerator implements LLMBasedGenerator {
 
                 sb.append("//   Scenario at event ").append(sampleEvent).append(":\n");
                 for (Map.Entry<ExportableValue, Object> entry : snapshot.entrySet()) {
-                    sb.append("//     ").append(entry.getKey().getType()).append(" = ").append(entry.getValue()).append("\n");
+                    String type = ((JavaValueIdentifier)entry.getKey()).getType();
+                    sb.append("//     ").append(type).append(" = ").append(entry.getValue()).append("\n");
                 }
                 sb.append("\n");
             }

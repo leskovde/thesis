@@ -1,6 +1,6 @@
 package cz.cuni.mff.d3s.autodebugger.model.java;
 
-import cz.cuni.mff.d3s.autodebugger.model.common.trace.EnhancedTrace;
+import cz.cuni.mff.d3s.autodebugger.model.common.trace.TemporalTrace;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.*;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.JavaClassIdentifier;
 import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.ExportableValue;
@@ -13,15 +13,15 @@ import java.util.SortedMap;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class EnhancedTraceTest {
+class TemporalTraceTest {
     
-    private EnhancedTrace trace;
+    private TemporalTrace trace;
     private ExportableValue argIdentifier;
     private ExportableValue fieldIdentifier;
     
     @BeforeEach
     void setUp() {
-        trace = new EnhancedTrace();
+        trace = new TemporalTrace();
         
         // Create test identifiers
         argIdentifier = new JavaArgumentIdentifier(

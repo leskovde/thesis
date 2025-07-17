@@ -1,6 +1,6 @@
 package cz.cuni.mff.d3s.autodebugger.testgenerator.java.trace;
 
-import cz.cuni.mff.d3s.autodebugger.model.common.trace.EnhancedTrace;
+import cz.cuni.mff.d3s.autodebugger.model.common.trace.TemporalTrace;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.JavaArgumentIdentifier;
 import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.ExportableValue;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.JavaFieldIdentifier;
@@ -18,8 +18,8 @@ import java.util.stream.Collectors;
 
 /**
  * Enhanced trace-based test generator that leverages the temporal aspects
- * of the EnhancedTrace to generate more sophisticated test scenarios.
- * 
+ * of the TemporalTrace to generate more sophisticated test scenarios.
+ * <p>
  * This generator can:
  * - Identify method invocation points in the execution timeline
  * - Reconstruct precise state at specific execution points
@@ -27,19 +27,19 @@ import java.util.stream.Collectors;
  * - Create parameterized tests for different execution scenarios
  */
 @Slf4j
-public class EnhancedTraceBasedGenerator {
+public class TemporalTraceBasedGenerator {
     
     private TestGenerationContext context;
     
     /**
-     * Generates tests from an EnhancedTrace by identifying method invocation points
+     * Generates tests from an TemporalTrace by identifying method invocation points
      * and reconstructing the application state at those points.
      * 
      * @param trace The enhanced trace containing temporal execution data
      * @param context Test generation configuration
      * @return List of generated test file paths
      */
-    public List<Path> generateTests(EnhancedTrace trace, TestGenerationContext context) {
+    public List<Path> generateTests(TemporalTrace trace, TestGenerationContext context) {
         this.context = context;
         log.info("Generating enhanced trace-based tests for method: {}", context.getTargetMethodSignature());
         
@@ -71,7 +71,7 @@ public class EnhancedTraceBasedGenerator {
      * Analyzes the trace to identify distinct test scenarios based on
      * method invocation points and state changes.
      */
-    private List<TestScenario> analyzeTraceForScenarios(EnhancedTrace trace) {
+    private List<TestScenario> analyzeTraceForScenarios(TemporalTrace trace) {
         List<TestScenario> scenarios = new ArrayList<>();
         
         // Get the event range to understand the execution timeline
@@ -114,7 +114,7 @@ public class EnhancedTraceBasedGenerator {
      * Identifies potential method invocation points in the trace.
      * These are typically events where argument values are captured.
      */
-    private List<Integer> identifyMethodInvocationPoints(EnhancedTrace trace, int[] eventRange) {
+    private List<Integer> identifyMethodInvocationPoints(TemporalTrace trace, int[] eventRange) {
         List<Integer> invocationPoints = new ArrayList<>();
         
         // Look for events where ArgumentIdentifiers have values
@@ -170,7 +170,7 @@ public class EnhancedTraceBasedGenerator {
     /**
      * Creates scenarios based on significant state changes in the trace.
      */
-    private List<TestScenario> createScenariosFromStateChanges(EnhancedTrace trace, int[] eventRange) {
+    private List<TestScenario> createScenariosFromStateChanges(TemporalTrace trace, int[] eventRange) {
         List<TestScenario> scenarios = new ArrayList<>();
         
         // Sample the trace at different points to capture state evolution
@@ -194,7 +194,7 @@ public class EnhancedTraceBasedGenerator {
     /**
      * Generates the complete test class content.
      */
-    private String generateTestClass(List<TestScenario> scenarios, EnhancedTrace trace) {
+    private String generateTestClass(List<TestScenario> scenarios, TemporalTrace trace) {
         StringBuilder sb = new StringBuilder();
         
         // Package declaration

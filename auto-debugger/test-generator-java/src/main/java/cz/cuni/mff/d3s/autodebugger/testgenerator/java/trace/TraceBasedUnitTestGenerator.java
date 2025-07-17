@@ -1,7 +1,7 @@
 package cz.cuni.mff.d3s.autodebugger.testgenerator.java.trace;
 
-import cz.cuni.mff.d3s.autodebugger.model.java.Trace;
-import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.ExportableValue;
+import cz.cuni.mff.d3s.autodebugger.model.common.trace.Trace;
+import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.JavaValueIdentifier;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.common.TraceBasedGenerator;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.common.UnitTestGenerator;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.common.TestGenerationContext;
@@ -15,7 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class TraceBasedUnitTestGenerator implements TraceBasedGenerator, UnitTestGenerator {
-  private final Map<Integer, ExportableValue> identifierMapping;
+  private final Map<Integer, JavaValueIdentifier> identifierMapping;
   private final NaiveTraceBasedGenerator naiveGenerator;
 
   public TraceBasedUnitTestGenerator(Path identifierMappingFile) {
@@ -23,7 +23,7 @@ public class TraceBasedUnitTestGenerator implements TraceBasedGenerator, UnitTes
     try {
       try (FileInputStream fileReader = new FileInputStream(identifierMappingFile.toFile());
           ObjectInputStream objectStream = new ObjectInputStream(fileReader)) {
-        identifierMapping = (HashMap<Integer, ExportableValue>) objectStream.readObject();
+        identifierMapping = (HashMap<Integer, JavaValueIdentifier>) objectStream.readObject();
       }
     } catch (Exception e) {
       log.error("Failed to load identifier mapping", e);

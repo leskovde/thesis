@@ -19,7 +19,7 @@ class DemoRunnerIntegrationTest {
     Path tempDir;
     
     @Test
-    void demonstrateComponentsCreation() throws Exception {
+    void demonstrateComponentsCreation() {
         // This test demonstrates that the components can be created and configured
         // The actual test execution would require a more complete implementation
 
