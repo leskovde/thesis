@@ -5,6 +5,7 @@ import cz.cuni.mff.d3s.autodebugger.model.common.RunConfiguration;
 import cz.cuni.mff.d3s.autodebugger.model.common.TargetLanguage;
 import cz.cuni.mff.d3s.autodebugger.model.common.trace.Trace;
 import cz.cuni.mff.d3s.autodebugger.runner.args.Arguments;
+import cz.cuni.mff.d3s.autodebugger.runner.factories.AnalyzerFactory;
 import cz.cuni.mff.d3s.autodebugger.runner.factories.InstrumentationModelFactory;
 import cz.cuni.mff.d3s.autodebugger.runner.factories.InstrumentorFactory;
 import cz.cuni.mff.d3s.autodebugger.runner.factories.RunConfigurationFactory;
@@ -45,13 +46,8 @@ public class Orchestrator {
     }
 
     public Trace runAnalysis(List<Path> instrumentationPaths) {
-//        log.info("Creating Java analyzer");
-//
-//        JavaAnalyzer analyzer = new JavaAnalyzer();
-//        analyzer.configure(runConfiguration);
-//
-//        log.info("Successfully created and configured Java analyzer");
-//        return analyzer;
+        var analyzer = AnalyzerFactory.createAnalyzer(runConfiguration);
+        return analyzer.runAnalysis(instrumentationPaths);
     }
 
     public List<Path> generateTests(Trace trace) {
