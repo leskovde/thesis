@@ -32,12 +32,20 @@ public class JavaRunConfiguration implements RunConfiguration {
     
     @Singular("classpathEntry")
     private final List<Path> classpathEntries;
-    
+
+    @Singular("runtimeArgument")
+    public final List<String> runtimeArguments;
+
     @Builder.Default
     private final Path outputDirectory = Path.of("auto-debugger-output");
 
+
     @Builder.Default
     private final TargetLanguage language = TargetLanguage.JAVA;
+
+    @Builder.Default
+    private final Path dislRepositoryPath = Path.of("../../disl/");
+
 
     @Override
     public void validate() {

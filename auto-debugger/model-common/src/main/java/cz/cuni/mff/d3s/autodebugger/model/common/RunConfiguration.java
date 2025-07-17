@@ -1,7 +1,7 @@
 package cz.cuni.mff.d3s.autodebugger.model.common;
 
 import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.ExportableValue;
-import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.Identifier;
+import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.MethodIdentifier;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -40,7 +40,7 @@ public interface RunConfiguration {
      * 
      * @return Method identifier for the target method
      */
-    Identifier getTargetMethod();
+    MethodIdentifier getTargetMethod();
     
     /**
      * Gets the list of exportable values (parameters, fields, etc.) that should be tracked.
@@ -55,7 +55,14 @@ public interface RunConfiguration {
      * @return Output directory path
      */
     Path getOutputDirectory();
-    
+
+    /**
+     * Gets the runtime arguments to pass to the application when running.
+     *
+     * @return List of runtime arguments
+     */
+    List<String> getRuntimeArguments();
+
     /**
      * Validates that this configuration is complete and valid.
      * 
