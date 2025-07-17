@@ -6,9 +6,11 @@ import cz.cuni.mff.d3s.autodebugger.model.java.enums.ValueType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 @Getter
 @NoArgsConstructor
-public abstract class JavaValueIdentifier implements Identifier, ExportableValue {
+public abstract class JavaValueIdentifier implements Identifier, ExportableValue, Serializable {
     private ValueType valueType;
     protected String type;
 

@@ -6,9 +6,11 @@ import cz.cuni.mff.d3s.autodebugger.model.java.factories.IdentifierFactory;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 @Getter
 @NoArgsConstructor
-public class JavaFieldIdentifier extends JavaValueIdentifier implements ExportableValue {
+public class JavaFieldIdentifier extends JavaValueIdentifier implements ExportableValue, Serializable {
     private int internalId;
     private String fieldName;
     private JavaClassIdentifier ownerClassIdentifier;

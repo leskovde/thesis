@@ -7,9 +7,11 @@ import cz.cuni.mff.d3s.autodebugger.model.java.factories.IdentifierFactory;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 @Getter
 @NoArgsConstructor
-public class JavaReturnValueIdentifier extends JavaValueIdentifier implements ExportableValue {
+public class JavaReturnValueIdentifier extends JavaValueIdentifier implements ExportableValue, Serializable {
     private int internalId;
     private MethodIdentifier methodIdentifier;
 
@@ -17,6 +19,7 @@ public class JavaReturnValueIdentifier extends JavaValueIdentifier implements Ex
         super(ValueType.RETURN_VALUE);
         this.methodIdentifier = parameters.methodIdentifier;
         this.internalId = IdentifierFactory.getNextId();
+        this.type = parameters.variableType;
     }
 
     @Override
