@@ -5,6 +5,11 @@ import lombok.Getter;
 
 import java.io.Serializable;
 
+/**
+ * Java-specific method identifier implementation.
+ * Extends the base MethodIdentifier with Java-specific class ownership
+ * information for precise method identification in Java applications.
+ */
 @Getter
 public class JavaMethodIdentifier extends MethodIdentifier implements Serializable {
     private final JavaClassIdentifier ownerClassIdentifier;

@@ -6,6 +6,11 @@ import java.util.List;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Abstract base class for method identifiers across different programming languages.
+ * Provides common method identification properties including name, return type,
+ * and parameter types while allowing language-specific extensions.
+ */
 @Getter
 @RequiredArgsConstructor
 public abstract class MethodIdentifier implements Identifier, Serializable {

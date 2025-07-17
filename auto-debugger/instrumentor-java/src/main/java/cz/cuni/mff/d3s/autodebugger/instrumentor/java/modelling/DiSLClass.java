@@ -5,6 +5,11 @@ import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
 
+/**
+ * Represents a complete DiSL instrumentation class.
+ * Generates a Java class containing DiSL instrumentation methods with
+ * appropriate imports and method definitions for runtime data collection.
+ */
 @Getter
 @Builder
 public class DiSLClass extends Metaclass {

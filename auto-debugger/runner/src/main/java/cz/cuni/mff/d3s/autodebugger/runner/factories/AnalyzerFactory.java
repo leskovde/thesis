@@ -7,9 +7,18 @@ import cz.cuni.mff.d3s.autodebugger.model.common.TargetLanguage;
 import cz.cuni.mff.d3s.autodebugger.model.java.JavaRunConfiguration;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Factory for creating language-specific Analyzer instances.
+ * Uses factory pattern to abstract analyzer creation based on
+ * target language, configuring appropriate analyzer implementations.
+ */
 @Slf4j
 public class AnalyzerFactory {
 
+    /**
+     * Creates a language-specific Analyzer from run configuration.
+     * Dispatches to appropriate language-specific factory method based on target language.
+     */
     public static Analyzer createAnalyzer(RunConfiguration runConfiguration) {
         TargetLanguage language = runConfiguration.getLanguage();
         if (language == TargetLanguage.JAVA) {

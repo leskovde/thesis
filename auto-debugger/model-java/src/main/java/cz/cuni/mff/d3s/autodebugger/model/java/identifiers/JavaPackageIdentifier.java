@@ -6,6 +6,11 @@ import lombok.Getter;
 
 import java.io.Serializable;
 
+/**
+ * Java package identifier for organizing classes in namespaces.
+ * Implements Identifier interface and provides a default package constant
+ * for classes without explicit package declarations.
+ */
 @Getter
 @AllArgsConstructor
 public class JavaPackageIdentifier implements Identifier, Serializable {

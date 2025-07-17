@@ -8,6 +8,11 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
+/**
+ * Abstract base class for Java value identifiers in instrumentation.
+ * Combines Identifier and ExportableValue interfaces to represent
+ * Java values that can be tracked during runtime analysis.
+ */
 @Getter
 @NoArgsConstructor
 public abstract class JavaValueIdentifier implements Identifier, ExportableValue, Serializable {

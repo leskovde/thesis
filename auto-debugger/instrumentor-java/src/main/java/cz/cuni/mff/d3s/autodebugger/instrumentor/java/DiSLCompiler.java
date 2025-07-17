@@ -14,6 +14,11 @@ import javax.tools.*;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Compiler for DiSL instrumentation classes.
+ * Handles compilation of generated DiSL Java source code into JAR files
+ * with proper manifest configuration for DiSL framework integration.
+ */
 @Slf4j
 @AllArgsConstructor
 public class DiSLCompiler {

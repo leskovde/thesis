@@ -15,6 +15,11 @@ import java.util.stream.Stream;
 
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * DiSL-specific instrumentation model for Java applications.
+ * Extends the base InstrumentationModel to provide DiSL-specific code generation
+ * with predefined imports, annotations, and instrumentation logic patterns.
+ */
 @Slf4j
 public class DiSLModel extends InstrumentationModel {
 

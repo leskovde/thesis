@@ -38,6 +38,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Main content panel for the auto-debugger IntelliJ plugin tool window.
+ * Provides UI components for configuring analysis parameters, selecting target methods,
+ * and executing the auto-debugger workflow with real-time feedback and validation.
+ */
 public class DebuggerToolWindowContent {
     private static final Logger LOG = Logger.getInstance(DebuggerToolWindowFactory.class);
 

@@ -13,9 +13,18 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Factory for creating language-specific RunConfiguration instances.
+ * Uses factory pattern to abstract the creation of run configurations
+ * based on target language, parsing command-line arguments appropriately.
+ */
 @Slf4j
 public class RunConfigurationFactory {
 
+    /**
+     * Creates a language-specific RunConfiguration from command-line arguments.
+     * Dispatches to appropriate language-specific factory method based on target language.
+     */
     public static RunConfiguration createRunConfiguration(Arguments arguments) {
         if (arguments.language == TargetLanguage.JAVA) {
             return createJavaRunConfiguration(arguments);

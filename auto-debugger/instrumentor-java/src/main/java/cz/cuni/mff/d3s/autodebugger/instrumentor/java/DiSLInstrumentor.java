@@ -19,6 +19,11 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.javatuples.Pair;
 
+/**
+ * DiSL-based instrumentor for Java applications.
+ * Generates DiSL instrumentation classes and compiles them into JAR files
+ * for runtime analysis using the DiSL dynamic instrumentation framework.
+ */
 @Slf4j
 @Builder
 public class DiSLInstrumentor implements Instrumentor {

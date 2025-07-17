@@ -5,6 +5,11 @@ import cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling.enums.Activation
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+/**
+ * Represents a DiSL annotation for instrumentation code generation.
+ * Combines activation time, marker, and target method scope to generate
+ * proper DiSL annotation syntax for instrumentation methods.
+ */
 @Getter
 @AllArgsConstructor
 public class DiSLAnnotation extends Metaclass {

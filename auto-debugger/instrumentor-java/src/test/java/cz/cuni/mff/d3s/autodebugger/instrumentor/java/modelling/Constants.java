@@ -8,6 +8,11 @@ import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.*;
 import java.nio.file.Path;
 import java.util.List;
 
+/**
+ * Test constants for instrumentor Java module testing.
+ * Provides shared test data including target class information, identifiers,
+ * and utility methods for consistent test setup across test classes.
+ */
 public class Constants {
     public static final String targetClassName = "Test";
     public static final String targetMethodName = "test";

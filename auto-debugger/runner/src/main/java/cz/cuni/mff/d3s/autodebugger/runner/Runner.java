@@ -5,6 +5,11 @@ import cz.cuni.mff.d3s.autodebugger.runner.orchestrator.Orchestrator;
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine;
 
+/**
+ * Main entry point for the auto-debugger application.
+ * Handles command-line argument parsing using PicoCLI and delegates execution
+ * to the orchestrator for the complete instrumentation-analysis-testing workflow.
+ */
 @Slf4j
 public class Runner {
 
@@ -35,6 +40,11 @@ public class Runner {
     }
   }
 
+  /**
+   * Executes the complete auto-debugger workflow using the provided arguments.
+   * Orchestrates instrumentation, analysis, test generation, and test execution
+   * in sequence, with comprehensive logging at each stage.
+   */
   public static void run(Arguments arguments) {
     log.info("Starting auto-debugger with arguments:");
     log.info("  Application JAR: {}", arguments.applicationJarPath);

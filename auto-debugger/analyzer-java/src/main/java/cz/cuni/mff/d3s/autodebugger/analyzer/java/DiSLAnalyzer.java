@@ -28,6 +28,11 @@ public class DiSLAnalyzer implements Analyzer {
 
     private final JavaRunConfiguration runConfiguration;
 
+    /**
+     * Executes the instrumented Java application and collects runtime traces.
+     * Runs the application as a separate process with DiSL instrumentation,
+     * captures output streams, and deserializes the collected trace data.
+     */
     @Override
     public Trace runAnalysis(List<Path> instrumentationPaths) {
         log.info("Starting Java analysis on instrumented application: {}", instrumentationPaths);

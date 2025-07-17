@@ -5,6 +5,11 @@ import lombok.Getter;
 
 import java.io.Serializable;
 
+/**
+ * Java class identifier combining class name with package information.
+ * Implements Identifier interface to provide consistent naming and
+ * supports conversion to importable package format for code generation.
+ */
 @Getter
 public class JavaClassIdentifier implements Identifier, Serializable {
   private final String className;
@@ -15,6 +20,10 @@ public class JavaClassIdentifier implements Identifier, Serializable {
     this.packageIdentifier = parameters.packageIdentifier;
   }
 
+  /**
+   * Converts this class identifier to an importable package identifier.
+   * Combines package name and class name to create a fully qualified import path.
+   */
   public JavaPackageIdentifier getAsImportablePackage() {
     return new JavaPackageIdentifier(packageIdentifier.getPackageName() + "." + className);
   }

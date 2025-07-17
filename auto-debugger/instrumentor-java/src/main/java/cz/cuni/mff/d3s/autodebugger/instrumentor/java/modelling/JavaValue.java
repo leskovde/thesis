@@ -7,6 +7,11 @@ import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.VariableIdentifierPar
 import cz.cuni.mff.d3s.autodebugger.instrumentor.common.modelling.Metaclass;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.java.CollectorMethodRegistry;
 
+/**
+ * Abstract base class for Java values in instrumentation code generation.
+ * Bridges between exportable value identifiers and instrumentation variables,
+ * providing code emission capabilities for DiSL collector integration.
+ */
 public abstract class JavaValue extends Metaclass {
     protected final JavaValueIdentifier exportedValueIdentifier;
     protected final JavaVariableIdentifier instrumentationVariableIdentifier;
@@ -20,6 +25,11 @@ public abstract class JavaValue extends Metaclass {
                 .generateIdentifier(parameters);
     }
 
+    /**
+     * Generates DiSL collector method call code for this value.
+     * Combines the collector method name with value ID and variable name
+     * to create a complete method invocation statement.
+     */
     public String emitCollectorCode() {
         return "CollectorRE." + CollectorMethodRegistry.getCollectorMethodName(exportedValueIdentifier) + "(" + exportedValueIdentifier.getInternalId() + ", " + instrumentationVariableIdentifier.getName() + ");";
     }

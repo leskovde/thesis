@@ -5,6 +5,11 @@ import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.Identifier;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+/**
+ * Represents a Java package declaration in generated code.
+ * Extends Metaclass to provide code emission capabilities for
+ * generating proper package declaration statements.
+ */
 @Getter
 @AllArgsConstructor
 public class JavaPackage extends Metaclass {

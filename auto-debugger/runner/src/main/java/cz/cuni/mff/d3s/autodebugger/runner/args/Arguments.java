@@ -4,6 +4,11 @@ import cz.cuni.mff.d3s.autodebugger.model.common.TargetLanguage;
 import picocli.CommandLine;
 import java.util.List;
 
+/**
+ * Command-line arguments container for the auto-debugger application.
+ * Uses PicoCLI annotations to define command-line options with validation,
+ * default values, and help text for user-friendly CLI experience.
+ */
 public class Arguments {
     @CommandLine.Option(names = { "-j", "--jar" }, paramLabel = "JAR", description = "Path to the application JAR file", required = true)
     public String applicationJarPath;

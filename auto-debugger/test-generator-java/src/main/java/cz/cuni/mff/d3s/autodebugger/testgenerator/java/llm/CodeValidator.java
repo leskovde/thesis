@@ -54,6 +54,10 @@ public class CodeValidator {
                 .build();
     }
     
+    /**
+     * Validates basic Java code structure including class declarations and balanced delimiters.
+     * Checks for proper class declaration syntax and matching braces/parentheses pairs.
+     */
     private void validateBasicStructure(String code, List<String> errors, List<String> warnings) {
         // Check for class declaration
         if (!CLASS_DECLARATION_PATTERN.matcher(code).find()) {
@@ -75,6 +79,10 @@ public class CodeValidator {
         }
     }
     
+    /**
+     * Validates import statements for essential JUnit dependencies.
+     * Ensures required JUnit imports are present and identifies potentially unused imports.
+     */
     private void validateImports(String code, List<String> errors, List<String> warnings) {
         // Check for essential JUnit imports
         if (code.contains("@Test") && !code.contains("import org.junit")) {

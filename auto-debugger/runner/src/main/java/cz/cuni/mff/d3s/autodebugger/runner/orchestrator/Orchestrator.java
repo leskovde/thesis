@@ -20,8 +20,9 @@ import java.nio.file.Path;
 import java.util.List;
 
 /**
- * Interface for orchestrating the creation and coordination of core components
- * (instrumentor, analyzer, test-generator, test-runner) based on language-specific strategies.
+ * Central orchestrator that coordinates the complete auto-debugger workflow.
+ * Uses factory pattern to create language-specific components and manages
+ * the sequential execution of instrumentation, analysis, test generation, and test execution.
  */
 @Slf4j
 public class Orchestrator {
@@ -46,26 +47,45 @@ public class Orchestrator {
         return InstrumentationModelFactory.buildInstrumentationModel(runConfiguration);
     }
 
+    /**
+     * Creates instrumentation artifacts using language-specific instrumentor.
+     * Delegates to factory-created instrumentor to generate instrumentation files.
+     */
     public List<Path> createInstrumentation(InstrumentationModel instrumentationModel) {
         var instrumentor = InstrumentorFactory.createInstrumentor(runConfiguration);
         return instrumentor.generateInstrumentation(instrumentationModel);
     }
 
+    /**
+     * Executes the instrumented application and collects runtime traces.
+     * Uses factory-created analyzer to run the instrumented application and capture data.
+     */
     public Trace runAnalysis(List<Path> instrumentationPaths) {
         var analyzer = AnalyzerFactory.createAnalyzer(runConfiguration);
         return analyzer.runAnalysis(instrumentationPaths);
     }
 
+    /**
+     * Generates test files from collected runtime traces.
+     * Uses strategy pattern to select appropriate test generation technique.
+     */
     public List<Path> generateTests(Trace trace) {
         var testGenerator = TestGeneratorFactory.createTestGenerator(runConfiguration, testGenerationStrategy, apiKey);
         return testGenerator.generateTests(trace);
     }
 
+    /**
+     * Executes generated test files and returns results.
+     * Uses language-specific test runner to compile and execute tests.
+     */
     public TestExecutionResult runTests(List<Path> testFiles) {
         var testRunner = TestRunnerFactory.createTestRunner(runConfiguration);
         return testRunner.executeTests(testFiles);
     }
 
+    /**
+     * Returns the target language for this orchestrator instance.
+     */
     public TargetLanguage getSupportedLanguage() {
         return runConfiguration.getLanguage();
     }

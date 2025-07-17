@@ -13,8 +13,17 @@ import cz.cuni.mff.d3s.autodebugger.intellijplugin.DebuggerToolWindowContent;
 import cz.cuni.mff.d3s.autodebugger.intellijplugin.actions.OpenSettingsAction;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Factory for creating the auto-debugger tool window in IntelliJ IDEA.
+ * Implements ToolWindowFactory to integrate with IntelliJ's tool window system
+ * and DumbAware to function during indexing operations.
+ */
 public final class DebuggerToolWindowFactory implements ToolWindowFactory, DumbAware {
 
+    /**
+     * Creates the tool window content and integrates it with IntelliJ's UI.
+     * Sets up the main content panel and configures tool window actions.
+     */
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
         DebuggerToolWindowContent toolWindowContent = new DebuggerToolWindowContent(project);
