@@ -29,16 +29,16 @@ public class ConfigurationProviderTest {
         assertEquals(ConfigurationField.FieldType.DIRECTORY_PATH, dislField.getType());
         assertTrue(dislField.isRequired());
         
-        // Check OpenAPI Key field
-        ConfigurationField openApiField = requiredFields.stream()
-                .filter(field -> "openapi.key".equals(field.getKey()))
+        // Check Anthropic API Key field
+        ConfigurationField anthropicField = requiredFields.stream()
+                .filter(field -> "anthropic.key".equals(field.getKey()))
                 .findFirst()
                 .orElse(null);
-        
-        assertNotNull(openApiField);
-        assertEquals("OpenAPI Key", openApiField.getDisplayName());
-        assertEquals(ConfigurationField.FieldType.PASSWORD, openApiField.getType());
-        assertTrue(openApiField.isRequired());
+
+        assertNotNull(anthropicField);
+        assertEquals("Anthropic API Key", anthropicField.getDisplayName());
+        assertEquals(ConfigurationField.FieldType.PASSWORD, anthropicField.getType());
+        assertTrue(anthropicField.isRequired());
     }
 
     @Test

@@ -28,10 +28,12 @@ public class Orchestrator {
 
     private final RunConfiguration runConfiguration;
     private final String testGenerationStrategy;
+    private final String apiKey;
 
     public Orchestrator(Arguments arguments) {
         runConfiguration = RunConfigurationFactory.createRunConfiguration(arguments);
         testGenerationStrategy = arguments.testGenerationStrategy;
+        apiKey = arguments.apiKey;
     }
 
     /**
@@ -55,7 +57,7 @@ public class Orchestrator {
     }
 
     public List<Path> generateTests(Trace trace) {
-        var testGenerator = TestGeneratorFactory.createTestGenerator(runConfiguration, testGenerationStrategy);
+        var testGenerator = TestGeneratorFactory.createTestGenerator(runConfiguration, testGenerationStrategy, apiKey);
         return testGenerator.generateTests(trace);
     }
 
