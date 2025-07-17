@@ -9,6 +9,8 @@ import cz.cuni.mff.d3s.autodebugger.runner.factories.AnalyzerFactory;
 import cz.cuni.mff.d3s.autodebugger.runner.factories.InstrumentationModelFactory;
 import cz.cuni.mff.d3s.autodebugger.runner.factories.InstrumentorFactory;
 import cz.cuni.mff.d3s.autodebugger.runner.factories.RunConfigurationFactory;
+import cz.cuni.mff.d3s.autodebugger.runner.factories.TestGeneratorFactory;
+import cz.cuni.mff.d3s.autodebugger.runner.factories.TestRunnerFactory;
 import cz.cuni.mff.d3s.autodebugger.runner.strategies.TestGenerationStrategy;
 import cz.cuni.mff.d3s.autodebugger.runner.strategies.TestGenerationStrategyProvider;
 import cz.cuni.mff.d3s.autodebugger.testrunner.common.TestExecutionResult;
@@ -25,9 +27,11 @@ import java.util.List;
 public class Orchestrator {
 
     private final RunConfiguration runConfiguration;
+    private final String testGenerationStrategy;
 
     public Orchestrator(Arguments arguments) {
         runConfiguration = RunConfigurationFactory.createRunConfiguration(arguments);
+        testGenerationStrategy = arguments.testGenerationStrategy;
     }
 
     /**
@@ -51,44 +55,17 @@ public class Orchestrator {
     }
 
     public List<Path> generateTests(Trace trace) {
-//        log.info("Creating Java test generator with technique: {}", generationTechnique);
-//
-//        try {
-//            // For now, we only support trace-based generation
-//            // In the future, this would use a factory pattern based on the technique
-//            if (!generationTechnique.startsWith("trace-based")) {
-//                throw new UnsupportedOperationException("Test generation technique not yet supported: " + generationTechnique);
-//            }
-//
-//            // Create the trace-based test generator
-//            // Note: This would need to be enhanced to support different techniques
-//            TraceBasedUnitTestGenerator generator = new TraceBasedUnitTestGenerator(Path.of("identifiers"));
-//
-//            log.info("Successfully created Java test generator with technique: {}", generationTechnique);
-//            return new TestGeneratorAdapter(generator, runConfiguration, generationTechnique);
-//        } catch (Exception e) {
-//            log.error("Failed to create Java test generator", e);
-//            throw new RuntimeException("Failed to create test generator", e);
-//        }
+        var testGenerator = TestGeneratorFactory.createTestGenerator(runConfiguration, testGenerationStrategy);
+        return testGenerator.generateTests(trace);
     }
 
     public TestExecutionResult runTests(List<Path> testFiles) {
-//        log.info("Creating Java test runner");
-//
-//        try {
-//            JUnitTestRunner testRunner = new JUnitTestRunner();
-//            testRunner.configure(runConfiguration);
-//
-//            log.info("Successfully created Java test runner");
-//            return testRunner;
-//        } catch (Exception e) {
-//            log.error("Failed to create Java test runner", e);
-//            throw new RuntimeException("Failed to create test runner", e);
-//        }
+        var testRunner = TestRunnerFactory.createTestRunner(runConfiguration);
+        return testRunner.executeTests(testFiles);
     }
 
     public TargetLanguage getSupportedLanguage() {
-        return language;
+        return runConfiguration.getLanguage();
     }
 
     /**
