@@ -1,10 +1,9 @@
-import org.jetbrains.intellij.platform.gradle.utils.intelliJPlatformResolver
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 
 plugins {
   id("java")
   alias(libs.plugins.lombok)
-  alias(libs.plugins.intelliJPlatform) // IntelliJ Platform Gradle Plugin
+  alias(libs.plugins.intelliJPlatform)
 }
 
 group = "cz.cuni.mff.d3s"
@@ -17,11 +16,6 @@ repositories {
   }
 }
 
-// https://platform.jetbrains.com/t/new-intellijplatformresolver-helper-to-control-the-intellij-platform-gradle-plugin-dependency-extraction/2024
-val intelliJPlatformResolver = project.intelliJPlatformResolver()
-
-// Configure Gradle IntelliJ Plugin
-// Read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin.html
 dependencies {
   implementation(project(mapOf("path" to ":model-java")))
   implementation(project(mapOf("path" to ":instrumentor-common")))
@@ -34,12 +28,6 @@ dependencies {
   testRuntimeOnly("junit:junit:4.13.2")
 
   intellijPlatform {
-    local(
-      intelliJPlatformResolver.resolve(
-        type = providers.gradleProperty("platformType"),
-        version = providers.gradleProperty("platformVersion"),
-      )
-    )
     intellijIdeaCommunity("2025.1")
     bundledPlugin("com.intellij.java")
 

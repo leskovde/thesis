@@ -24,7 +24,9 @@ import cz.cuni.mff.d3s.autodebugger.intellijplugin.services.InstrumentationServi
 import cz.cuni.mff.d3s.autodebugger.intellijplugin.services.OutputService;
 import cz.cuni.mff.d3s.autodebugger.intellijplugin.utils.MethodCompletionProvider;
 import cz.cuni.mff.d3s.autodebugger.intellijplugin.utils.MethodValidator;
+import cz.cuni.mff.d3s.autodebugger.runner.args.Arguments;
 import cz.cuni.mff.d3s.autodebugger.runner.strategies.TestGenerationStrategy;
+import cz.cuni.mff.d3s.autodebugger.runner.strategies.TestGenerationStrategyName;
 import cz.cuni.mff.d3s.autodebugger.runner.strategies.TestGenerationStrategyProvider;
 
 import javax.swing.*;
@@ -229,10 +231,7 @@ public class DebuggerToolWindowContent {
             LOG.error("Failed to load test generation strategies", e);
             // Add a fallback strategy in case of error
             TestGenerationStrategy fallback = new TestGenerationStrategy(
-                "fallback",
-                "Basic Test Generation",
-                "Fallback strategy when others fail to load",
-                true
+                    TestGenerationStrategyName.TRACE_BASED_NAIVE, true
             );
             testGenerationStrategyComboBox.addItem(fallback);
         }
@@ -597,18 +596,37 @@ public class DebuggerToolWindowContent {
         config.setDescription("Auto-generated configuration for " + targetMethodSignature);
         config.setTargetMethodReference(targetMethodSignature);
 
-        // TODO: Extract more information from IntelliJ run configuration
-        // This would need to be enhanced based on the specific run configuration type
+        // Set required fields with mock/default values for now
+        // TODO: Extract actual information from IntelliJ run configuration
+        config.setApplicationJarPath(java.nio.file.Path.of("target/application.jar"));
+        config.setMainClass("com.example.MainClass");
+
+        // Set optional fields
+        config.setWorkingDirectory(java.nio.file.Path.of(project.getBasePath() != null ? project.getBasePath() : "."));
+
+        // Extract class name from method signature for main class if possible
+        if (targetMethodSignature.contains(".")) {
+            String className = targetMethodSignature.substring(0, targetMethodSignature.lastIndexOf('.'));
+            if (className.contains(".")) {
+                // If it contains package, use it as is
+                config.setMainClass(className.substring(0, className.lastIndexOf('.')));
+            } else {
+                // Simple class name
+                config.setMainClass(className);
+            }
+        }
 
         return config;
     }
 
-    private void runAnalysis(ApplicationRunConfiguration config) {
+    private void runAnalysis(ApplicationRunConfiguration config, TestGenerationStrategy strategy) {
         OutputService outputService = OutputService.getInstance(project);
 
         // Clear previous output and start new analysis
         outputService.clear(OutputService.OutputType.TOOL_OUTPUT);
         outputService.print(OutputService.OutputType.TOOL_OUTPUT, "Starting analysis...");
+        outputService.print(OutputService.OutputType.TOOL_OUTPUT, "Selected test generation strategy: " + strategy.getDisplayName());
+        outputService.print(OutputService.OutputType.TOOL_OUTPUT, "Strategy description: " + strategy.getDescription());
 
         runAnalysisButton.setEnabled(false);
 
@@ -616,6 +634,9 @@ public class DebuggerToolWindowContent {
             try {
                 // Start instrumentation phase
                 outputService.print(OutputService.OutputType.TOOL_OUTPUT, "Phase 1: Running instrumentation...");
+
+                // TODO: Arguments arguments = new Arguments();
+                // TODO: Runner.run();
 
                 InstrumentationService service = InstrumentationService.getInstance(project);
                 service.runInstrumentation(config, line ->
@@ -642,7 +663,7 @@ public class DebuggerToolWindowContent {
                                     runApplicationAnalysis(config, outputService);
 
                                     // Start test generation and execution phase
-                                    runTestGeneration(config, outputService);
+                                    runTestGeneration(config, strategy, outputService);
                                 }
                             });
                         });
@@ -693,7 +714,7 @@ public class DebuggerToolWindowContent {
     /**
      * Simulates generating and running unit tests based on collected data.
      */
-    private void runTestGeneration(ApplicationRunConfiguration config, OutputService outputService) {
+    private void runTestGeneration(ApplicationRunConfiguration config, TestGenerationStrategy strategy, OutputService outputService) {
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
             try {
                 // Wait a bit for application analysis to start
@@ -701,14 +722,15 @@ public class DebuggerToolWindowContent {
 
                 outputService.clear(OutputService.OutputType.TESTS);
                 outputService.print(OutputService.OutputType.TESTS, "Phase 3: Generating and running unit tests...");
+                outputService.print(OutputService.OutputType.TESTS, "Using strategy: " + strategy.getDisplayName());
                 outputService.print(OutputService.OutputType.TESTS, "");
 
-                // Simulate test generation
+                // Simulate test generation based on strategy
                 Thread.sleep(1500);
-                outputService.print(OutputService.OutputType.TESTS, "Generating test cases from runtime data...");
-                outputService.print(OutputService.OutputType.TESTS, "Generated test: testMethod_WithArgs42AndTest_ReturnsSuccess()");
-                outputService.print(OutputService.OutputType.TESTS, "Generated test: testMethod_WithNullArgs_ThrowsException()");
-                outputService.print(OutputService.OutputType.TESTS, "Generated test: testMethod_WithEmptyString_ReturnsEmpty()");
+                outputService.print(OutputService.OutputType.TESTS, "Generating test cases using " + strategy.getDisplayName() + "...");
+
+                // Generate strategy-specific test examples
+                generateStrategySpecificTests(strategy, outputService);
                 outputService.print(OutputService.OutputType.TESTS, "");
 
                 // Simulate test compilation
@@ -734,5 +756,53 @@ public class DebuggerToolWindowContent {
                 Thread.currentThread().interrupt();
             }
         });
+    }
+
+    /**
+     * Generates strategy-specific test examples for demonstration purposes.
+     */
+    private void generateStrategySpecificTests(TestGenerationStrategy strategy, OutputService outputService) {
+        switch (strategy.getId()) {
+            case "trace-based-basic":
+                outputService.print(OutputService.OutputType.TESTS, "Generated test: testMethod_WithArgs42AndTest_ReturnsSuccess()");
+                outputService.print(OutputService.OutputType.TESTS, "Generated test: testMethod_WithNullArgs_ThrowsException()");
+                outputService.print(OutputService.OutputType.TESTS, "Generated test: testMethod_WithEmptyString_ReturnsEmpty()");
+                break;
+
+            case "trace-based-advanced":
+                outputService.print(OutputService.OutputType.TESTS, "Generated test: testMethod_EdgeCase_BoundaryValue()");
+                outputService.print(OutputService.OutputType.TESTS, "Generated test: testMethod_MLDetected_UnusualPattern()");
+                outputService.print(OutputService.OutputType.TESTS, "Generated test: testMethod_AdvancedScenario_ComplexFlow()");
+                break;
+
+            case "property-based":
+                outputService.print(OutputService.OutputType.TESTS, "Generated property: forAll_inputRange_outputInvariantHolds()");
+                outputService.print(OutputService.OutputType.TESTS, "Generated property: forAll_validInputs_noExceptionThrown()");
+                outputService.print(OutputService.OutputType.TESTS, "Generated property: forAll_operations_idempotencyHolds()");
+                break;
+
+            case "mutation-based":
+                outputService.print(OutputService.OutputType.TESTS, "Generated test: testMethod_MutatedInput_1_DetectsBehaviorChange()");
+                outputService.print(OutputService.OutputType.TESTS, "Generated test: testMethod_MutatedInput_2_VerifiesRobustness()");
+                outputService.print(OutputService.OutputType.TESTS, "Generated test: testMethod_BoundaryMutation_HandlesEdgeCases()");
+                break;
+
+            case "symbolic-execution":
+                outputService.print(OutputService.OutputType.TESTS, "Generated test: testMethod_Path1_ConditionTrue()");
+                outputService.print(OutputService.OutputType.TESTS, "Generated test: testMethod_Path2_ConditionFalse()");
+                outputService.print(OutputService.OutputType.TESTS, "Generated test: testMethod_Path3_ExceptionPath()");
+                break;
+
+            case "ai-assisted":
+                outputService.print(OutputService.OutputType.TESTS, "Generated test: testMethod_AIGenerated_ReadableScenario1()");
+                outputService.print(OutputService.OutputType.TESTS, "Generated test: testMethod_AIGenerated_BusinessLogicTest()");
+                outputService.print(OutputService.OutputType.TESTS, "Generated test: testMethod_AIGenerated_DocumentedBehavior()");
+                break;
+
+            default:
+                outputService.print(OutputService.OutputType.TESTS, "Generated test: testMethod_DefaultStrategy_BasicTest()");
+                outputService.print(OutputService.OutputType.TESTS, "Generated test: testMethod_DefaultStrategy_SimpleCase()");
+                break;
+        }
     }
 }
