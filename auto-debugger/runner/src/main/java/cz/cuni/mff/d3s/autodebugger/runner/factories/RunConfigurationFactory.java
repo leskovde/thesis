@@ -18,9 +18,9 @@ public class RunConfigurationFactory {
     public static RunConfiguration createRunConfiguration(Arguments arguments) {
         if (arguments.language == TargetLanguage.JAVA) {
             return createJavaRunConfiguration(arguments);
-        } else {
-            throw new IllegalArgumentException("Unsupported language: " + arguments.language);
         }
+
+        throw new IllegalArgumentException("Unsupported language: " + arguments.language);
     }
 
     private static JavaRunConfiguration createJavaRunConfiguration(Arguments arguments) {

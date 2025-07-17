@@ -13,7 +13,7 @@ public class InstrumentationModelFactory {
         TargetLanguage language = runConfiguration.getLanguage();
         if (language == TargetLanguage.JAVA) {
             return createJavaInstrumentationModel(runConfiguration);
-        };
+        }
 
         throw new IllegalArgumentException("Unsupported language: " + language);
     }

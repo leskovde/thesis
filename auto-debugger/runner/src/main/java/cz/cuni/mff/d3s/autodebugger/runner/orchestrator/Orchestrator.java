@@ -6,6 +6,7 @@ import cz.cuni.mff.d3s.autodebugger.model.common.TargetLanguage;
 import cz.cuni.mff.d3s.autodebugger.model.common.trace.Trace;
 import cz.cuni.mff.d3s.autodebugger.runner.args.Arguments;
 import cz.cuni.mff.d3s.autodebugger.runner.factories.InstrumentationModelFactory;
+import cz.cuni.mff.d3s.autodebugger.runner.factories.InstrumentorFactory;
 import cz.cuni.mff.d3s.autodebugger.runner.factories.RunConfigurationFactory;
 import cz.cuni.mff.d3s.autodebugger.runner.strategies.TestGenerationStrategy;
 import cz.cuni.mff.d3s.autodebugger.runner.strategies.TestGenerationStrategyProvider;
@@ -39,20 +40,8 @@ public class Orchestrator {
     }
 
     public List<Path> createInstrumentation(InstrumentationModel instrumentationModel) {
-//        log.info("Creating DiSL instrumentor");
-//
-//        if (!(instrumentationModel instanceof DiSLModel)) {
-//            throw new IllegalArgumentException("Expected DiSLModel, got: " + instrumentationModel.getClass().getSimpleName());
-//        }
-//
-//        // Extract information from the model to create the instrumentor
-//        // Note: This is a simplified approach. In practice, the model should contain
-//        // all the necessary information to reconstruct the instrumentor
-//        DiSLModel dislModel = (DiSLModel) instrumentationModel;
-//
-//        // For now, we'll need to get the information from somewhere else
-//        // This is a limitation of the current DiSLModel design
-//        throw new UnsupportedOperationException("Creating instrumentor from model not yet fully implemented");
+        var instrumentor = InstrumentorFactory.createInstrumentor(runConfiguration);
+        return instrumentor.generateInstrumentation(instrumentationModel);
     }
 
     public Trace runAnalysis(List<Path> instrumentationPaths) {
