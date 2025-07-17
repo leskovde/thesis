@@ -32,5 +32,5 @@ tasks.test {
 }
 
 application {
-    mainClass.set("cz.cuni.mff.d3s.autodebugger.runner.Main")
+    mainClass.set("cz.cuni.mff.d3s.autodebugger.runner.Runner")
 }

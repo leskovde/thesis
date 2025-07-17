@@ -128,7 +128,7 @@ public final class InstrumentationService {
         command.add("../runner/build/libs/*");
         
         // Add the main class
-        command.add("cz.cuni.mff.d3s.autodebugger.runner.Main");
+        command.add("cz.cuni.mff.d3s.autodebugger.runner.Runner");
         
         // Add the application JAR path
         command.add("--jar");
