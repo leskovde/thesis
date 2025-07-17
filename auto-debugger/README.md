@@ -2,9 +2,13 @@
 
 ## Overview
 
-The `auto-debugger` is a thesis project exploring automated test generation through dynamic program analysis and instrumentation. Building upon established techniques in runtime analysis, this framework investigates how captured execution traces can be systematically transformed into meaningful test suites. The project extends existing approaches by integrating multiple test generation strategies, from traditional trace-based methods to modern AI-assisted techniques.
+The `auto-debugger` is a thesis project exploring automated test generation through dynamic program analysis and instrumentation. 
+Building upon established techniques in runtime analysis, this framework investigates how captured execution traces can be systematically transformed into meaningful test suites. 
+The project extends existing approaches by integrating multiple test generation strategies, from traditional trace-based methods to modern AI-assisted techniques.
 
-Developed as part of academic research, this system demonstrates practical applications of dynamic analysis for test automation. The implementation leverages the DiSL (Dynamic Software Language) framework for bytecode instrumentation, Java's reflection capabilities for runtime introspection, and modern language models for intelligent test generation. The technology stack includes Gradle for build automation, JUnit 5 for test execution, Eclipse JDT for code compilation, and IntelliJ Platform SDK for IDE integration.
+Developed as part of academic research, this system demonstrates practical applications of dynamic analysis for test automation.
+The implementation leverages the DiSL framework for bytecode instrumentation.
+The technology stack includes Gradle for build automation, JUnit 5 for test execution, and IntelliJ Plugin SDK for IDE integration.
 
 The project aims to advance understanding of how runtime behavior analysis can complement traditional testing approaches, exploring the trade-offs between different generation strategies and investigating the practical challenges of automated test creation in real-world Java applications.
 
@@ -228,7 +232,7 @@ public class DiSLClass {
     System.out.println("Instrumentation: After method main");
     CollectorRE.testingBasic(true, (byte) 125, 's', (short) 50000, 100000, 10000000000L);
     CollectorRE.testingAdvanced(
-        "Corect transfer of String", "test", Object.class, Thread.currentThread());
+        "Correct transfer of String", "test", Object.class, Thread.currentThread());
   }
 }
 ```
@@ -241,24 +245,3 @@ The framework supports (or plans to support soon) multiple test generation appro
 2. **Enhanced Temporal**: Sophisticated generation using temporal trace semantics with state reconstruction
 3. **LLM-Powered**: AI-assisted test generation using large language models for semantic understanding
 4. **Hybrid Approaches**: Combination of trace-based and AI techniques for comprehensive coverage
-
-## Research Applications
-
-This framework is particularly suited for:
-
-- **Automated Testing Research**: Novel approaches to test generation and validation
-- **Dynamic Analysis Studies**: Runtime behavior analysis and characterization
-- **AI-Assisted Development**: Integration of machine learning with software testing
-- **Enterprise Testing**: Automated test suite generation for legacy systems
-- **Educational Purposes**: Teaching dynamic analysis and automated testing concepts
-
-## Technical Highlights
-
-- **Temporal Trace Model**: Event-based trace representation enabling precise state reconstruction
-- **Language Extensibility**: Modular architecture supporting multiple programming languages
-- **IDE Integration**: Full IntelliJ IDEA plugin with graphical configuration
-- **Multiple Generation Strategies**: From simple replay to AI-powered semantic generation
-- **Comprehensive Validation**: Generated code validation and compilation verification
-- **Research-Grade Logging**: Detailed execution traces for analysis and debugging
-
-The `auto-debugger` represents an exploration into automated testing research, providing a platform for investigating the intersection of dynamic analysis, artificial intelligence, and software testing methodologies within the context of academic research and practical application development.
