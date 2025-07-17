@@ -1,5 +1,6 @@
 package cz.cuni.mff.d3s.autodebugger.runner.args;
 
+import cz.cuni.mff.d3s.autodebugger.model.common.TargetLanguage;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
