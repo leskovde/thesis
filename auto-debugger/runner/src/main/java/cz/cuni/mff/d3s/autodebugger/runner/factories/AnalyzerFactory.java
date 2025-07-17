@@ -1,33 +1,31 @@
 package cz.cuni.mff.d3s.autodebugger.runner.factories;
 
-import cz.cuni.mff.d3s.autodebugger.instrumentor.common.Instrumentor;
-import cz.cuni.mff.d3s.autodebugger.instrumentor.java.DiSLInstrumentor;
+import cz.cuni.mff.d3s.autodebugger.analyzer.common.Analyzer;
+import cz.cuni.mff.d3s.autodebugger.analyzer.java.DiSLAnalyzer;
 import cz.cuni.mff.d3s.autodebugger.model.common.RunConfiguration;
 import cz.cuni.mff.d3s.autodebugger.model.common.TargetLanguage;
 import cz.cuni.mff.d3s.autodebugger.model.java.JavaRunConfiguration;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class InstrumentorFactory {
+public class AnalyzerFactory {
 
-    public static Instrumentor createInstrumentor(RunConfiguration runConfiguration) {
+    public static Analyzer createAnalyzer(RunConfiguration runConfiguration) {
         TargetLanguage language = runConfiguration.getLanguage();
         if (language == TargetLanguage.JAVA) {
-            return createJavaInstrumentor(runConfiguration);
+            return createJavaAnalyzer(runConfiguration);
         }
 
         throw new IllegalArgumentException("Unsupported language: " + language);
     }
 
-    private static DiSLInstrumentor createJavaInstrumentor(RunConfiguration runConfiguration) {
-        log.info("Building DiSL instrumentor");
+    private static DiSLAnalyzer createJavaAnalyzer(RunConfiguration runConfiguration) {
+        log.info("Creating DiSL analyzer");
 
         if (runConfiguration instanceof JavaRunConfiguration javaRunConfiguration) {
-            DiSLInstrumentor instrumentor = DiSLInstrumentor.builder()
-                .runConfiguration(javaRunConfiguration)
-                .build();
-            log.info("Successfully built DiSL instrumentor");
-            return instrumentor;
+            DiSLAnalyzer analyzer = new DiSLAnalyzer(javaRunConfiguration);
+            log.info("Successfully created DiSL instrumentor");
+            return analyzer;
         }
 
         throw new IllegalArgumentException("Expected JavaRunConfiguration, got: " + runConfiguration.getClass().getSimpleName());

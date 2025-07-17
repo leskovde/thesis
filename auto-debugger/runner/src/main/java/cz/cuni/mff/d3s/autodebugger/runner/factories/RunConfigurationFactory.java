@@ -15,6 +15,7 @@ import java.util.List;
 
 @Slf4j
 public class RunConfigurationFactory {
+
     public static RunConfiguration createRunConfiguration(Arguments arguments) {
         if (arguments.language == TargetLanguage.JAVA) {
             return createJavaRunConfiguration(arguments);
@@ -30,6 +31,8 @@ public class RunConfigurationFactory {
             // Parse paths
             Path applicationPath = Path.of(arguments.applicationJarPath);
             Path sourceCodePath = Path.of(arguments.sourceCodePath);
+            Path dislHomePath = Path.of(arguments.dislHomePath);
+            List<Path> classpathEntries = arguments.classpath.stream().map(Path::of).toList();
 
             JavaMethodSignatureParser parser = new JavaMethodSignatureParser();
 
@@ -51,6 +54,9 @@ public class RunConfigurationFactory {
                     .sourceCodePath(sourceCodePath)
                     .targetMethod(methodIdentifier)
                     .exportableValues(exportableValues)
+                    .runtimeArguments(arguments.runtimeArguments)
+                    .classpathEntries(classpathEntries)
+                    .dislHomePath(dislHomePath)
                     .build();
 
             // Validate the configuration

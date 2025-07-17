@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class InstrumentationModelFactory {
+
     public static InstrumentationModel buildInstrumentationModel(RunConfiguration runConfiguration) {
         TargetLanguage language = runConfiguration.getLanguage();
         if (language == TargetLanguage.JAVA) {
