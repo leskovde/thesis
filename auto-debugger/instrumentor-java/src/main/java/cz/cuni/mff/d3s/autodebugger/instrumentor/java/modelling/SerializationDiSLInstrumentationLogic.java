@@ -1,7 +1,7 @@
 package cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling;
 
-import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.Identifier;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.common.modelling.Metaclass;
+import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.MethodIdentifier;
 import lombok.Getter;
 
 import java.util.List;
@@ -9,7 +9,7 @@ import java.util.List;
 @Getter
 public class SerializationDiSLInstrumentationLogic extends DiSLInstrumentationLogic {
 
-    public SerializationDiSLInstrumentationLogic(Identifier identifier, DiSLAnnotation annotation, List<JavaValue> exports) {
+    public SerializationDiSLInstrumentationLogic(MethodIdentifier identifier, DiSLAnnotation annotation, List<JavaValue> exports) {
         super(identifier, annotation, exports);
     }
 

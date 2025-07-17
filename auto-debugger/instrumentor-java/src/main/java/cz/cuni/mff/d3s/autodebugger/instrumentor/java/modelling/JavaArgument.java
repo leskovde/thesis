@@ -1,13 +1,13 @@
 package cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling;
 
-import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.ExportableValue;
+import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.JavaValueIdentifier;
 import lombok.Getter;
 
 @Getter
 public class JavaArgument extends JavaValue {
     private final int argumentSlot;
 
-    public JavaArgument(int argumentSlot, ExportableValue exportableValue) {
+    public JavaArgument(int argumentSlot, JavaValueIdentifier exportableValue) {
         super(exportableValue);
         this.argumentSlot = argumentSlot;
     }

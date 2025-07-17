@@ -1,6 +1,6 @@
 package cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling;
 
-import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.ExportableValue;
+import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.JavaValueIdentifier;
 import lombok.Getter;
 
 @Getter
@@ -8,7 +8,7 @@ public class JavaField extends JavaValue {
     private final String name;
     private final String ownerType;
 
-    public JavaField(String name, String ownerType, ExportableValue exportableValue) {
+    public JavaField(String name, String ownerType, JavaValueIdentifier exportableValue) {
         super(exportableValue);
         this.name = name;
         // TODO: Use fully qualified name for ownerType

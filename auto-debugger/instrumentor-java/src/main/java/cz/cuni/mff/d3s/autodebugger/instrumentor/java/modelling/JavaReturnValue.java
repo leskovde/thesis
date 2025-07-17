@@ -1,10 +1,10 @@
 package cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling;
 
-import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.ExportableValue;
+import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.JavaValueIdentifier;
 
 public class JavaReturnValue extends JavaValue {
 
-    public JavaReturnValue(ExportableValue exportableValue) {
+    public JavaReturnValue(JavaValueIdentifier exportableValue) {
         super(exportableValue);
     }
 
