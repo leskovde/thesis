@@ -4,7 +4,6 @@ import cz.cuni.mff.d3s.autodebugger.instrumentor.common.Instrumentor;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.java.DiSLInstrumentor;
 import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.MethodIdentifier;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.*;
-import cz.cuni.mff.d3s.autodebugger.model.java.parsing.JavaMethodSignatureParser;
 import cz.cuni.mff.d3s.autodebugger.model.java.parsing.MethodSignature;
 import cz.cuni.mff.d3s.autodebugger.model.java.parsing.SignatureState;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +19,7 @@ import java.util.regex.Pattern;
  * Uses the existing JavaMethodSignatureParser from the model-java module.
  */
 @Slf4j
-public class JavaMethodSignatureParsingStrategy implements MethodSignatureParsingStrategy {
+public class JavaMethodSignatureParser {
     
     // Pattern for parameter: "slot:type" or "type:name"
     private static final Pattern PARAMETER_PATTERN = Pattern.compile("^(\\d+):(.+)$|^([^:]+):([^:]+)$");
@@ -28,11 +27,10 @@ public class JavaMethodSignatureParsingStrategy implements MethodSignatureParsin
     // Pattern for field: "type:name"
     private static final Pattern FIELD_PATTERN = Pattern.compile("^([^:]+):([^:]+)$");
     
-    @Override
-    public MethodIdentifier parseMethodReference(String methodReference) {
+    public JavaMethodIdentifier parseMethodReference(String methodReference) {
         log.debug("Parsing Java method reference: {}", methodReference);
         
-        MethodSignature signature = JavaMethodSignatureParser.parseMethodSignature(methodReference);
+        MethodSignature signature = cz.cuni.mff.d3s.autodebugger.model.java.parsing.JavaMethodSignatureParser.parseMethodSignature(methodReference);
         
         if (signature.getState() != SignatureState.FULL_METHOD) {
             throw new IllegalArgumentException(
@@ -53,7 +51,7 @@ public class JavaMethodSignatureParsingStrategy implements MethodSignatureParsin
         );
         
         // Create method identifier
-        MethodIdentifier methodIdentifier = new MethodIdentifier(
+        JavaMethodIdentifier methodIdentifier = new JavaMethodIdentifier(
             MethodIdentifierParameters.builder()
                 .ownerClassIdentifier(classIdentifier)
                 .methodName(signature.getMethodName())
@@ -69,13 +67,12 @@ public class JavaMethodSignatureParsingStrategy implements MethodSignatureParsin
         return methodIdentifier;
     }
     
-    @Override
-    public List<ExportableValue> parseTargetParameters(List<String> targetParameters, MethodIdentifier methodIdentifier) {
+    public List<JavaValueIdentifier> parseTargetParameters(List<String> targetParameters, MethodIdentifier methodIdentifier) {
         if (targetParameters == null || targetParameters.isEmpty()) {
             return new ArrayList<>();
         }
         
-        List<ExportableValue> exportableValues = new ArrayList<>();
+        List<JavaValueIdentifier> exportableValues = new ArrayList<>();
         
         for (int i = 0; i < targetParameters.size(); i++) {
             String parameterString = targetParameters.get(i).trim();
@@ -93,13 +90,12 @@ public class JavaMethodSignatureParsingStrategy implements MethodSignatureParsin
         return exportableValues;
     }
     
-    @Override
-    public List<ExportableValue> parseTargetFields(List<String> targetFields, MethodIdentifier methodIdentifier) {
+    public List<JavaValueIdentifier> parseTargetFields(List<String> targetFields, JavaMethodIdentifier methodIdentifier) {
         if (targetFields == null || targetFields.isEmpty()) {
             return new ArrayList<>();
         }
         
-        List<ExportableValue> exportableValues = new ArrayList<>();
+        List<JavaValueIdentifier> exportableValues = new ArrayList<>();
         JavaClassIdentifier ownerClass = methodIdentifier.getOwnerClassIdentifier();
         
         for (String fieldString : targetFields) {
@@ -116,37 +112,6 @@ public class JavaMethodSignatureParsingStrategy implements MethodSignatureParsin
         }
         
         return exportableValues;
-    }
-    
-    @Override
-    public Instrumentor createInstrumentor(
-            Path applicationPath,
-            Path sourceCodePath,
-            MethodIdentifier methodIdentifier,
-            List<ExportableValue> exportableValues) {
-        
-        return DiSLInstrumentor.builder()
-            .applicationJarPath(applicationPath)
-            .method(methodIdentifier)
-            .exportedValues(exportableValues)
-            .classpath(List.of(applicationPath)) // Add the application JAR to classpath
-            .build();
-    }
-    
-    @Override
-    public void validateConfiguration(Path applicationPath, Path sourceCodePath) {
-        if (!applicationPath.toFile().exists()) {
-            throw new IllegalArgumentException("Application JAR file does not exist: " + applicationPath);
-        }
-        
-        if (!sourceCodePath.toFile().exists()) {
-            throw new IllegalArgumentException("Source code path does not exist: " + sourceCodePath);
-        }
-        
-        // Check if it's a JAR file
-        if (!applicationPath.toString().toLowerCase().endsWith(".jar")) {
-            throw new IllegalArgumentException("Application file must be a JAR file: " + applicationPath);
-        }
     }
     
     /**
