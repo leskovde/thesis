@@ -1,6 +1,6 @@
 package cz.cuni.mff.d3s.autodebugger.instrumentor.common;
 
-import cz.cuni.mff.d3s.autodebugger.instrumentor.common.modelling.Model;
+import cz.cuni.mff.d3s.autodebugger.instrumentor.common.modelling.InstrumentationModel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -11,6 +11,6 @@ import java.util.Optional;
 @AllArgsConstructor
 public abstract class InstrumentationCodeGenerator {
     protected Path outputDirectory;
-    protected Model instrumentationModel;
+    protected InstrumentationModel instrumentationModel;
     public abstract Optional<Path> generateCode();
 }
