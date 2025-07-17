@@ -1,7 +1,7 @@
 package cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling;
 
-import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.Identifier;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.common.modelling.Metaclass;
+import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.MethodIdentifier;
 import java.util.List;
 import lombok.Getter;
 
@@ -9,7 +9,7 @@ import lombok.Getter;
 public class ShadowDiSLInstrumentationLogic extends DiSLInstrumentationLogic {
 
   public ShadowDiSLInstrumentationLogic(
-      Identifier identifier, DiSLAnnotation annotation, List<JavaValue> exports) {
+          MethodIdentifier identifier, DiSLAnnotation annotation, List<JavaValue> exports) {
     super(identifier, annotation, exports);
   }
 

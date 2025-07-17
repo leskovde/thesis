@@ -1,6 +1,6 @@
 package cz.cuni.mff.d3s.autodebugger.model.java.factories;
 
-import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.Identifier;
+import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.Identifier;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.IdentifierParameters;
 
 public abstract class IdentifierFactory {

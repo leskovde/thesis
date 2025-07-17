@@ -1,7 +1,9 @@
 package cz.cuni.mff.d3s.autodebugger.model.java.identifiers;
 
 import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.MethodIdentifier;
+import lombok.Getter;
 
+@Getter
 public class JavaMethodIdentifier extends MethodIdentifier {
     private final JavaClassIdentifier ownerClassIdentifier;
 

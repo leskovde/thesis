@@ -7,13 +7,13 @@ import java.io.FileWriter;
 import java.nio.file.Path;
 import java.util.Optional;
 
-import cz.cuni.mff.d3s.autodebugger.instrumentor.common.modelling.Model;
+import cz.cuni.mff.d3s.autodebugger.instrumentor.common.modelling.InstrumentationModel;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class DiSLClassGenerator extends InstrumentationCodeGenerator {
 
-  public DiSLClassGenerator(Path outputDirectory, Model instrumentationModel) {
+  public DiSLClassGenerator(Path outputDirectory, InstrumentationModel instrumentationModel) {
     super(outputDirectory, instrumentationModel);
   }
 

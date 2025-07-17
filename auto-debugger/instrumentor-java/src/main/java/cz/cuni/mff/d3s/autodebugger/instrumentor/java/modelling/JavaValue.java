@@ -1,17 +1,17 @@
 package cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling;
 
 import cz.cuni.mff.d3s.autodebugger.model.java.factories.VariableIdentifierFactory;
-import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.ExportableValue;
+import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.JavaValueIdentifier;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.JavaVariableIdentifier;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.VariableIdentifierParameters;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.common.modelling.Metaclass;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.java.CollectorMethodRegistry;
 
 public abstract class JavaValue extends Metaclass {
-    protected final ExportableValue exportedValueIdentifier;
+    protected final JavaValueIdentifier exportedValueIdentifier;
     protected final JavaVariableIdentifier instrumentationVariableIdentifier;
 
-    public JavaValue(ExportableValue exportableValue) {
+    public JavaValue(JavaValueIdentifier exportableValue) {
         this.exportedValueIdentifier = exportableValue;
         var parameters = VariableIdentifierParameters.builder()
                 .variableType(exportableValue.getType())
