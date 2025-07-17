@@ -12,6 +12,93 @@ The technology stack includes Gradle for build automation, JUnit 5 for test exec
 
 The project aims to advance understanding of how runtime behavior analysis can complement traditional testing approaches, exploring the trade-offs between different generation strategies and investigating the practical challenges of automated test creation in real-world Java applications.
 
+## Dependencies and Platform Support
+
+### System Requirements
+
+The Auto-Debugger supports **Linux**, **OS X**, and **macOS** platforms, inheriting platform limitations from the DiSL framework dependency.
+Windows is not currently supported.
+
+**Note for macOS users**: While macOS is supported, DiSL may require modifications to build scripts, as `gcc` and `ld` is not present in favor of `clang`.
+
+### Core Dependencies
+
+- **Java 17**: Required for compilation and runtime
+- **Gradle 8.5+**: Build automation and dependency management
+
+### Runtime Dependencies (Optional)
+
+The following dependencies are required only for specific functionalities:
+
+- **DiSL Framework**: Required for instrumentation and dynamic analysis features
+    - Without DiSL: Test generation from pre-existing traces still functions
+    - Mock instrumentation can be used for development and testing
+- **Anthropic API Key**: Required for LLM-based test generation
+    - Without API key: Trace-based and naive generation strategies remain fully functional
+    - Set via `ANTHROPIC_API_KEY` environment variable or `--api-key` command line option
+
+## Building and Running
+
+### Quick Start
+
+1. **Clone the repository**:
+   ```bash
+   git clone <repository-url>
+   cd auto-debugger
+   ```
+
+2. **Build the project**:
+   ```bash
+   ./gradlew build
+   ```
+
+3. **Run the application**:
+   ```bash
+   ./gradlew :runner:run --args="--help"
+   ```
+
+### Basic Usage Example
+
+```bash
+# Generate tests for a Java application
+./gradlew :runner:run --args="
+  --jar /path/to/your/application.jar
+  --source /path/to/source/code
+  --method org.example.YourClass.yourMethod(int,String)
+  --disl-home /path/to/disl
+"
+```
+
+### IntelliJ Plugin Development
+
+To work with the IntelliJ plugin:
+
+```bash
+# Run IntelliJ IDEA with the plugin
+./gradlew :intellij-plugin:runIde
+
+# Build plugin distribution
+./gradlew :intellij-plugin:buildPlugin
+```
+
+### Testing
+
+Run the complete test suite:
+
+```bash
+# Run all tests
+./gradlew test
+
+# Run tests for specific modules
+./gradlew :test-generator-java:test
+./gradlew :instrumentor-java:test
+```
+
+### Development Without DiSL
+
+Developing and running certain parts of the pipeline is possible.
+When working on new languages or debating a switch to another dynamic analysis framework (RoadRunner, ASM), create new modules and strategies for selecting them.
+
 ## Architecture
 
 The `auto-debugger` follows a modular, language-extensible architecture organized around four core phases:
