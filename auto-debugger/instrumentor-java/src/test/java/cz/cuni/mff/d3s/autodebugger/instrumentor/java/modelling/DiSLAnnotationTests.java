@@ -19,6 +19,6 @@ public class DiSLAnnotationTests {
     String code = dislAnnotation.emitCode();
 
     // then
-    assertEquals("@Before(marker = BodyMarker.class, scope = \"test\")", code);
+    assertEquals("@Before(marker = BodyMarker.class, scope = \"Test.test\")", code);
   }
 }

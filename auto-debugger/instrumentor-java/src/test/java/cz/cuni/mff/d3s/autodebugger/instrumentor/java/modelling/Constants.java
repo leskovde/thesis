@@ -12,9 +12,9 @@ public class Constants {
     public static final String targetClassName = "Test";
     public static final String targetMethodName = "test";
     public static final Path targetJarPath = Path.of("src/test/resources/targets/extraction/Test.jar");
-    public static final PackageIdentifier packageIdentifier = new PackageIdentifier("targets.extraction");
-    public static final ClassIdentifier testClassIdentifier =
-            new ClassIdentifier(
+    public static final JavaPackageIdentifier packageIdentifier = new JavaPackageIdentifier("targets.extraction");
+    public static final JavaClassIdentifier testClassIdentifier =
+            new JavaClassIdentifier(
                     ClassIdentifierParameters.builder()
                             .className(targetClassName)
                             .packageIdentifier(packageIdentifier)
@@ -30,17 +30,17 @@ public class Constants {
       MethodIdentifierParameters.builder()
           .returnType("void")
           .ownerClassIdentifier(
-                  new ClassIdentifier(
+                  new JavaClassIdentifier(
                           ClassIdentifierParameters
                                   .builder()
                                   .className("DiSLClass")
-                                  .packageIdentifier(PackageIdentifier.DEFAULT_PACKAGE)
+                                  .packageIdentifier(JavaPackageIdentifier.DEFAULT_PACKAGE)
                                   .build()))
           .parameterTypes(List.of("DynamicContext"))
           .build();
 
-    public static final MethodIdentifier targetMethodIdentifier = new MethodIdentifier(targetMethodIdentifierParameters);
-    public static final MethodIdentifier instrumentationLogicMethodIdentifier = MethodIdentifierFactory.getInstance().generateIdentifier(instrumentationLogicIdentifierParameters);
+    public static final JavaMethodIdentifier targetMethodIdentifier = new JavaMethodIdentifier(targetMethodIdentifierParameters);
+    public static final JavaMethodIdentifier instrumentationLogicMethodIdentifier = MethodIdentifierFactory.getInstance().generateIdentifier(instrumentationLogicIdentifierParameters);
 
     public static final DiSLMarker dislMarker = new DiSLMarker(MarkerType.BODY);
 
@@ -50,16 +50,16 @@ public class Constants {
 
     public static final List<JavaValue> instrumentationLogicExports = List.of();
 
-    private static final ArgumentIdentifier stringArgumentIdentifier =
-      new ArgumentIdentifier(
+    private static final JavaArgumentIdentifier stringArgumentIdentifier =
+      new JavaArgumentIdentifier(
               ArgumentIdentifierParameters.builder()
                       .argumentSlot(0)
                       .variableType("java.lang.String")
                       .build());
     public static final JavaArgument javaArgument = new JavaArgument(0, stringArgumentIdentifier);
 
-    private static final FieldIdentifier stringFieldIdentifier =
-      new FieldIdentifier(
+    private static final JavaFieldIdentifier stringFieldIdentifier =
+      new JavaFieldIdentifier(
               FieldIdentifierParameters.builder()
                       .variableName("testField")
                       .variableType("java.lang.String")
@@ -67,11 +67,17 @@ public class Constants {
                       .build());
     public static final JavaField javaField = new JavaField(stringFieldIdentifier.getFieldName(), stringFieldIdentifier.getOwnerClassIdentifier().getName(), stringFieldIdentifier);
 
+    public static final JavaVariable javaVariable = new JavaVariable(0, stringArgumentIdentifier);
+
     // TODO
     //public static final JavaVariable javaVariable = new JavaVariable(0, "String");
 
     public static final JavaPackageImport javaPackageImport =
-      new JavaPackageImport(new PackageIdentifier("java.util.List"));
+      new JavaPackageImport(new JavaPackageIdentifier("java.util.List"));
 
-    public static final JavaPackage javaPackage = new JavaPackage(new PackageIdentifier("cz.cuni.mff.d3s.test"));
+    public static final JavaPackage javaPackage = new JavaPackage(new JavaPackageIdentifier("cz.cuni.mff.d3s.test"));
+
+    public static String normalizeVariableNames(String code) {
+        return code.replaceAll("generatedVariable\\d+", "generatedVariableX");
+    }
 }

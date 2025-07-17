@@ -1,5 +1,6 @@
 package cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling;
 
+import static cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling.Constants.normalizeVariableNames;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
@@ -15,8 +16,7 @@ public class JavaFieldTests {
     String code = javaField.emitCode();
 
     // then
-    assertEquals(
-        "String generatedVariable1 = di.getInstanceFieldValue(di.getThis(), Test.class, \"testField\", String.class);",
-        code);
+    String expectedCode = "java.lang.String generatedVariable1 = di.getInstanceFieldValue(di.getThis(), Test.class, \"testField\", java.lang.String.class);";
+    assertEquals(normalizeVariableNames(expectedCode), normalizeVariableNames(code));
   }
 }
