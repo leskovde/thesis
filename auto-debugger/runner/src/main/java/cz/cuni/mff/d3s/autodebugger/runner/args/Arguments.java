@@ -11,8 +11,14 @@ public class Arguments {
     @CommandLine.Option(names = { "-c", "--classpath" }, paramLabel = "CLASSPATH", description = "Additional classpath entries (separated by ':')", split = ":")
     public List<String> classpath;
 
+    @CommandLine.Option(names = { "-a", "--args" }, paramLabel = "ARGS", description = "Runtime arguments for the target application (separated by ' ')", split = " ")
+    public List<String> runtimeArguments;
+
     @CommandLine.Option(names = { "-s", "--source" }, paramLabel = "SOURCE", description = "Path to the target application's source code", required = true)
     public String sourceCodePath;
+
+    @CommandLine.Option(names = { "-d", "--disl-home" }, paramLabel = "DISL_HOME", description = "Path to the DiSL project (required for DiSL-based analysis)")
+    public String dislHomePath;
 
     @CommandLine.Option(names = { "-m", "--method" }, paramLabel = "METHOD", description = "Target method reference (e.g., org.example.Main.main(String[]))", required = true)
     public String targetMethodReference;

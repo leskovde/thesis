@@ -38,12 +38,14 @@ public class Runner {
   public static void run(Arguments arguments) {
     log.info("Starting auto-debugger with arguments:");
     log.info("  Application JAR: {}", arguments.applicationJarPath);
+    log.info("  Application arguments: {}", arguments.runtimeArguments);
     log.info("  Source code path: {}", arguments.sourceCodePath);
     log.info("  Target method: {}", arguments.targetMethodReference);
     log.info("  Target parameters: {}", arguments.targetParameters);
     log.info("  Target fields: {}", arguments.targetFields);
     log.info("  Language: {}", arguments.language.getDisplayName());
     log.info("  Classpath: {}", arguments.classpath);
+    log.info("  DiSL home: {}", arguments.dislHomePath);
 
     var orchestrator = new Orchestrator(arguments);
     log.info("Created orchestrator for language: {}", arguments.language.getDisplayName());

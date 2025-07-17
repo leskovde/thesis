@@ -44,7 +44,7 @@ public class JavaRunConfiguration implements RunConfiguration {
     private final TargetLanguage language = TargetLanguage.JAVA;
 
     @Builder.Default
-    private final Path dislRepositoryPath = Path.of("../../disl/");
+    private final Path dislHomePath = Path.of("../../disl/");
 
 
     @Override
