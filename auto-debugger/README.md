@@ -23,7 +23,7 @@ Windows is not currently supported.
 
 ### Core Dependencies
 
-- **Java 17**: Required for compilation and runtime
+- **Java 21**: Required for compilation and runtime
 - **Gradle 8.5+**: Build automation and dependency management
 
 ### Runtime Dependencies (Optional)
