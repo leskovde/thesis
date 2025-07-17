@@ -5,9 +5,8 @@ import cz.cuni.mff.d3s.autodebugger.model.common.RunConfiguration;
 import cz.cuni.mff.d3s.autodebugger.model.common.TargetLanguage;
 import cz.cuni.mff.d3s.autodebugger.model.common.trace.Trace;
 import cz.cuni.mff.d3s.autodebugger.runner.args.Arguments;
-import cz.cuni.mff.d3s.autodebugger.runner.parsing.MethodSignatureParsingStrategy;
-import cz.cuni.mff.d3s.autodebugger.runner.parsing.MethodSignatureParsingStrategyFactory;
-import cz.cuni.mff.d3s.autodebugger.runner.strategies.InstrumentationStrategy;
+import cz.cuni.mff.d3s.autodebugger.runner.factories.InstrumentationModelFactory;
+import cz.cuni.mff.d3s.autodebugger.runner.factories.RunConfigurationFactory;
 import cz.cuni.mff.d3s.autodebugger.runner.strategies.TestGenerationStrategy;
 import cz.cuni.mff.d3s.autodebugger.runner.strategies.TestGenerationStrategyProvider;
 import cz.cuni.mff.d3s.autodebugger.testrunner.common.TestExecutionResult;
@@ -23,22 +22,10 @@ import java.util.List;
 @Slf4j
 public class Orchestrator {
 
-    private final TargetLanguage language;
     private final RunConfiguration runConfiguration;
 
     public Orchestrator(Arguments arguments) {
-        this.language = arguments.language;
-        runConfiguration = createRunConfiguration(arguments);
-    }
-
-    /**
-     * Creates a run configuration from command line arguments.
-     *
-     * @param args Command line arguments
-     * @return Language-specific run configuration
-     */
-    public RunConfiguration createRunConfiguration(Arguments arguments) {
-
+        runConfiguration = RunConfigurationFactory.createRunConfiguration(arguments);
     }
 
     /**
@@ -48,26 +35,7 @@ public class Orchestrator {
      * @return Instrumentation model specific to the instrumentor
      */
     public InstrumentationModel buildInstrumentationModel() {
-
-//        log.info("Building DiSL instrumentation model");
-//
-//        if (!language.getIdentifier().equals(runConfiguration.getLanguage())) {
-//            throw new IllegalArgumentException("Expected Java run configuration, got: " + runConfiguration.getLanguage());
-//        }
-//
-//        // Create a temporary instrumentor to build the model
-//        // This is a bit of a circular dependency, but the DiSLModel needs an Instrumentor
-//        Instrumentor tempInstrumentor = DiSLInstrumentor.builder()
-//                .applicationJarPath(runConfiguration.getApplicationPath())
-//                .className(runConfiguration.getTargetMethod().getOwnerClassIdentifier())
-//                .method(runConfiguration.getTargetMethod())
-//                .exportedValues(runConfiguration.getExportableValues())
-//                .classpath(runConfiguration.getClasspathEntries())
-//                .build();
-//
-//        DiSLModel model = new DiSLModel(tempInstrumentor);
-//        log.info("Successfully built DiSL instrumentation model");
-//        return model;
+        return InstrumentationModelFactory.buildInstrumentationModel(runConfiguration);
     }
 
     public List<Path> createInstrumentation(InstrumentationModel instrumentationModel) {

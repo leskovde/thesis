@@ -1,8 +1,6 @@
 package cz.cuni.mff.d3s.autodebugger.runner;
 
-import cz.cuni.mff.d3s.autodebugger.instrumentor.common.Instrumentor;
 import cz.cuni.mff.d3s.autodebugger.runner.args.Arguments;
-import cz.cuni.mff.d3s.autodebugger.runner.model.ModelBuilder;
 import cz.cuni.mff.d3s.autodebugger.runner.orchestrator.Orchestrator;
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine;
@@ -49,10 +47,6 @@ public class Runner {
 
     var orchestrator = new Orchestrator(arguments);
     log.info("Created orchestrator for language: {}", arguments.language.getDisplayName());
-
-    var runConfiguration = orchestrator.createRunConfiguration(arguments);
-    log.info(
-        "Created run configuration for method: {}", runConfiguration.getTargetMethod().getName());
 
     var instrumentationModel = orchestrator.buildInstrumentationModel();
     log.info("Built instrumentation model");
