@@ -16,13 +16,18 @@ public class LLMConfiguration {
     
     /**
      * LLM provider (e.g., "openai", "anthropic", "local").
+     * Defaults to "anthropic" for Claude integration.
      */
-    private final String provider;
+    @Builder.Default
+    private final String provider = "anthropic";
     
     /**
-     * Model name to use (e.g., "gpt-4", "claude-3-sonnet").
+     * Model name to use (e.g., "gpt-4", "claude-sonnet-4-20250514").
+     * Defaults to Claude 3.5 Sonnet (latest version) for Anthropic provider.
      */
-    private final String modelName;
+    @Builder.Default
+    private final String modelName = "claude-sonnet-4-20250514";
+
     
     /**
      * API key for the LLM service.

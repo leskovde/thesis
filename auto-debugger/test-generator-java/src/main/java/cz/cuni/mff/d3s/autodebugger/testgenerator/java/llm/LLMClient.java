@@ -1,5 +1,10 @@
 package cz.cuni.mff.d3s.autodebugger.testgenerator.java.llm;
 
+import com.anthropic.client.AnthropicClient;
+import com.anthropic.client.okhttp.AnthropicOkHttpClient;
+import com.anthropic.models.messages.Message;
+import com.anthropic.models.messages.MessageCreateParams;
+import com.anthropic.models.messages.Model;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.common.LLMConfiguration;
 import lombok.extern.slf4j.Slf4j;
 
@@ -8,7 +13,6 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.time.Duration;
 
 /**
  * Client for communicating with Large Language Model APIs.
@@ -16,16 +20,24 @@ import java.time.Duration;
  */
 @Slf4j
 public class LLMClient {
-    
+
     private LLMConfiguration config;
     private HttpClient httpClient;
-    
+    private AnthropicClient anthropicClient;
+
     public void configure(LLMConfiguration config) {
         this.config = config;
         this.httpClient = HttpClient.newBuilder()
                 .connectTimeout(config.getRequestTimeout())
                 .build();
-        
+
+        // Initialize Anthropic client if using Anthropic provider
+        if ("anthropic".equalsIgnoreCase(config.getProvider())) {
+            this.anthropicClient = AnthropicOkHttpClient.builder()
+                    .apiKey(config.getApiKey())
+                    .build();
+        }
+
         log.info("Configured LLM client for provider: {}", config.getProvider());
     }
     
@@ -40,16 +52,21 @@ public class LLMClient {
         if (config == null) {
             throw new IllegalStateException("LLM client must be configured before use");
         }
-        
+
         log.debug("Sending prompt to LLM (length: {} chars)", prompt.length());
-        
+
         try {
-            String response = sendRequest(prompt);
+            String response;
+            if ("anthropic".equalsIgnoreCase(config.getProvider()) && anthropicClient != null) {
+                response = sendAnthropicRequest(prompt);
+            } else {
+                response = sendRequest(prompt);
+            }
             String extractedCode = extractCodeFromResponse(response);
-            
+
             log.debug("Received response from LLM (length: {} chars)", extractedCode.length());
             return extractedCode;
-            
+
         } catch (Exception e) {
             log.error("Failed to generate code using LLM", e);
             throw new IOException("LLM code generation failed", e);
@@ -76,6 +93,34 @@ public class LLMClient {
         }
         
         return response.body();
+    }
+
+    private String sendAnthropicRequest(String prompt) throws IOException {
+        try {
+            MessageCreateParams params = MessageCreateParams.builder()
+                    .model(Model.of(config.getModelName()))
+                    .maxTokens((long) config.getMaxTokens())
+                    .temperature(config.getTemperature())
+                    .addUserMessage(prompt)
+                    .build();
+
+            Message response = anthropicClient.messages().create(params);
+
+            // Extract text content from the response
+            if (response.content() != null && !response.content().isEmpty()) {
+                // Get the first content block and extract text
+                var contentBlock = response.content().getFirst();
+                if (contentBlock.text().isPresent()) {
+                    return contentBlock.text().get().text();
+                }
+            }
+
+            throw new IOException("Empty response from Anthropic API");
+
+        } catch (Exception e) {
+            log.error("Failed to send request to Anthropic API", e);
+            throw new IOException("Anthropic API request failed", e);
+        }
     }
     
     private String buildRequestBody(String prompt) {
