@@ -6,14 +6,14 @@ import java.nio.file.Path;
 
 public class DiSLPathHelper {
     public static Path getDislClassPathRoot(JavaRunConfiguration runConfiguration) {
-        return runConfiguration.getOutputDirectory().resolve("output/lib/");
+        return runConfiguration.getDislHomePath().resolve("output/lib/");
     }
 
     public static Path getDislRunnerPath(JavaRunConfiguration runConfiguration) {
-        return runConfiguration.getOutputDirectory().resolve("bin/disl.py");
+        return runConfiguration.getDislHomePath().resolve("bin/disl.py");
     }
 
     public static Path getDislHomePath(JavaRunConfiguration runConfiguration) {
-        return runConfiguration.getOutputDirectory().resolve("output");
+        return runConfiguration.getDislHomePath().resolve("output");
     }
 }

@@ -46,7 +46,6 @@ public class JavaRunConfiguration implements RunConfiguration {
     @Builder.Default
     private final Path dislHomePath = Path.of("../../disl/");
 
-
     @Override
     public void validate() {
         log.debug("Validating Java run configuration");

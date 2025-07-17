@@ -47,7 +47,7 @@ public interface RunConfiguration {
      * 
      * @return List of exportable values to track during execution
      */
-    List<ExportableValue> getExportableValues();
+    List<? extends ExportableValue> getExportableValues();
     
     /**
      * Gets the output directory where generated files should be placed.
