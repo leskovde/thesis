@@ -35,19 +35,19 @@ public class SettingsServiceTest extends LightJavaCodeInsightFixtureTestCase5 {
         // Test setting multiple values
         Map<String, String> values = new HashMap<>();
         values.put("disl.path", "/path/to/disl");
-        values.put("openapi.key", "secret-key");
-        
+        values.put("anthropic.key", "secret-key");
+
         settingsService.setConfigurationValues(values);
-        
+
         assertEquals("/path/to/disl", settingsService.getConfigurationValue("disl.path"));
-        assertEquals("secret-key", settingsService.getConfigurationValue("openapi.key"));
-        
+        assertEquals("secret-key", settingsService.getConfigurationValue("anthropic.key"));
+
         // Test getting all values
         Map<String, String> allValues = settingsService.getAllConfigurationValues();
         assertTrue(allValues.containsKey("disl.path"));
-        assertTrue(allValues.containsKey("openapi.key"));
+        assertTrue(allValues.containsKey("anthropic.key"));
         assertEquals("/path/to/disl", allValues.get("disl.path"));
-        assertEquals("secret-key", allValues.get("openapi.key"));
+        assertEquals("secret-key", allValues.get("anthropic.key"));
     }
 
     @Test
