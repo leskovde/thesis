@@ -1,6 +1,6 @@
 package cz.cuni.mff.d3s.autodebugger.testrunner.common;
 
-import cz.cuni.mff.d3s.autodebugger.model.java.Trace;
+import cz.cuni.mff.d3s.autodebugger.model.common.trace.Trace;
 import lombok.Builder;
 import lombok.Getter;
 

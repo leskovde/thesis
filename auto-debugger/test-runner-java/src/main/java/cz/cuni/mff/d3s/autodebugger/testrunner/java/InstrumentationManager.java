@@ -1,6 +1,7 @@
 package cz.cuni.mff.d3s.autodebugger.testrunner.java;
 
 import cz.cuni.mff.d3s.autodebugger.testrunner.common.TestRunnerConfiguration;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.nio.file.Files;
@@ -14,6 +15,8 @@ import java.nio.file.Path;
 public class InstrumentationManager {
     
     private boolean instrumentationSetup = false;
+
+    @Getter
     private Path instrumentationJarPath;
     
     /**
@@ -42,13 +45,9 @@ public class InstrumentationManager {
         }
         
         log.info("Instrumentation JAR found: {}", instrumentationJarPath);
-        
-        // Set up JVM arguments for DiSL agent
-        setupDiSLAgent();
-        
-        // Set up ShadowVM for trace collection
-        setupShadowVM();
-        
+
+        // TODO
+
         instrumentationSetup = true;
         log.info("Instrumentation setup completed");
     }
@@ -61,16 +60,7 @@ public class InstrumentationManager {
     public boolean isInstrumentationReady() {
         return instrumentationSetup;
     }
-    
-    /**
-     * Gets the instrumentation JAR path.
-     * 
-     * @return Path to the instrumentation JAR, or null if not set up
-     */
-    public Path getInstrumentationJarPath() {
-        return instrumentationJarPath;
-    }
-    
+
     /**
      * Cleans up instrumentation resources.
      */
@@ -78,60 +68,5 @@ public class InstrumentationManager {
         log.info("Cleaning up instrumentation resources");
         instrumentationSetup = false;
         instrumentationJarPath = null;
-    }
-    
-    private void setupDiSLAgent() {
-        log.debug("Setting up DiSL agent configuration");
-        
-        // Set system properties for DiSL
-        System.setProperty("disl.instrumentation.jar", instrumentationJarPath.toString());
-        
-        // Configure DiSL server settings
-        System.setProperty("disl.server.host", "localhost");
-        System.setProperty("disl.server.port", "11217");
-        
-        // Configure ShadowVM settings
-        System.setProperty("shadowvm.server.host", "localhost");
-        System.setProperty("shadowvm.server.port", "11218");
-        
-        log.debug("DiSL agent configuration completed");
-    }
-    
-    private void setupShadowVM() {
-        log.debug("Setting up ShadowVM for trace collection");
-        
-        // Configure ShadowVM for remote analysis
-        System.setProperty("shadowvm.analysis.class", "cz.cuni.mff.d3s.autodebugger.analyzer.disl.Collector");
-        
-        // Set up trace collection directory
-        Path traceDir = Path.of(System.getProperty("java.io.tmpdir"), "autodebugger-traces");
-        try {
-            Files.createDirectories(traceDir);
-            System.setProperty("autodebugger.trace.dir", traceDir.toString());
-            log.debug("Trace collection directory: {}", traceDir);
-        } catch (Exception e) {
-            log.warn("Failed to create trace directory: {}", traceDir, e);
-        }
-        
-        log.debug("ShadowVM setup completed");
-    }
-    
-    /**
-     * Gets JVM arguments needed for instrumentation.
-     * 
-     * @return Array of JVM arguments for DiSL agent
-     */
-    public String[] getInstrumentationJVMArgs() {
-        if (!instrumentationSetup) {
-            return new String[0];
-        }
-        
-        return new String[] {
-            "-javaagent:" + instrumentationJarPath.toString(),
-            "-Ddisl.server.host=localhost",
-            "-Ddisl.server.port=11217",
-            "-Dshadowvm.server.host=localhost",
-            "-Dshadowvm.server.port=11218"
-        };
     }
 }

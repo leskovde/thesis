@@ -4,7 +4,6 @@ import cz.cuni.mff.d3s.autodebugger.testrunner.common.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.List;
@@ -14,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Integration example showing how test-generator and test-runner components work together.
  */
-class IntegrationExample {
+class DemoRunnerIntegrationTest {
     
     @TempDir
     Path tempDir;
