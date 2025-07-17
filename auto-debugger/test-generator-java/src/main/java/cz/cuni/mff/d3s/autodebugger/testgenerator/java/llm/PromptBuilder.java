@@ -15,81 +15,34 @@ public class PromptBuilder {
      */
     public String buildTestGenerationPrompt(LLMPromptContext context) {
         StringBuilder prompt = new StringBuilder();
-        
-        // Role and task definition
+
+        // Role-playing instruction (as specified in solution.tex)
         prompt.append("You are an expert Java developer who specializes in writing robust ")
               .append(context.getTestFramework()).append(" tests.\n\n");
-        
-        prompt.append("Generate a comprehensive test suite for the method `")
-              .append(context.getTargetMethodSignature())
-              .append("` in the following Java class. ");
-        
-        prompt.append("Use the provided runtime data to create assertions that verify the observed outcomes. ");
-        
+
+        // Task definition (as specified in solution.tex)
+        prompt.append("Generate a suite of ").append(context.getTestFramework())
+              .append(" tests for the ").append(context.getTargetMethodSignature())
+              .append(" method. Use the provided runtime data to create assertions that verify the observed outcomes. ");
+
         if (context.isGenerateEdgeCases()) {
             prompt.append("Also generate tests for potential edge cases not present in the runtime data. ");
         }
-        
-        if (context.isGenerateNegativeTests()) {
-            prompt.append("Include negative test cases that test error conditions and boundary violations. ");
-        }
-        
-        prompt.append("Ensure test methods have descriptive names");
-        if (context.getNamingStrategy() == TestNamingStrategy.BDD_STYLE) {
-            prompt.append(" using given/when/then format");
-        } else if (context.getNamingStrategy() == TestNamingStrategy.DESCRIPTIVE) {
-            prompt.append(" that clearly describe what is being tested");
-        }
-        prompt.append(".\n\n");
-        
-        // Source code context
-        prompt.append("## Source Code\n");
-        prompt.append("```java\n");
+
+        prompt.append("Ensure test methods have descriptive names.\n\n");
+
+        // Static context: Source code (as specified in solution.tex)
+        prompt.append("// --- Static Context: Source Code ---\n");
         prompt.append(context.getSourceCode());
-        prompt.append("\n```\n\n");
-        
-        // Runtime trace data
-        if (context.getTraceData() != null && !context.getTraceData().isEmpty()) {
-            prompt.append("## Runtime Trace Data\n");
-            prompt.append("```\n");
-            prompt.append(context.getTraceData());
-            prompt.append("\n```\n\n");
-        }
-        
-        // Test generation requirements
-        prompt.append("## Test Generation Requirements\n");
-        prompt.append("- Use ").append(context.getTestFramework()).append(" framework\n");
-        prompt.append("- Generate up to ").append(context.getMaxTestCount()).append(" test methods\n");
-        prompt.append("- Include appropriate setup and teardown methods if needed\n");
-        prompt.append("- Use meaningful assertions that verify both expected outcomes and error conditions\n");
-        prompt.append("- Follow Java naming conventions and best practices\n");
-        
-        if (context.getPackageName() != null && !context.getPackageName().isEmpty()) {
-            prompt.append("- Use package: ").append(context.getPackageName()).append("\n");
-        }
-        
-        if (context.isGenerateParameterizedTests()) {
-            prompt.append("- Consider using parameterized tests for testing multiple input combinations\n");
-        }
-        
         prompt.append("\n");
-        
-        // Additional instructions
-        if (context.getAdditionalInstructions() != null && !context.getAdditionalInstructions().isEmpty()) {
-            prompt.append("## Additional Instructions\n");
-            prompt.append(context.getAdditionalInstructions());
-            prompt.append("\n\n");
+
+        // Dynamic context: Runtime trace data (as specified in solution.tex)
+        if (context.getTraceData() != null && !context.getTraceData().isEmpty()) {
+            prompt.append("// --- Dynamic Context: Observed Runtime Traces ---\n");
+            prompt.append(context.getTraceData());
+            prompt.append("\n");
         }
-        
-        // Output format
-        prompt.append("## Output Format\n");
-        prompt.append("Provide only the complete Java test class code, including:\n");
-        prompt.append("- Package declaration (if applicable)\n");
-        prompt.append("- All necessary imports\n");
-        prompt.append("- Class declaration with appropriate name\n");
-        prompt.append("- Setup/teardown methods if needed\n");
-        prompt.append("- All test methods with proper annotations\n");
-        prompt.append("- Meaningful assertions and error handling\n\n");
+
         
         prompt.append("Do not include explanations or markdown formatting - just the Java code.\n");
         
