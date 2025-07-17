@@ -34,6 +34,11 @@ public class Arguments {
                         defaultValue = "java", converter = TargetLanguageConverter.class)
     public TargetLanguage language;
 
+    @CommandLine.Option(names = { "-t", "--test-strategy" }, paramLabel = "STRATEGY",
+                        description = "Test generation strategy (e.g., trace-based-basic, ai-assisted)",
+                        defaultValue = "trace-based-basic")
+    public String testGenerationStrategy;
+
     @CommandLine.Option(names = { "-h", "--help" }, usageHelp = true, description = "display a help message")
     private boolean helpRequested = false;
 

@@ -14,14 +14,27 @@ public class TestGenerationStrategy {
      * Creates a new test generation strategy.
      *
      * @param id The unique identifier for this strategy
-     * @param displayName The human-readable name displayed in the UI
-     * @param description A detailed description of what this strategy does
+     * @param displayName The human-readable display name
+     * @param description The description of this strategy
      * @param isDefault Whether this strategy should be selected by default
      */
     public TestGenerationStrategy(String id, String displayName, String description, boolean isDefault) {
         this.id = id;
         this.displayName = displayName;
         this.description = description;
+        this.isDefault = isDefault;
+    }
+
+    /**
+     * Creates a new test generation strategy using enum.
+     *
+     * @param name The unique identifier for this strategy
+     * @param isDefault Whether this strategy should be selected by default
+     */
+    public TestGenerationStrategy(TestGenerationStrategyName name, boolean isDefault) {
+        this.id = name.name().toLowerCase().replace('_', '-');
+        this.displayName = name.getDisplayName();
+        this.description = name.getDescription();
         this.isDefault = isDefault;
     }
 

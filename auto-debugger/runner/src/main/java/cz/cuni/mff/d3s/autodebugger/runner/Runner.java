@@ -44,6 +44,7 @@ public class Runner {
     log.info("  Target parameters: {}", arguments.targetParameters);
     log.info("  Target fields: {}", arguments.targetFields);
     log.info("  Language: {}", arguments.language.getDisplayName());
+    log.info("  Test generation strategy: {}", arguments.testGenerationStrategy);
     log.info("  Classpath: {}", arguments.classpath);
     log.info("  DiSL home: {}", arguments.dislHomePath);
 
