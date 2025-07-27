@@ -21,7 +21,7 @@ public class DiSLModelTests {
      * Exportable Value: The int count parameter (slot 0)
      */
     @Test
-    public void testModelConstructionForSinglePrimitiveParameter() {
+    public void givenSinglePrimitiveParameter_whenConstructingModel_thenInstrumentationIsGenerated() {
         // given
         JavaClassIdentifier processorClass = new JavaClassIdentifier(
                 ClassIdentifierParameters.builder()
@@ -75,7 +75,7 @@ public class DiSLModelTests {
      * Exportable Values: Both parameters and both fields
      */
     @Test
-    public void testModelConstructionForMultipleParametersAndFields() {
+    public void givenMultipleParametersAndFields_whenConstructingModel_thenAllValuesAreInstrumented() {
         // given
         JavaClassIdentifier taskRunnerClass = new JavaClassIdentifier(
                 ClassIdentifierParameters.builder()
@@ -154,7 +154,7 @@ public class DiSLModelTests {
      * Note: The current implementation imports the owner class, not the field type
      */
     @Test
-    public void testModelIncludesCorrectImportsForExternalPackageTypes() {
+    public void givenFieldFromExternalPackage_whenConstructingModel_thenOwnerClassIsImported() {
         // given
         JavaClassIdentifier repositoryClass = new JavaClassIdentifier(
                 ClassIdentifierParameters.builder()
@@ -205,7 +205,7 @@ public class DiSLModelTests {
      * Note: The current implementation imports the owner class, not the field type
      */
     @Test
-    public void testModelIncludesCorrectImportsForCustomTypes() {
+    public void givenFieldFromCustomPackage_whenConstructingModel_thenOwnerClassIsImported() {
         // given
         JavaClassIdentifier userClass = new JavaClassIdentifier(
                 ClassIdentifierParameters.builder()
@@ -262,7 +262,7 @@ public class DiSLModelTests {
      * is not fully implemented in the code emission.
      */
     @Test
-    public void testGenerationOfAfterReturningInstrumentation() {
+    public void givenReturnValueIdentifier_whenConstructingModel_thenInstrumentationIsGenerated() {
         // given
         JavaClassIdentifier formatterClass = new JavaClassIdentifier(
                 ClassIdentifierParameters.builder()
@@ -308,7 +308,7 @@ public class DiSLModelTests {
      * Activation Times: Both ActivationTime.BEFORE and ActivationTime.AFTER
      */
     @Test
-    public void testGenerationOfBeforeAndAfterInstrumentation() {
+    public void givenFieldIdentifier_whenConstructingModel_thenBeforeAndAfterInstrumentationIsGenerated() {
         // given
         JavaClassIdentifier stateManagerClass = new JavaClassIdentifier(
                 ClassIdentifierParameters.builder()
@@ -369,7 +369,7 @@ public class DiSLModelTests {
      * This should not fail but should generate instrumentation methods without a value collection.
      */
     @Test
-    public void testModelConstructionWithEmptyExportableValues() {
+    public void givenEmptyExportableValues_whenConstructingModel_thenBasicInstrumentationIsGenerated() {
         // given
         JavaClassIdentifier testClass = new JavaClassIdentifier(
                 ClassIdentifierParameters.builder()
