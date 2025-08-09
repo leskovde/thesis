@@ -101,4 +101,13 @@ public class Orchestrator {
                 .map(TestGenerationStrategy::getId)
                 .toArray(String[]::new);
     }
+
+    /**
+     * Gets the test generation strategy configured for this orchestrator.
+     *
+     * @return The test generation strategy identifier
+     */
+    public String getTestGenerationStrategy() {
+        return testGenerationStrategy;
+    }
 }

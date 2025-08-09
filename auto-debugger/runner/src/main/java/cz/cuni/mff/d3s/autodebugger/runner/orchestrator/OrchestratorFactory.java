@@ -35,6 +35,34 @@ public class OrchestratorFactory {
     }
 
     /**
+     * Creates an orchestrator for the specified language using arguments.
+     *
+     * @param arguments The arguments containing language and configuration
+     * @return Orchestrator instance
+     * @throws IllegalArgumentException if arguments or language is null or unsupported
+     */
+    public static Orchestrator create(Arguments arguments) {
+        if (arguments == null) {
+            throw new IllegalArgumentException("Arguments cannot be null");
+        }
+
+        if (arguments.language == null) {
+            throw new IllegalArgumentException("Language cannot be null");
+        }
+
+        if (!isLanguageSupported(arguments.language)) {
+            throw new IllegalArgumentException("Unsupported language: " + arguments.language);
+        }
+
+        // Create language-specific orchestrator
+        if (arguments.language == TargetLanguage.JAVA) {
+            return new JavaOrchestrator(arguments);
+        }
+
+        throw new IllegalArgumentException("Unsupported language: " + arguments.language);
+    }
+
+    /**
      * Creates an orchestrator for the specified language using string identifier.
      *
      * @param languageId The language identifier (case-insensitive)

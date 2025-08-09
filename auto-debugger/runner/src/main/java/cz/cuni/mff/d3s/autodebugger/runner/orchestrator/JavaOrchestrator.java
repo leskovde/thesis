@@ -26,17 +26,41 @@ public class JavaOrchestrator extends Orchestrator {
      * Creates dummy arguments for Java testing.
      */
     private static Arguments createDummyJavaArguments() {
-        Arguments args = new Arguments();
-        args.language = cz.cuni.mff.d3s.autodebugger.model.common.TargetLanguage.JAVA;
-        args.applicationJarPath = "dummy.jar";
-        args.sourceCodePath = "src";
-        args.dislHomePath = "disl";
-        args.targetMethodReference = "org.example.Test.method()";
-        args.testGenerationStrategy = "trace-based-basic";
-        args.classpath = java.util.List.of();
-        args.targetParameters = java.util.List.of();
-        args.targetFields = java.util.List.of();
-        args.runtimeArguments = java.util.List.of();
-        return args;
+        try {
+            // Create temporary directories and files for testing
+            java.nio.file.Path tempDir = java.nio.file.Files.createTempDirectory("autodebugger-test");
+            java.nio.file.Path dummyJar = tempDir.resolve("dummy.jar");
+            java.nio.file.Files.createFile(dummyJar);
+
+            java.nio.file.Path sourceDir = tempDir.resolve("src");
+            java.nio.file.Files.createDirectories(sourceDir);
+
+            java.nio.file.Path dislHome = tempDir.resolve("disl");
+            java.nio.file.Files.createDirectories(dislHome);
+
+            // Create required DiSL structure
+            java.nio.file.Path dislBin = dislHome.resolve("bin");
+            java.nio.file.Files.createDirectories(dislBin);
+            java.nio.file.Path dislPy = dislBin.resolve("disl.py");
+            java.nio.file.Files.createFile(dislPy);
+
+            java.nio.file.Path dislOutputLib = dislHome.resolve("output/lib");
+            java.nio.file.Files.createDirectories(dislOutputLib);
+
+            Arguments args = new Arguments();
+            args.language = cz.cuni.mff.d3s.autodebugger.model.common.TargetLanguage.JAVA;
+            args.applicationJarPath = dummyJar.toString();
+            args.sourceCodePath = sourceDir.toString();
+            args.dislHomePath = dislHome.toString();
+            args.targetMethodReference = "org.example.Test.method()";
+            args.testGenerationStrategy = "trace-based-basic";
+            args.classpath = java.util.List.of();
+            args.targetParameters = java.util.List.of();
+            args.targetFields = java.util.List.of();
+            args.runtimeArguments = java.util.List.of();
+            return args;
+        } catch (java.io.IOException e) {
+            throw new RuntimeException("Failed to create dummy arguments for testing", e);
+        }
     }
 }
