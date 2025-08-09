@@ -35,7 +35,7 @@ public class DiSLCompiler {
             String fileName = DISL_CLASS_NAME + ".java";
             File dislClassFile = new File(instrumentationSourceFile, fileName);
             File collectorClassFile = new File(instrumentationSourceFile, "Collector.java");
-            File collectorReClassFile = new File(instrumentationSourceFile, "CollectorRe.java");
+            File collectorReClassFile = new File(instrumentationSourceFile, "CollectorRE.java");
             JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
             try (StandardJavaFileManager fileManager =
                          compiler.getStandardFileManager(null, null, null)) {

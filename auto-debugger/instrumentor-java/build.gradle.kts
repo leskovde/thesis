@@ -17,6 +17,8 @@ dependencies {
     implementation(libs.log4j)
     implementation(libs.javatuples)
     testImplementation(libs.bundles.junit)
+    testImplementation(project(mapOf("path" to ":analyzer-common")))
+    testImplementation(project(mapOf("path" to ":analyzer-java")))
 }
 
 tasks.test {
