@@ -16,6 +16,7 @@ dependencies {
     implementation(project(mapOf("path" to ":analyzer-common")))
     implementation(libs.log4j)
     testImplementation(libs.bundles.junit)
+    testImplementation(libs.mockito)
 }
 
 tasks.test {

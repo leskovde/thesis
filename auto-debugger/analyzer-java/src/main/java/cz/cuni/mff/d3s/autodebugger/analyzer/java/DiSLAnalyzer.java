@@ -29,6 +29,22 @@ public class DiSLAnalyzer implements Analyzer {
     private final JavaRunConfiguration runConfiguration;
 
     /**
+     * Gets the timeout in seconds for process execution.
+     * Protected to allow overriding in tests.
+     */
+    protected long getTimeoutSeconds() {
+        return DEFAULT_TIMEOUT_SECONDS;
+    }
+
+    /**
+     * Gets the run configuration.
+     * Protected to allow access in tests.
+     */
+    protected JavaRunConfiguration getRunConfiguration() {
+        return runConfiguration;
+    }
+
+    /**
      * Executes the instrumented Java application and collects runtime traces.
      * Runs the application as a separate process with DiSL instrumentation,
      * captures output streams, and deserializes the collected trace data.
@@ -62,10 +78,10 @@ public class DiSLAnalyzer implements Analyzer {
             errorReader.start();
             
             // Wait for process completion with timeout
-            boolean finished = process.waitFor(DEFAULT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            boolean finished = process.waitFor(getTimeoutSeconds(), TimeUnit.SECONDS);
             
             if (!finished) {
-                log.warn("Analysis process timed out after {} seconds, terminating", DEFAULT_TIMEOUT_SECONDS);
+                log.warn("Analysis process timed out after {} seconds, terminating", getTimeoutSeconds());
                 process.destroyForcibly();
                 throw new RuntimeException("Analysis process timed out");
             }
@@ -108,7 +124,7 @@ public class DiSLAnalyzer implements Analyzer {
             throw new IllegalArgumentException("Instrumentation file does not exist: " + instrumentationPath);
         }
         
-        if (!instrumentationPath.endsWith(".jar")) {
+        if (!instrumentationPath.toString().endsWith(".jar")) {
             throw new IllegalArgumentException("Expected JAR file for DiSL instrumentation, got: " + instrumentationPath);
         }
         
@@ -158,7 +174,7 @@ public class DiSLAnalyzer implements Analyzer {
 //        return List.of();
 //    }
 
-    private List<String> buildExecutionCommand(Path instrumentationJarPath) {
+   public List<String> buildExecutionCommand(Path instrumentationJarPath) {
         List<String> command = new ArrayList<>();
 
         // Run the disl.py script
