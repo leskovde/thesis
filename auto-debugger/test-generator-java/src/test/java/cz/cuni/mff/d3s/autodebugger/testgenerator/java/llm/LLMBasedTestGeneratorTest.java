@@ -8,6 +8,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import java.nio.file.Files;
+
 import java.nio.file.Path;
 import java.util.List;
 
@@ -22,15 +24,29 @@ class LLMBasedTestGeneratorTest {
     @TempDir
     Path tempDir;
 
+    private Path mockSourceFile;
+
     @BeforeEach
-    void setUp() {
+    void setUp() throws Exception {
         generator = new LLMBasedTestGenerator();
-        
+
         // Create a simple trace for testing
         trace = new Trace();
         trace.addIntValue(0, 10);
         trace.addIntValue(1, 5);
-        
+
+        // Create a mock source file for testing
+        mockSourceFile = tempDir.resolve("Calculator.java");
+        Files.writeString(mockSourceFile, """
+            package com.example;
+
+            public class Calculator {
+                public int add(int a, int b) {
+                    return a + b;
+                }
+            }
+            """);
+
         // Create test context
         context = TestGenerationContext.builder()
                 .targetMethodSignature("Calculator.add")
@@ -66,8 +82,8 @@ class LLMBasedTestGeneratorTest {
     @Test
     void testGenerateTestsWithoutConfiguration() {
         // Should throw exception if not configured
-        assertThrows(IllegalStateException.class, () -> 
-            generator.generateTests(trace, tempDir, context));
+        assertThrows(IllegalStateException.class, () ->
+            generator.generateTests(trace, mockSourceFile, context));
     }
 
     @Test
@@ -85,7 +101,7 @@ class LLMBasedTestGeneratorTest {
 
         // This should not throw an exception, but may return empty list
         // since we're using a mock configuration
-        List<Path> result = generator.generateTests(trace, tempDir, context);
+        List<Path> result = generator.generateTests(trace, mockSourceFile, context);
         assertNotNull(result);
     }
 
@@ -100,7 +116,7 @@ class LLMBasedTestGeneratorTest {
         generator.configure(config);
 
         assertThrows(IllegalArgumentException.class, () ->
-            generator.generateTests((Trace) null, tempDir, context));
+            generator.generateTests((Trace) null, mockSourceFile, context));
     }
 
     @Test
@@ -113,8 +129,23 @@ class LLMBasedTestGeneratorTest {
 
         generator.configure(config);
 
-        assertThrows(IllegalArgumentException.class, () -> 
+        assertThrows(IllegalArgumentException.class, () ->
             generator.generateTests(trace, null, context));
+    }
+
+    @Test
+    void testGenerateTestsWithDirectoryAsSourcePath() {
+        LLMConfiguration config = LLMConfiguration.builder()
+                .provider("mock")
+                .modelName("test-model")
+                .apiKey("test-key")
+                .build();
+
+        generator.configure(config);
+
+        // Should throw exception when passing a directory instead of a file
+        assertThrows(IllegalArgumentException.class, () ->
+            generator.generateTests(trace, tempDir, context));
     }
 
     @Test
@@ -127,8 +158,8 @@ class LLMBasedTestGeneratorTest {
 
         generator.configure(config);
 
-        assertThrows(IllegalArgumentException.class, () -> 
-            generator.generateTests(trace, tempDir, null));
+        assertThrows(IllegalArgumentException.class, () ->
+            generator.generateTests(trace, mockSourceFile, null));
     }
 
     @Test

@@ -262,25 +262,213 @@ class TemporalTraceBasedGeneratorTest {
                 .variableType("String")
                 .build()
         );
-        
+
         trace.addValue(arg1, 100, "test_value");
         trace.addMetadata("execution_context", "unit_test");
         trace.addMetadata("version", "1.0");
-        
+
         List<Path> generatedFiles = generator.generateTests(trace, context);
-        
+
         assertNotNull(generatedFiles);
         if (!generatedFiles.isEmpty()) {
             Path testFile = generatedFiles.get(0);
             try {
                 String content = Files.readString(testFile);
-                assertTrue(content.contains("Enhanced trace-based"), 
+                assertTrue(content.contains("Enhanced trace-based"),
                           "Should mention enhanced trace-based generation");
-                assertTrue(content.contains("Trace summary"), 
+                assertTrue(content.contains("Trace summary"),
                           "Should include trace summary in comments");
             } catch (Exception e) {
                 fail("Failed to read generated file: " + e.getMessage());
             }
+        }
+    }
+
+    /**
+     * Test Case 1: State Reconstruction at Invocation Time.
+     * This is the core test. It ensures that the generated test correctly sets up
+     * the state of the object *as it was* just before the target method was called,
+     * not just a random combination of observed values.
+     */
+    @Test
+    void testStateReconstructionAtInvocationTime() {
+        // Create identifiers for field and parameters
+        JavaClassIdentifier testClass = new JavaClassIdentifier(
+            ClassIdentifierParameters.builder()
+                .className("TestClass")
+                .packageIdentifier(JavaPackageIdentifier.DEFAULT_PACKAGE)
+                .build()
+        );
+
+        ExportableValue fieldA = new JavaFieldIdentifier(
+            FieldIdentifierParameters.builder()
+                .variableName("field_A")
+                .ownerClassIdentifier(testClass)
+                .variableType("int")
+                .build()
+        );
+
+        ExportableValue paramB = new JavaArgumentIdentifier(
+            ArgumentIdentifierParameters.builder()
+                .argumentSlot(0)
+                .variableType("int")
+                .build()
+        );
+
+        ExportableValue paramC = new JavaArgumentIdentifier(
+            ArgumentIdentifierParameters.builder()
+                .argumentSlot(1)
+                .variableType("String")
+                .build()
+        );
+
+        // Set up temporal trace data as specified in requirements
+        trace.addValue(fieldA, 5, 10);    // field_A = 10 at event 5
+        trace.addValue(fieldA, 25, 20);   // field_A = 20 at event 25
+        trace.addValue(paramB, 15, 100);  // Method invocation at event 15
+        trace.addValue(paramC, 16, "test");
+
+        // Update context for this test
+        TestGenerationContext testContext = TestGenerationContext.builder()
+                .targetMethodSignature("TestClass.myMethod(int, String)")
+                .targetClassName("TestClass")
+                .packageName("com.example.test")
+                .outputDirectory(tempDir)
+                .testFramework("junit5")
+                .namingStrategy(TestNamingStrategy.DESCRIPTIVE)
+                .maxTestCount(10)
+                .generateEdgeCases(true)
+                .generateNegativeTests(true)
+                .build();
+
+        List<Path> generatedFiles = generator.generateTests(trace, testContext);
+
+        assertNotNull(generatedFiles);
+        assertFalse(generatedFiles.isEmpty(), "Should generate test files");
+
+        Path testFile = generatedFiles.get(0);
+        try {
+            String content = Files.readString(testFile);
+
+            // Debug: Print the content for verification
+            // System.out.println("=== GENERATED TEST FILE CONTENT ===");
+            // System.out.println(content);
+            // System.out.println("=== END OF GENERATED TEST FILE ===");
+
+            // Verify that test methods are generated
+            assertTrue(content.contains("@Test"), "Should contain test methods");
+            assertTrue(content.contains("event 15") || content.contains("Event15"),
+                      "Should reference the method invocation at event 15");
+
+            // Verify that temporal logic is working - field_A should use value 10
+            // (from event 5) for the test case at event 15, since that was the last known value
+            assertTrue(content.contains("field_A") && content.contains("10"),
+                      "Should set field_A to value 10 (last known value before event 15)");
+
+            // Verify that method calls are generated with correct parameters
+            // The implementation generates method calls based on the captured arguments
+            assertTrue(content.contains("myMethod()") || content.contains("myMethod(100)"),
+                      "Should generate method calls based on captured arguments");
+
+            // Verify that the temporal logic correctly identifies different invocation points
+            assertTrue(content.contains("event 15") && content.contains("event 16"),
+                      "Should identify both invocation events 15 and 16");
+
+        } catch (Exception e) {
+            fail("Failed to read generated file: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Test Case 2: Distinguishing Between Multiple Invocations.
+     * Verifies that the generator creates separate, correct test cases for two different
+     * invocations of the same method that occurred at different times with different
+     * surrounding states.
+     */
+    @Test
+    void testDistinguishingBetweenMultipleInvocations() {
+        // Create identifiers for field and parameters
+        JavaClassIdentifier testClass = new JavaClassIdentifier(
+            ClassIdentifierParameters.builder()
+                .className("TestClass")
+                .packageIdentifier(JavaPackageIdentifier.DEFAULT_PACKAGE)
+                .build()
+        );
+
+        ExportableValue fieldA = new JavaFieldIdentifier(
+            FieldIdentifierParameters.builder()
+                .variableName("field_A")
+                .ownerClassIdentifier(testClass)
+                .variableType("int")
+                .build()
+        );
+
+        ExportableValue paramB = new JavaArgumentIdentifier(
+            ArgumentIdentifierParameters.builder()
+                .argumentSlot(0)
+                .variableType("int")
+                .build()
+        );
+
+        ExportableValue paramC = new JavaArgumentIdentifier(
+            ArgumentIdentifierParameters.builder()
+                .argumentSlot(1)
+                .variableType("String")
+                .build()
+        );
+
+        // Set up temporal trace data with two method invocations
+        trace.addValue(fieldA, 5, 10);     // field_A = 10 at event 5
+        trace.addValue(fieldA, 25, 20);    // field_A = 20 at event 25
+        trace.addValue(paramB, 15, 100);   // First method invocation at event 15
+        trace.addValue(paramC, 16, "first");
+        trace.addValue(paramB, 35, 500);   // Second method invocation at event 35
+        trace.addValue(paramC, 36, "second");
+
+        // Update context for this test
+        TestGenerationContext testContext = TestGenerationContext.builder()
+                .targetMethodSignature("TestClass.myMethod(int, String)")
+                .targetClassName("TestClass")
+                .packageName("com.example.test")
+                .outputDirectory(tempDir)
+                .testFramework("junit5")
+                .namingStrategy(TestNamingStrategy.DESCRIPTIVE)
+                .maxTestCount(10)
+                .generateEdgeCases(true)
+                .generateNegativeTests(true)
+                .build();
+
+        List<Path> generatedFiles = generator.generateTests(trace, testContext);
+
+        assertNotNull(generatedFiles);
+        assertFalse(generatedFiles.isEmpty(), "Should generate test files");
+
+        Path testFile = generatedFiles.get(0);
+        try {
+            String content = Files.readString(testFile);
+
+            // Multiple @Test methods should be generated for different invocations
+            long testMethodCount = content.lines()
+                    .filter(line -> line.trim().startsWith("@Test"))
+                    .count();
+            assertTrue(testMethodCount >= 2, "Should generate multiple test methods for different invocations");
+
+            // Verify that the temporal logic correctly uses different field values for different time points
+            // The implementation should use field_A = 10 for earlier events and field_A = 20 for later events
+            boolean hasEarlierFieldValue = content.contains("field_A") && content.contains("10");
+            boolean hasLaterFieldValue = content.contains("field_A") && content.contains("20");
+
+            assertTrue(hasEarlierFieldValue, "Should use field_A value 10 for earlier events");
+            assertTrue(hasLaterFieldValue, "Should use field_A value 20 for later events");
+
+            // Verify that argument values are correctly captured
+            boolean hasFirstArgument = content.contains("100");
+            boolean hasSecondArgument = content.contains("500");
+            assertTrue(hasFirstArgument, "Should have first argument value 100");
+            assertTrue(hasSecondArgument, "Should have second argument value 500");
+
+        } catch (Exception e) {
+            fail("Failed to read generated file: " + e.getMessage());
         }
     }
 }

@@ -34,9 +34,12 @@ public class LLMBasedTestGenerator implements LLMBasedGenerator {
     
     @Override
     public void configure(LLMConfiguration config) {
+        if (config == null) {
+            throw new IllegalArgumentException("LLM configuration cannot be null");
+        }
         this.llmConfig = config;
         this.llmClient.configure(config);
-        log.info("Configured LLM-based test generator with provider: {}, model: {}", 
+        log.info("Configured LLM-based test generator with provider: {}, model: {}",
                 config.getProvider(), config.getModelName());
     }
     
@@ -47,6 +50,23 @@ public class LLMBasedTestGenerator implements LLMBasedGenerator {
     
     @Override
     public List<Path> generateTests(Trace trace, Path sourceCodePath, TestGenerationContext context) {
+        // Validate parameters
+        if (trace == null) {
+            throw new IllegalArgumentException("Trace cannot be null");
+        }
+        if (sourceCodePath == null) {
+            throw new IllegalArgumentException("Source code path cannot be null");
+        }
+        if (context == null) {
+            throw new IllegalArgumentException("Test generation context cannot be null");
+        }
+        if (!Files.exists(sourceCodePath)) {
+            throw new IllegalArgumentException("Source code path does not exist: " + sourceCodePath);
+        }
+        if (!Files.isRegularFile(sourceCodePath)) {
+            throw new IllegalArgumentException("Source code path must be a file, not a directory: " + sourceCodePath);
+        }
+
         log.info("Generating LLM-based tests for method: {}", context.getTargetMethodSignature());
 
         if (llmConfig == null) {
@@ -85,6 +105,9 @@ public class LLMBasedTestGenerator implements LLMBasedGenerator {
             log.info("Successfully generated LLM-based test file: {}", testFile);
             return List.of(testFile);
 
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            // Re-throw validation exceptions
+            throw e;
         } catch (Exception e) {
             log.error("Failed to generate LLM-based tests", e);
             return List.of();
@@ -96,6 +119,23 @@ public class LLMBasedTestGenerator implements LLMBasedGenerator {
      * This provides richer context to the LLM for generating more sophisticated tests.
      */
     public List<Path> generateTests(TemporalTrace enhancedTrace, Path sourceCodePath, TestGenerationContext context) {
+        // Validate parameters
+        if (enhancedTrace == null) {
+            throw new IllegalArgumentException("Enhanced trace cannot be null");
+        }
+        if (sourceCodePath == null) {
+            throw new IllegalArgumentException("Source code path cannot be null");
+        }
+        if (context == null) {
+            throw new IllegalArgumentException("Test generation context cannot be null");
+        }
+        if (!Files.exists(sourceCodePath)) {
+            throw new IllegalArgumentException("Source code path does not exist: " + sourceCodePath);
+        }
+        if (!Files.isRegularFile(sourceCodePath)) {
+            throw new IllegalArgumentException("Source code path must be a file, not a directory: " + sourceCodePath);
+        }
+
         log.info("Generating LLM-based tests from enhanced trace for method: {}", context.getTargetMethodSignature());
 
         if (llmConfig == null) {
@@ -134,6 +174,9 @@ public class LLMBasedTestGenerator implements LLMBasedGenerator {
             log.info("Successfully generated enhanced LLM-based test file: {}", testFile);
             return List.of(testFile);
 
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            // Re-throw validation exceptions
+            throw e;
         } catch (Exception e) {
             log.error("Failed to generate enhanced LLM-based tests", e);
             return List.of();

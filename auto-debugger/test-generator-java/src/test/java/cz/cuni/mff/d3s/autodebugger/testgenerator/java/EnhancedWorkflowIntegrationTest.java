@@ -19,6 +19,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -280,5 +281,110 @@ class EnhancedWorkflowIntegrationTest {
         trace.addMetadata("edge_cases", "division_by_zero");
         
         return trace;
+    }
+
+    /**
+     * Test Case 1: Full Conversion and Generation Workflow.
+     * This is an end-to-end test for the enhanced workflow. It starts with a legacy
+     * Trace object, converts it, and generates a final, compilable test file.
+     */
+    @Test
+    void testFullConversionAndGenerationWorkflow() {
+        // 1. Create a legacy trace (simulating existing data)
+        Trace legacyTrace = new Trace();
+        legacyTrace.addIntValue(0, 100);  // parameter
+        legacyTrace.addIntValue(1, 42);   // field (using int since legacy trace doesn't support strings)
+
+        // 2. Create identifier mapping as specified in requirements
+        Map<Integer, JavaValueIdentifier> workflowIdentifierMapping = new HashMap<>();
+
+        JavaArgumentIdentifier arg0 = new JavaArgumentIdentifier(
+            ArgumentIdentifierParameters.builder()
+                .argumentSlot(0)
+                .variableType("int")
+                .build()
+        );
+
+        JavaClassIdentifier statusClass = new JavaClassIdentifier(
+            ClassIdentifierParameters.builder()
+                .className("StatusManager")
+                .packageIdentifier(JavaPackageIdentifier.DEFAULT_PACKAGE)
+                .build()
+        );
+
+        JavaFieldIdentifier statusField = new JavaFieldIdentifier(
+            FieldIdentifierParameters.builder()
+                .variableName("status")
+                .ownerClassIdentifier(statusClass)
+                .variableType("int")
+                .build()
+        );
+
+        workflowIdentifierMapping.put(0, arg0);
+        workflowIdentifierMapping.put(1, statusField);
+
+        // 3. Create test generation context for updateStatus method
+        TestGenerationContext workflowContext = TestGenerationContext.builder()
+                .targetMethodSignature("StatusManager.updateStatus(int)")
+                .targetClassName("StatusManager")
+                .packageName("com.example.test")
+                .outputDirectory(tempDir)
+                .testFramework("junit5")
+                .namingStrategy(TestNamingStrategy.DESCRIPTIVE)
+                .maxTestCount(5)
+                .generateEdgeCases(true)
+                .generateNegativeTests(true)
+                .build();
+
+        // 4. Call TraceAdapter.convertToEnhanced to create an TemporalTrace
+        TemporalTrace enhancedTrace = TraceAdapter.convertToEnhanced(legacyTrace, workflowIdentifierMapping);
+
+        // 5. Verify conversion results as specified in requirements
+        assertNotNull(enhancedTrace, "convertToEnhanced must produce a valid TemporalTrace");
+
+        // Assert that trace.getLatestValueBefore(identifier_for_slot_0, ...) returns 100
+        Optional<Object> latestArg0Value = enhancedTrace.getLatestValueBefore(arg0, Integer.MAX_VALUE);
+        assertTrue(latestArg0Value.isPresent(), "Should have value for argument identifier");
+        assertEquals(100, latestArg0Value.get(), "getLatestValueBefore for slot 0 should return 100");
+
+        // Assert that trace.getLatestValueBefore(identifier_for_slot_1, ...) returns 42
+        Optional<Object> latestStatusValue = enhancedTrace.getLatestValueBefore(statusField, Integer.MAX_VALUE);
+        assertTrue(latestStatusValue.isPresent(), "Should have value for status field identifier");
+        assertEquals(42, latestStatusValue.get(), "getLatestValueBefore for slot 1 should return 42");
+
+        // 6. Pass the resulting TemporalTrace to the TemporalTraceBasedGenerator
+        TemporalTraceBasedGenerator generator = new TemporalTraceBasedGenerator();
+        List<Path> generatedFiles = generator.generateTests(enhancedTrace, workflowContext);
+
+        // 7. Verify generation results as specified in requirements
+        assertNotNull(generatedFiles, "TemporalTraceBasedGenerator must successfully generate files");
+        assertFalse(generatedFiles.isEmpty(), "Should generate at least one test file");
+
+        // The TemporalTraceBasedGenerator must successfully generate a compilable .java test file
+        Path testFile = generatedFiles.get(0);
+        assertTrue(Files.exists(testFile), "Generated test file must exist");
+        assertTrue(testFile.toString().endsWith(".java"), "Generated file must be a .java file");
+
+        try {
+            String content = Files.readString(testFile);
+
+            // The content of the generated test file must correctly reflect the data from the original legacy trace
+            assertTrue(content.contains("package com.example.test"), "Should have correct package declaration");
+            assertTrue(content.contains("class"), "Should contain a test class");
+            assertTrue(content.contains("@Test"), "Should contain test methods");
+
+            // with a setup for the status field and a method call instance.updateStatus(100)
+            assertTrue(content.contains("status") && content.contains("42"),
+                      "Should have setup for the status field with value 42");
+            assertTrue(content.contains("updateStatus(100)"),
+                      "Should have method call instance.updateStatus(100)");
+
+            System.out.println("✅ Full conversion and generation workflow completed successfully!");
+            System.out.println("📄 Generated test file: " + testFile.getFileName());
+            System.out.println("📊 Legacy trace -> Enhanced trace -> Generated test file");
+
+        } catch (Exception e) {
+            fail("Failed to read or validate generated test file: " + e.getMessage());
+        }
     }
 }

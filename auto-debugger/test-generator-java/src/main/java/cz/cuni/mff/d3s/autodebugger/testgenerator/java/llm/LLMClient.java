@@ -26,6 +26,9 @@ public class LLMClient {
     private AnthropicClient anthropicClient;
 
     public void configure(LLMConfiguration config) {
+        if (config == null) {
+            throw new IllegalArgumentException("LLM configuration cannot be null");
+        }
         this.config = config;
         this.httpClient = HttpClient.newBuilder()
                 .connectTimeout(config.getRequestTimeout())
@@ -57,7 +60,9 @@ public class LLMClient {
 
         try {
             String response;
-            if ("anthropic".equalsIgnoreCase(config.getProvider()) && anthropicClient != null) {
+            if ("mock".equalsIgnoreCase(config.getProvider())) {
+                response = generateMockResponse(prompt);
+            } else if ("anthropic".equalsIgnoreCase(config.getProvider()) && anthropicClient != null) {
                 response = sendAnthropicRequest(prompt);
             } else {
                 response = sendRequest(prompt);
@@ -159,17 +164,35 @@ public class LLMClient {
         if (config.getApiEndpoint() != null && !config.getApiEndpoint().isEmpty()) {
             return config.getApiEndpoint();
         }
-        
-        switch (config.getProvider().toLowerCase()) {
-            case "openai":
-                return "https://api.openai.com/v1/chat/completions";
-            case "anthropic":
-                return "https://api.anthropic.com/v1/messages";
-            default:
-                throw new IllegalArgumentException("Unknown provider: " + config.getProvider());
-        }
+
+        return switch (config.getProvider().toLowerCase()) {
+            case "openai" -> "https://api.openai.com/v1/chat/completions";
+            case "anthropic" -> "https://api.anthropic.com/v1/messages";
+            case "mock" -> "http://localhost:8080/mock"; // Mock endpoint for testing
+            default -> throw new IllegalArgumentException("Unknown provider: " + config.getProvider());
+        };
     }
-    
+
+    private String generateMockResponse(String prompt) {
+        // Generate a mock test class for testing purposes
+        return """
+            ```java
+            package com.example;
+
+            import org.junit.jupiter.api.Test;
+            import static org.junit.jupiter.api.Assertions.*;
+
+            public class MockGeneratedTest {
+                @Test
+                void testMockMethod() {
+                    // Mock test generated for testing purposes
+                    assertTrue(true);
+                }
+            }
+            ```
+            """;
+    }
+
     private String extractCodeFromResponse(String response) {
         // This is a simplified implementation - in practice, you'd want to use a JSON library
         // and handle the specific response format for each provider
