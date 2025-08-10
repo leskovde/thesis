@@ -16,8 +16,9 @@ dependencies {
     implementation(project(mapOf("path" to ":model-common")))
     implementation(project(mapOf("path" to ":model-java")))
     implementation(libs.log4j)
-    implementation("com.anthropic:anthropic-java:2.1.0")
+    implementation(libs.anthropic.java)
     testImplementation(libs.bundles.junit)
+    testImplementation(libs.mockito)
 }
 
 tasks.assemble {

@@ -5,6 +5,9 @@ import cz.cuni.mff.d3s.autodebugger.model.common.trace.TemporalTrace;
 import cz.cuni.mff.d3s.autodebugger.model.common.trace.Trace;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.JavaValueIdentifier;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.common.*;
+import cz.cuni.mff.d3s.autodebugger.testgenerator.common.exceptions.LLMConfigurationException;
+import cz.cuni.mff.d3s.autodebugger.testgenerator.java.llm.exceptions.TestGenerationWorkflowException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -19,28 +22,25 @@ import java.util.*;
  * and source code analysis.
  */
 @Slf4j
+@RequiredArgsConstructor
 public class LLMBasedTestGenerator implements LLMBasedGenerator {
-    
+
     private LLMConfiguration llmConfig;
-    private final LLMClient llmClient;
+    private final AnthropicClient anthropicClient;
     private final PromptBuilder promptBuilder;
     private final CodeValidator codeValidator;
-    
-    public LLMBasedTestGenerator() {
-        this.llmClient = new LLMClient();
-        this.promptBuilder = new PromptBuilder();
-        this.codeValidator = new CodeValidator();
-    }
-    
+
     @Override
-    public void configure(LLMConfiguration config) {
+    public void configure(LLMConfiguration config) throws LLMConfigurationException {
         if (config == null) {
-            throw new IllegalArgumentException("LLM configuration cannot be null");
+            throw new LLMConfigurationException("LLM configuration cannot be null");
         }
         this.llmConfig = config;
-        this.llmClient.configure(config);
-        log.info("Configured LLM-based test generator with provider: {}, model: {}",
-                config.getProvider(), config.getModelName());
+
+        // Configure the Anthropic client with the same configuration
+        anthropicClient.configure(config);
+
+        log.info("Configured LLM-based test generator with model: {}", config.getModelName());
     }
     
     @Override
@@ -52,19 +52,19 @@ public class LLMBasedTestGenerator implements LLMBasedGenerator {
     public List<Path> generateTests(Trace trace, Path sourceCodePath, TestGenerationContext context) {
         // Validate parameters
         if (trace == null) {
-            throw new IllegalArgumentException("Trace cannot be null");
+            throw new TestGenerationWorkflowException("Trace cannot be null", "Parameter Validation", sourceCodePath != null ? sourceCodePath.toString() : null, null);
         }
         if (sourceCodePath == null) {
-            throw new IllegalArgumentException("Source code path cannot be null");
+            throw new TestGenerationWorkflowException("Source code path cannot be null", "Parameter Validation", null, null);
         }
         if (context == null) {
-            throw new IllegalArgumentException("Test generation context cannot be null");
+            throw new TestGenerationWorkflowException("Test generation context cannot be null", "Parameter Validation", sourceCodePath.toString(), null);
         }
         if (!Files.exists(sourceCodePath)) {
-            throw new IllegalArgumentException("Source code path does not exist: " + sourceCodePath);
+            throw new TestGenerationWorkflowException("Source code path does not exist: " + sourceCodePath, "Parameter Validation", sourceCodePath.toString(), null);
         }
         if (!Files.isRegularFile(sourceCodePath)) {
-            throw new IllegalArgumentException("Source code path must be a file, not a directory: " + sourceCodePath);
+            throw new TestGenerationWorkflowException("Source code path must be a file, not a directory: " + sourceCodePath, "Parameter Validation", sourceCodePath.toString(), null);
         }
 
         log.info("Generating LLM-based tests for method: {}", context.getTargetMethodSignature());
@@ -82,7 +82,7 @@ public class LLMBasedTestGenerator implements LLMBasedGenerator {
 
             // Generate initial test suite
             String prompt = promptBuilder.buildTestGenerationPrompt(promptContext);
-            String generatedCode = llmClient.generateCode(prompt);
+            String generatedCode = anthropicClient.generateCode(prompt);
 
             // Validate and refine if needed
             if (llmConfig.isEnableIterativeRefinement()) {
@@ -105,12 +105,18 @@ public class LLMBasedTestGenerator implements LLMBasedGenerator {
             log.info("Successfully generated LLM-based test file: {}", testFile);
             return List.of(testFile);
 
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            // Re-throw validation exceptions
+        } catch (TestGenerationWorkflowException e) {
+            // Re-throw workflow exceptions
             throw e;
         } catch (Exception e) {
             log.error("Failed to generate LLM-based tests", e);
-            return List.of();
+            throw new TestGenerationWorkflowException(
+                "LLM-based test generation failed: " + e.getMessage(),
+                "Test Generation",
+                sourceCodePath.toString(),
+                context.getTargetMethodSignature(),
+                e
+            );
         }
     }
 
@@ -151,7 +157,7 @@ public class LLMBasedTestGenerator implements LLMBasedGenerator {
 
             // Generate initial test suite
             String prompt = promptBuilder.buildTestGenerationPrompt(promptContext);
-            String generatedCode = llmClient.generateCode(prompt);
+            String generatedCode = anthropicClient.generateCode(prompt);
 
             // Validate and refine if needed
             if (llmConfig.isEnableIterativeRefinement()) {
@@ -320,7 +326,7 @@ public class LLMBasedTestGenerator implements LLMBasedGenerator {
             String refinementPrompt = promptBuilder.buildRefinementPrompt(currentCode, validation, context);
             
             try {
-                String refinedCode = llmClient.generateCode(refinementPrompt);
+                String refinedCode = anthropicClient.generateCode(refinementPrompt);
                 currentCode = refinedCode;
                 log.debug("Completed refinement iteration {}", iteration + 1);
             } catch (Exception e) {
@@ -338,25 +344,35 @@ public class LLMBasedTestGenerator implements LLMBasedGenerator {
         String fixPrompt = promptBuilder.buildErrorFixPrompt(code, validation, context);
         
         try {
-            return llmClient.generateCode(fixPrompt);
+            return anthropicClient.generateCode(fixPrompt);
         } catch (Exception e) {
             log.warn("Failed to fix validation errors: {}", e.getMessage());
             return code; // Return original code if fixing fails
         }
     }
     
-    private Path writeTestFile(String testCode, TestGenerationContext context) throws IOException {
-        // Extract class name from generated code
-        String className = extractClassNameFromCode(testCode);
-        if (className == null) {
-            className = extractClassNameFromMethod(context.getTargetMethodSignature()) + "Test";
+    private Path writeTestFile(String testCode, TestGenerationContext context) throws TestGenerationWorkflowException {
+        try {
+            // Extract class name from generated code
+            String className = extractClassNameFromCode(testCode);
+            if (className == null) {
+                className = extractClassNameFromMethod(context.getTargetMethodSignature()) + "Test";
+            }
+
+            Path testFile = context.getOutputDirectory().resolve(className + ".java");
+            Files.createDirectories(testFile.getParent());
+            Files.write(testFile, testCode.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+
+            return testFile;
+        } catch (Exception e) {
+            throw new TestGenerationWorkflowException(
+                "Failed to write test file: " + e.getMessage(),
+                "Test File Writing",
+                null,
+                context.getTargetMethodSignature(),
+                e
+            );
         }
-        
-        Path testFile = context.getOutputDirectory().resolve(className + ".java");
-        Files.createDirectories(testFile.getParent());
-        Files.write(testFile, testCode.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-        
-        return testFile;
     }
     
     private String extractClassNameFromCode(String code) {

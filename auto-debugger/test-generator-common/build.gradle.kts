@@ -12,6 +12,8 @@ repositories {
 
 dependencies {
     implementation(project(mapOf("path" to ":model-common")))
+    implementation(libs.anthropic.java)
+    implementation(libs.log4j)
     testImplementation(libs.bundles.junit)
 }
 

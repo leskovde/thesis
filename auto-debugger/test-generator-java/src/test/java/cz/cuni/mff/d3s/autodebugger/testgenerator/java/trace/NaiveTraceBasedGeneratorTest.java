@@ -38,7 +38,7 @@ class NaiveTraceBasedGeneratorTest {
      * generated test setup.
      */
     @Test
-    void testHappyPathWithMultipleInvocationsAndState() throws Exception {
+    void givenMultipleInvocationsAndState_whenGeneratingTests_thenCreatesDistinctTestCases() throws Exception {
         // Setup identifier mapping - only use primitive types that are supported
         JavaArgumentIdentifier arg0 = new JavaArgumentIdentifier(
             ArgumentIdentifierParameters.builder()
@@ -155,7 +155,7 @@ class NaiveTraceBasedGeneratorTest {
      * NOTE: the current implementation has bugs with literal formatting that should be fixed.
      */
     @Test
-    void testCorrectLiteralFormattingForVariousPrimitiveTypes() throws Exception {
+    void givenVariousPrimitiveTypes_whenGeneratingTests_thenFormatsLiteralsCorrectly() throws Exception {
         // Setup identifier mapping for different primitive types (only supported ones)
         JavaArgumentIdentifier longArg = new JavaArgumentIdentifier(
             ArgumentIdentifierParameters.builder()
@@ -247,7 +247,7 @@ class NaiveTraceBasedGeneratorTest {
      * NOTE: Current implementation generates 0 scenarios for empty traces.
      */
     @Test
-    void testMethodWithNoParameters() throws Exception {
+    void givenMethodWithNoParameters_whenGeneratingTests_thenHandlesEdgeCase() throws Exception {
         // Setup empty identifier mapping (no parameters)
         generator = new NaiveTraceBasedGenerator(identifierMapping);
 
@@ -290,7 +290,7 @@ class NaiveTraceBasedGeneratorTest {
      * Test different naming strategies
      */
     @Test
-    void testGenerateTestsWithSimpleNamingStrategy() throws Exception {
+    void givenSimpleNamingStrategy_whenGeneratingTests_thenUsesCorrectNaming() throws Exception {
         JavaArgumentIdentifier arg1 = new JavaArgumentIdentifier(
             ArgumentIdentifierParameters.builder()
                 .argumentSlot(0)
@@ -326,7 +326,7 @@ class NaiveTraceBasedGeneratorTest {
      * Test edge case with empty trace
      */
     @Test
-    void testGenerateTestsWithEmptyTrace() throws Exception {
+    void givenEmptyTrace_whenGeneratingTests_thenHandlesEmptyTraceEdgeCase() throws Exception {
         generator = new NaiveTraceBasedGenerator(identifierMapping);
 
         Trace emptyTrace = new Trace();

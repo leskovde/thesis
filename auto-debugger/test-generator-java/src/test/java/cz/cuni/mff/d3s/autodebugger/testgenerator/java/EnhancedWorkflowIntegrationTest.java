@@ -88,7 +88,7 @@ class EnhancedWorkflowIntegrationTest {
     }
     
     @Test
-    void testLegacyToTemporalTraceConversion() {
+    void givenLegacyTrace_whenConvertingToTemporal_thenCreatesValidTemporalTrace() {
         // 1. Create a legacy trace (simulating existing data)
         Trace legacyTrace = new Trace();
         legacyTrace.addIntValue(0, 10);  // arg1
@@ -115,7 +115,7 @@ class EnhancedWorkflowIntegrationTest {
     }
     
     @Test
-    void testTemporalTraceBasedGeneration() {
+    void givenTemporalTrace_whenGeneratingTests_thenCreatesEnhancedTests() {
         // 1. Create an enhanced trace with temporal data
         TemporalTrace enhancedTrace = createRealisticTemporalTrace();
         
@@ -154,7 +154,7 @@ class EnhancedWorkflowIntegrationTest {
     }
     
     @Test
-    void testComparisonBetweenNaiveAndEnhanced() {
+    void givenSameData_whenComparingNaiveAndEnhanced_thenEnhancedProducesBetterResults() {
         // 1. Create both legacy and enhanced traces with same data
         Trace legacyTrace = new Trace();
         legacyTrace.addIntValue(0, 15);
@@ -197,7 +197,7 @@ class EnhancedWorkflowIntegrationTest {
     }
     
     @Test
-    void testSyntheticTraceGeneration() {
+    void givenIdentifierMapping_whenGeneratingSyntheticTrace_thenCreatesValidTrace() {
         // 1. Create synthetic trace for testing
         TemporalTrace syntheticTrace = TraceAdapter.createSyntheticTrace(identifierMapping);
         
@@ -219,7 +219,7 @@ class EnhancedWorkflowIntegrationTest {
     }
     
     @Test
-    void testTraceTemporalQueries() {
+    void givenTemporalTrace_whenQueryingAtDifferentTimes_thenReturnsCorrectValues() {
         // 1. Create a trace with temporal evolution
         TemporalTrace trace = new TemporalTrace();
         ExportableValue counter = identifierMapping.get(2); // field1
@@ -289,7 +289,7 @@ class EnhancedWorkflowIntegrationTest {
      * Trace object, converts it, and generates a final, compilable test file.
      */
     @Test
-    void testFullConversionAndGenerationWorkflow() {
+    void givenLegacyTrace_whenRunningFullWorkflow_thenGeneratesCompilableTest() {
         // 1. Create a legacy trace (simulating existing data)
         Trace legacyTrace = new Trace();
         legacyTrace.addIntValue(0, 100);  // parameter

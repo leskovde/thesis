@@ -1,6 +1,7 @@
 package cz.cuni.mff.d3s.autodebugger.testgenerator.common;
 
 import cz.cuni.mff.d3s.autodebugger.model.common.trace.Trace;
+import cz.cuni.mff.d3s.autodebugger.testgenerator.common.exceptions.LLMConfigurationException;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -33,8 +34,9 @@ public interface LLMBasedGenerator {
     
     /**
      * Configures the LLM provider and settings.
-     * 
+     *
      * @param config LLM configuration including API keys, model settings, etc.
+     * @throws LLMConfigurationException if the configuration is invalid
      */
-    void configure(LLMConfiguration config);
+    void configure(LLMConfiguration config) throws LLMConfigurationException;
 }

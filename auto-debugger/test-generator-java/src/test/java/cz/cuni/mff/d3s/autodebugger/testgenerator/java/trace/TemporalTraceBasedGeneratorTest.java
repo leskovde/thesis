@@ -44,15 +44,15 @@ class TemporalTraceBasedGeneratorTest {
     }
     
     @Test
-    void testGenerateTestsWithEmptyTrace() {
+    void givenEmptyTrace_whenGeneratingTests_thenReturnsEmptyList() {
         List<Path> generatedFiles = generator.generateTests(trace, context);
-        
+
         assertNotNull(generatedFiles);
         assertTrue(generatedFiles.isEmpty(), "Should not generate tests from empty trace");
     }
-    
+
     @Test
-    void testGenerateTestsWithSimpleTrace() {
+    void givenSimpleTrace_whenGeneratingTests_thenCreatesValidTestFile() {
         // Create test identifiers
         ExportableValue arg1 = new JavaArgumentIdentifier(
             ArgumentIdentifierParameters.builder()
@@ -104,7 +104,7 @@ class TemporalTraceBasedGeneratorTest {
     }
     
     @Test
-    void testGenerateTestsWithComplexTrace() {
+    void givenComplexTrace_whenGeneratingTests_thenCreatesComprehensiveTestFile() {
         // Create identifiers for a more complex scenario
         ExportableValue arg1 = new JavaArgumentIdentifier(
             ArgumentIdentifierParameters.builder()
@@ -157,7 +157,7 @@ class TemporalTraceBasedGeneratorTest {
     }
     
     @Test
-    void testGenerateTestsWithDifferentNamingStrategies() {
+    void givenDifferentNamingStrategies_whenGeneratingTests_thenUsesAppropriateNaming() {
         // Setup trace data
         ExportableValue arg1 = new JavaArgumentIdentifier(
             ArgumentIdentifierParameters.builder()
@@ -207,7 +207,7 @@ class TemporalTraceBasedGeneratorTest {
     }
     
     @Test
-    void testGenerateTestsWithMaxTestCountLimit() {
+    void givenMaxTestCountLimit_whenGeneratingTests_thenRespectsLimit() {
         // Create a trace with many events
         ExportableValue arg1 = new JavaArgumentIdentifier(
             ArgumentIdentifierParameters.builder()
@@ -255,7 +255,7 @@ class TemporalTraceBasedGeneratorTest {
     }
     
     @Test
-    void testGenerateTestsWithMetadata() {
+    void givenTraceWithMetadata_whenGeneratingTests_thenIncludesMetadataInTests() {
         ExportableValue arg1 = new JavaArgumentIdentifier(
             ArgumentIdentifierParameters.builder()
                 .argumentSlot(0)
@@ -291,7 +291,7 @@ class TemporalTraceBasedGeneratorTest {
      * not just a random combination of observed values.
      */
     @Test
-    void testStateReconstructionAtInvocationTime() {
+    void givenObjectStateAtInvocationTime_whenGeneratingTests_thenReconstructsCorrectState() {
         // Create identifiers for field and parameters
         JavaClassIdentifier testClass = new JavaClassIdentifier(
             ClassIdentifierParameters.builder()
@@ -386,7 +386,7 @@ class TemporalTraceBasedGeneratorTest {
      * surrounding states.
      */
     @Test
-    void testDistinguishingBetweenMultipleInvocations() {
+    void givenMultipleInvocationsWithDifferentStates_whenGeneratingTests_thenCreatesSeparateTestCases() {
         // Create identifiers for field and parameters
         JavaClassIdentifier testClass = new JavaClassIdentifier(
             ClassIdentifierParameters.builder()

@@ -1,124 +1,129 @@
 package cz.cuni.mff.d3s.autodebugger.testgenerator.common;
 
+import cz.cuni.mff.d3s.autodebugger.testgenerator.common.exceptions.LLMConfigurationException;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.time.Duration;
-import java.util.Map;
-
 /**
- * Configuration for LLM-based test generation, including API settings,
- * model parameters, and generation preferences.
+ * Configuration for Anthropic Claude-based test generation.
+ * Simplified to focus only on Claude models and essential parameters.
+ *
+ * API Key Handling:
+ * - If apiKey is provided, it will be used directly
+ * - If apiKey is null, the client will use the ANTHROPIC_API_KEY environment variable
+ * - For testing, use "mock" as the model name to enable mock responses
  */
 @Builder
 @Getter
 public class LLMConfiguration {
-    
+
     /**
-     * LLM provider (e.g., "openai", "anthropic", "local").
-     * Defaults to "anthropic" for Claude integration.
-     */
-    @Builder.Default
-    private final String provider = "anthropic";
-    
-    /**
-     * Model name to use (e.g., "gpt-4", "claude-sonnet-4-20250514").
-     * Defaults to Claude 3.5 Sonnet (latest version) for Anthropic provider.
+     * Claude model name to use.
+     * Supported models:
+     * - "claude-sonnet-4-20250514" (default, most capable)
+     * - "claude-3-5-sonnet-20241022" (fast and capable)
+     * - "claude-3-5-haiku-20241022" (fastest, cost-effective)
+     * - "mock" (for testing, returns predefined responses)
      */
     @Builder.Default
     private final String modelName = "claude-sonnet-4-20250514";
 
-    
     /**
-     * API key for the LLM service.
+     * API key for Anthropic Claude API.
+     * If null, the client will use the ANTHROPIC_API_KEY environment variable.
+     * Not required for mock model.
      */
     private final String apiKey;
-    
-    /**
-     * API endpoint URL (for custom or local deployments).
-     */
-    private final String apiEndpoint;
-    
+
     /**
      * Maximum number of tokens in the response.
+     * Claude models support up to 8192 output tokens.
      */
     @Builder.Default
     private final int maxTokens = 4000;
-    
+
     /**
      * Temperature for response generation (0.0 to 1.0).
      * Lower values make output more deterministic.
+     * 0.0-0.3 recommended for code generation.
      */
     @Builder.Default
     private final double temperature = 0.3;
-    
-    /**
-     * Top-p sampling parameter (0.0 to 1.0).
-     */
-    @Builder.Default
-    private final double topP = 0.9;
-    
-    /**
-     * Timeout for API requests.
-     */
-    @Builder.Default
-    private final Duration requestTimeout = Duration.ofMinutes(2);
-    
-    /**
-     * Maximum number of retry attempts for failed requests.
-     */
-    @Builder.Default
-    private final int maxRetries = 3;
-    
+
     /**
      * Whether to enable iterative refinement of generated tests.
+     * When enabled, the generator will attempt to fix compilation errors automatically.
      */
     @Builder.Default
     private final boolean enableIterativeRefinement = true;
-    
+
     /**
      * Maximum number of refinement iterations.
      */
     @Builder.Default
     private final int maxRefinementIterations = 3;
-    
+
     /**
      * Whether to validate generated code before returning.
      */
     @Builder.Default
     private final boolean validateGeneratedCode = true;
-    
+
     /**
-     * Custom prompt templates for different test generation scenarios.
+     * Determines if this configuration is using the mock model for testing.
+     *
+     * @return true if using mock model
      */
-    private final Map<String, String> promptTemplates;
-    
+    public boolean isMockModel() {
+        return "mock".equalsIgnoreCase(modelName);
+    }
+
     /**
-     * Additional model-specific parameters.
+     * Determines if this configuration requires an API key.
+     * Mock model doesn't need an API key.
+     *
+     * @return true if API key is required
      */
-    private final Map<String, Object> additionalParameters;
-    
+    public boolean requiresApiKey() {
+        return !isMockModel();
+    }
+
     /**
-     * Whether to include source code context in prompts.
+     * Validates the configuration for Claude models.
+     *
+     * @throws LLMConfigurationException if configuration is invalid
      */
-    @Builder.Default
-    private final boolean includeSourceContext = true;
-    
+    public void validate() throws LLMConfigurationException {
+        if (modelName == null || modelName.trim().isEmpty()) {
+            throw new LLMConfigurationException("Model name cannot be null or empty", "modelName", modelName);
+        }
+
+        if (requiresApiKey() && (apiKey == null || apiKey.trim().isEmpty()) && System.getenv("ANTHROPIC_API_KEY") == null) {
+            throw new LLMConfigurationException(
+                "API key must be provided either directly or via ANTHROPIC_API_KEY environment variable",
+                "apiKey",
+                apiKey
+            );
+        }
+
+        if (maxTokens <= 0) {
+            throw new LLMConfigurationException("Max tokens must be positive", "maxTokens", maxTokens);
+        }
+
+        if (temperature < 0.0 || temperature > 1.0) {
+            throw new LLMConfigurationException("Temperature must be between 0.0 and 1.0", "temperature", temperature);
+        }
+    }
+
     /**
-     * Whether to include runtime trace data in prompts.
+     * Gets the effective API key, checking environment variable if not explicitly set.
+     *
+     * @return the API key to use, or null if using mock model
      */
-    @Builder.Default
-    private final boolean includeTraceContext = true;
-    
-    /**
-     * Maximum size of source code context to include (in characters).
-     */
-    @Builder.Default
-    private final int maxSourceContextSize = 10000;
-    
-    /**
-     * Whether to use few-shot examples in prompts.
-     */
-    @Builder.Default
-    private final boolean useFewShotExamples = true;
+    public String getEffectiveApiKey() {
+        if (isMockModel()) {
+            return null;
+        }
+        return apiKey != null ? apiKey : System.getenv("ANTHROPIC_API_KEY");
+    }
 }
