@@ -31,7 +31,7 @@ public class ConfigurationProvider {
                 "Anthropic API Key",
                 "API key for Anthropic Claude services used in LLM-based test generation",
                 ConfigurationField.FieldType.PASSWORD,
-                true,
+                false,  // Optional since it can be provided via environment variable
                 ""
             )
         );

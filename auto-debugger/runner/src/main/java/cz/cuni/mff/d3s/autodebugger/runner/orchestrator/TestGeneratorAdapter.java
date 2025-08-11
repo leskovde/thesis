@@ -53,6 +53,20 @@ public class TestGeneratorAdapter implements TestGenerator {
         validateTrace(trace);
         return delegate.generateTests(trace, context);
     }
+
+    @Override
+    public List<Path> generateTests(Trace trace, RunConfiguration configuration) {
+        log.info("Generating tests using adapter with RunConfiguration directly");
+        validateTrace(trace);
+
+        // Check if the delegate supports RunConfiguration directly
+        if (delegate instanceof cz.cuni.mff.d3s.autodebugger.testgenerator.common.TraceBasedGenerator) {
+            return delegate.generateTests(trace, configuration);
+        } else {
+            // Fallback to default implementation
+            return TestGenerator.super.generateTests(trace, configuration);
+        }
+    }
     
     @Override
     public String getGenerationTechnique() {

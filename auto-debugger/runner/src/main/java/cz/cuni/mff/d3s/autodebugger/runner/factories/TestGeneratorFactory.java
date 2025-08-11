@@ -3,12 +3,13 @@ package cz.cuni.mff.d3s.autodebugger.runner.factories;
 import cz.cuni.mff.d3s.autodebugger.model.common.RunConfiguration;
 import cz.cuni.mff.d3s.autodebugger.model.common.TargetLanguage;
 import cz.cuni.mff.d3s.autodebugger.model.java.JavaRunConfiguration;
-import cz.cuni.mff.d3s.autodebugger.runner.orchestrator.LLMTestGeneratorAdapter;
-import cz.cuni.mff.d3s.autodebugger.runner.orchestrator.TestGeneratorAdapter;
 import cz.cuni.mff.d3s.autodebugger.runner.strategies.TestGenerationStrategyProvider;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.common.LLMConfiguration;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.common.TestGenerator;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.java.llm.LLMBasedTestGenerator;
+import cz.cuni.mff.d3s.autodebugger.testgenerator.common.AnthropicClient;
+import cz.cuni.mff.d3s.autodebugger.testgenerator.java.llm.PromptBuilder;
+import cz.cuni.mff.d3s.autodebugger.testgenerator.java.llm.CodeValidator;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.java.trace.TraceBasedUnitTestGenerator;
 import lombok.extern.slf4j.Slf4j;
 
@@ -41,33 +42,39 @@ public class TestGeneratorFactory {
         if (runConfiguration instanceof JavaRunConfiguration javaRunConfiguration) {
             try {
                 if ("ai-assisted".equals(strategyId)) {
-                    // Create LLM-based test generator
-                    LLMBasedTestGenerator llmGenerator = new LLMBasedTestGenerator();
+                    // Create dependencies for LLM-based test generator
+                    AnthropicClient anthropicClient = new AnthropicClient();
+                    PromptBuilder promptBuilder = new PromptBuilder();
+                    CodeValidator codeValidator = new CodeValidator();
 
-                    // Configure with default settings for Claude 4
+                    // Create LLM-based test generator with dependencies
+                    LLMBasedTestGenerator llmGenerator = new LLMBasedTestGenerator(
+                            anthropicClient, promptBuilder, codeValidator);
+
+                    // Configure with Anthropic Claude settings
                     String resolvedApiKey = getApiKeyFromEnvironmentOrConfig(apiKey);
+
                     LLMConfiguration llmConfig = LLMConfiguration.builder()
-                            .provider("anthropic")
                             .modelName("claude-sonnet-4-20250514")
                             .apiKey(resolvedApiKey)
                             .maxTokens(4000)
                             .temperature(0.3)
-                            .enableIterativeRefinement(true)
-                            .validateGeneratedCode(true)
                             .build();
 
                     llmGenerator.configure(llmConfig);
+                    llmGenerator.configure(runConfiguration);
 
-                    log.info("Successfully created LLM-based Java test generator with Claude");
-                    return new LLMTestGeneratorAdapter(llmGenerator, runConfiguration, strategyId);
+                    log.info("Successfully created LLM-based Java test generator with Claude - using RunConfiguration directly");
+                    return llmGenerator;
 
                 } else if (strategyId.startsWith("trace-based")) {
                     // Create the trace-based test generator
                     Path identifiersPath = javaRunConfiguration.getSourceCodePath().resolve("identifiers");
                     TraceBasedUnitTestGenerator generator = new TraceBasedUnitTestGenerator(identifiersPath);
+                    generator.configure(runConfiguration);
 
-                    log.info("Successfully created Java test generator with strategy: {}", strategyId);
-                    return new TestGeneratorAdapter(generator, runConfiguration, strategyId);
+                    log.info("Successfully created Java test generator with strategy: {} - using RunConfiguration directly", strategyId);
+                    return generator;
                 } else {
                     throw new UnsupportedOperationException("Test generation technique not yet supported: " + strategyId);
                 }
@@ -86,14 +93,14 @@ public class TestGeneratorFactory {
             return providedApiKey;
         }
 
-        // Then try environment variable
-        String envApiKey = System.getenv("ANTHROPIC_API_KEY");
-        if (envApiKey != null && !envApiKey.trim().isEmpty()) {
-            return envApiKey;
+        // Try Anthropic environment variable
+        String anthropicKey = System.getenv("ANTHROPIC_API_KEY");
+        if (anthropicKey != null && !anthropicKey.trim().isEmpty()) {
+            return anthropicKey;
         }
 
-        // TODO: Add support for reading from configuration file/settings
-        // For now, throw an exception if no API key is found
-        throw new IllegalStateException("Anthropic API key not found. Please set ANTHROPIC_API_KEY environment variable or provide via --api-key argument");
+        // Return null to let the LLMConfiguration handle the missing API key
+        // The configuration will throw an appropriate exception during validation
+        return null;
     }
 }

@@ -65,8 +65,41 @@ public interface RunConfiguration {
 
     /**
      * Validates that this configuration is complete and valid.
-     * 
+     *
      * @throws IllegalStateException if the configuration is invalid
      */
     void validate();
+
+    /**
+     * Creates a TestGenerationContext from this RunConfiguration using default settings.
+     * This is a convenience method that delegates to the appropriate factory based on the target language.
+     *
+     * Note: This method requires the test-generator-common module to be available at runtime.
+     * If not available, implementations should throw UnsupportedOperationException.
+     *
+     * @return A TestGenerationContext with default settings
+     * @throws UnsupportedOperationException if test generation context creation is not supported
+     */
+    default Object createTestGenerationContext() {
+        throw new UnsupportedOperationException(
+            "TestGenerationContext creation not implemented for " + getClass().getSimpleName() +
+            ". Use TestGenerationContextFactory.createFromRunConfiguration() instead.");
+    }
+
+    /**
+     * Creates a TestGenerationContext from this RunConfiguration with custom settings.
+     * This is a convenience method that delegates to the appropriate factory based on the target language.
+     *
+     * Note: This method requires the test-generator-common module to be available at runtime.
+     * If not available, implementations should throw UnsupportedOperationException.
+     *
+     * @param settings Custom test generation settings (implementation-specific type)
+     * @return A TestGenerationContext with the specified settings
+     * @throws UnsupportedOperationException if test generation context creation is not supported
+     */
+    default Object createTestGenerationContext(Object settings) {
+        throw new UnsupportedOperationException(
+            "TestGenerationContext creation with custom settings not implemented for " + getClass().getSimpleName() +
+            ". Use TestGenerationContextFactory.createFromRunConfiguration() instead.");
+    }
 }

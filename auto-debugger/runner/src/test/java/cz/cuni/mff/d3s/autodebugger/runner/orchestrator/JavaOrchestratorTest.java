@@ -30,9 +30,12 @@ class JavaOrchestratorTest {
         Path sourceDir = tempDir.resolve("src");
         Files.createDirectories(sourceDir);
 
-        // Create DiSL home directory
+        // Create DiSL home directory with required structure
         Path dislHome = tempDir.resolve("disl");
         Files.createDirectories(dislHome);
+        Files.createDirectories(dislHome.resolve("bin"));
+        Files.createFile(dislHome.resolve("bin/disl.py"));
+        Files.createDirectories(dislHome.resolve("output/lib"));
 
         // Setup test arguments
         testArguments = new Arguments();
@@ -45,6 +48,7 @@ class JavaOrchestratorTest {
         testArguments.language = TargetLanguage.JAVA;
         testArguments.testGenerationStrategy = "trace-based-basic";
         testArguments.classpath = List.of();
+        testArguments.runtimeArguments = List.of();
 
         orchestrator = new JavaOrchestrator(testArguments);
     }

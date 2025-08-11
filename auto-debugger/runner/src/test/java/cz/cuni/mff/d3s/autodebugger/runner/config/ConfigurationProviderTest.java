@@ -14,21 +14,21 @@ public class ConfigurationProviderTest {
     @Test
     public void testRequiredConfigurationFields() {
         List<ConfigurationField> requiredFields = ConfigurationProvider.getRequiredConfigurationFields();
-        
+
         assertNotNull(requiredFields);
         assertEquals(2, requiredFields.size());
-        
+
         // Check DiSL Path field
         ConfigurationField dislField = requiredFields.stream()
                 .filter(field -> "disl.path".equals(field.getKey()))
                 .findFirst()
                 .orElse(null);
-        
+
         assertNotNull(dislField);
         assertEquals("DiSL Path", dislField.getDisplayName());
         assertEquals(ConfigurationField.FieldType.DIRECTORY_PATH, dislField.getType());
         assertTrue(dislField.isRequired());
-        
+
         // Check Anthropic API Key field
         ConfigurationField anthropicField = requiredFields.stream()
                 .filter(field -> "anthropic.key".equals(field.getKey()))
@@ -38,7 +38,7 @@ public class ConfigurationProviderTest {
         assertNotNull(anthropicField);
         assertEquals("Anthropic API Key", anthropicField.getDisplayName());
         assertEquals(ConfigurationField.FieldType.PASSWORD, anthropicField.getType());
-        assertTrue(anthropicField.isRequired());
+        assertFalse(anthropicField.isRequired()); // Now optional since it can come from environment
     }
 
     @Test

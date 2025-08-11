@@ -71,6 +71,54 @@ public class JavaRunConfiguration implements RunConfiguration {
     }
 
     /**
+     * Creates a TestGenerationContext from this JavaRunConfiguration using default settings.
+     * Uses the JavaTestGenerationContextFactory to leverage Java-specific identifier methods.
+     *
+     * @return A TestGenerationContext with default settings
+     * @throws UnsupportedOperationException if the test-generator-java module is not available
+     */
+    @Override
+    public Object createTestGenerationContext() {
+        try {
+            // Use reflection to avoid compile-time dependency on test-generator-java
+            Class<?> factoryClass = Class.forName("cz.cuni.mff.d3s.autodebugger.testgenerator.java.JavaTestGenerationContextFactory");
+            java.lang.reflect.Method createMethod = factoryClass.getMethod("createFromJavaRunConfiguration", JavaRunConfiguration.class);
+            return createMethod.invoke(null, this);
+        } catch (ClassNotFoundException e) {
+            throw new UnsupportedOperationException(
+                "JavaTestGenerationContextFactory not found. Ensure test-generator-java module is on the classpath.", e);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to create TestGenerationContext", e);
+        }
+    }
+
+    /**
+     * Creates a TestGenerationContext from this JavaRunConfiguration with custom settings.
+     * Uses the JavaTestGenerationContextFactory to leverage Java-specific identifier methods.
+     *
+     * @param settings TestGenerationSettings for customizing test generation behavior
+     * @return A TestGenerationContext with the specified settings
+     * @throws UnsupportedOperationException if the test-generator-java module is not available
+     */
+    @Override
+    public Object createTestGenerationContext(Object settings) {
+        try {
+            // Use reflection to avoid compile-time dependency on test-generator-java
+            Class<?> factoryClass = Class.forName("cz.cuni.mff.d3s.autodebugger.testgenerator.java.JavaTestGenerationContextFactory");
+            Class<?> settingsClass = Class.forName("cz.cuni.mff.d3s.autodebugger.testgenerator.common.TestGenerationSettings");
+            java.lang.reflect.Method createMethod = factoryClass.getMethod("createFromJavaRunConfiguration",
+                    JavaRunConfiguration.class, settingsClass);
+            return createMethod.invoke(null, this, settings);
+        } catch (ClassNotFoundException e) {
+            throw new UnsupportedOperationException(
+                "JavaTestGenerationContextFactory or TestGenerationSettings not found. " +
+                "Ensure test-generator-java and test-generator-common modules are on the classpath.", e);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to create TestGenerationContext with custom settings", e);
+        }
+    }
+
+    /**
      * Validates the application path is an existing, readable file.
      * Issues a warning if the file does not have a .jar extension.
      */

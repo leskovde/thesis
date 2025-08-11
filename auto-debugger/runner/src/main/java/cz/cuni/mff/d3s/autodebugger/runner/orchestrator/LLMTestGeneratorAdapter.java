@@ -2,7 +2,10 @@ package cz.cuni.mff.d3s.autodebugger.runner.orchestrator;
 
 import cz.cuni.mff.d3s.autodebugger.model.common.RunConfiguration;
 import cz.cuni.mff.d3s.autodebugger.model.common.trace.Trace;
+import cz.cuni.mff.d3s.autodebugger.testgenerator.common.LLMBasedGenerator;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.common.TestGenerationContext;
+import cz.cuni.mff.d3s.autodebugger.testgenerator.common.TestGenerationContextFactory;
+import cz.cuni.mff.d3s.autodebugger.testgenerator.common.TestGenerationSettings;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.common.TestGenerator;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.common.TestNamingStrategy;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.java.llm.LLMBasedTestGenerator;
@@ -39,14 +42,19 @@ public class LLMTestGeneratorAdapter implements TestGenerator {
     public List<Path> generateTests(Trace trace) {
         log.info("Generating LLM-based tests using adapter");
         validateTrace(trace);
-        
+
         // Create context for LLM test generation
-        TestGenerationContext context = createTestGenerationContext();
-        
-        // Use the source code path from configuration
+        // Use RunConfiguration directly with the LLM generator
         Path sourceCodePath = configuration.getSourceCodePath();
-        
-        return delegate.generateTests(trace, sourceCodePath, context);
+
+        // Check if the delegate supports RunConfiguration directly
+        if (delegate instanceof LLMBasedGenerator) {
+            return delegate.generateTests(trace, sourceCodePath, configuration);
+        } else {
+            // Fallback to creating context manually
+            TestGenerationContext context = createTestGenerationContext();
+            return delegate.generateTests(trace, sourceCodePath, context);
+        }
     }
     
     @Override
@@ -77,54 +85,17 @@ public class LLMTestGeneratorAdapter implements TestGenerator {
     }
     
     private TestGenerationContext createTestGenerationContext() {
-        return TestGenerationContext.builder()
-                .targetMethodSignature(extractMethodSignature())
-                .targetClassName(extractClassName())
-                .packageName(extractPackageName())
-                .outputDirectory(configuration.getOutputDirectory())
-                .testFramework("JUnit5")
+        // Create settings optimized for LLM-based test generation
+        TestGenerationSettings llmSettings = TestGenerationSettings.builder()
+                .testFramework("junit5")
                 .maxTestCount(20)
                 .generateEdgeCases(true)
                 .generateNegativeTests(true)
                 .namingStrategy(TestNamingStrategy.DESCRIPTIVE)
                 .build();
+
+        // Use the factory to create context from RunConfiguration
+        return TestGenerationContextFactory.createFromRunConfiguration(configuration, llmSettings);
     }
-    
-    private String extractMethodSignature() {
-        // Extract method signature from configuration
-        if (configuration.getTargetMethod() != null) {
-            return configuration.getTargetMethod().toString();
-        }
-        return "unknownMethod";
-    }
-    
-    private String extractClassName() {
-        // Extract class name from method signature or configuration
-        String methodSignature = extractMethodSignature();
-        if (methodSignature.contains(".")) {
-            String[] parts = methodSignature.split("\\.");
-            if (parts.length >= 2) {
-                return parts[parts.length - 2]; // Get class name (second to last part)
-            }
-        }
-        return "UnknownClass";
-    }
-    
-    private String extractPackageName() {
-        // Extract package name from method signature or configuration
-        String methodSignature = extractMethodSignature();
-        if (methodSignature.contains(".")) {
-            String[] parts = methodSignature.split("\\.");
-            if (parts.length >= 3) {
-                // Join all parts except the last two (class and method)
-                StringBuilder packageName = new StringBuilder();
-                for (int i = 0; i < parts.length - 2; i++) {
-                    if (i > 0) packageName.append(".");
-                    packageName.append(parts[i]);
-                }
-                return packageName.toString();
-            }
-        }
-        return "";
-    }
+
 }
