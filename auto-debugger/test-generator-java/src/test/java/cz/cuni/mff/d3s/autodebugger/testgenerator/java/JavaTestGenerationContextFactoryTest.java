@@ -1,0 +1,168 @@
+package cz.cuni.mff.d3s.autodebugger.testgenerator.java;
+
+import cz.cuni.mff.d3s.autodebugger.model.java.JavaRunConfiguration;
+import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.*;
+import cz.cuni.mff.d3s.autodebugger.testgenerator.common.TestGenerationContext;
+import cz.cuni.mff.d3s.autodebugger.testgenerator.common.TestGenerationSettings;
+import cz.cuni.mff.d3s.autodebugger.testgenerator.common.TestNamingStrategy;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+import java.nio.file.Path;
+import java.util.Arrays;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+/**
+ * Test class for JavaTestGenerationContextFactory.
+ */
+class JavaTestGenerationContextFactoryTest {
+
+    @TempDir
+    Path tempDir;
+
+    private JavaRunConfiguration javaRunConfiguration;
+    private JavaMethodIdentifier methodIdentifier;
+
+    @BeforeEach
+    void setUp() {
+        // Create a complete Java method identifier
+        JavaPackageIdentifier packageIdentifier = new JavaPackageIdentifier("com.example.service");
+        JavaClassIdentifier classIdentifier = new JavaClassIdentifier(
+            ClassIdentifierParameters.builder()
+                .packageIdentifier(packageIdentifier)
+                .className("UserService")
+                .build()
+        );
+        
+        methodIdentifier = new JavaMethodIdentifier(
+            MethodIdentifierParameters.builder()
+                .ownerClassIdentifier(classIdentifier)
+                .methodName("authenticate")
+                .returnType("boolean")
+                .parameterTypes(Arrays.asList("java.lang.String", "java.lang.String"))
+                .build()
+        );
+
+        // Create Java run configuration
+        javaRunConfiguration = JavaRunConfiguration.builder()
+                .applicationPath(Path.of("test-app.jar"))
+                .sourceCodePath(Path.of("src/main/java"))
+                .targetMethod(methodIdentifier)
+                .outputDirectory(tempDir)
+                .build();
+    }
+
+    @Test
+    void testCreateFromJavaRunConfiguration_WithDefaultSettings() {
+        TestGenerationContext context = JavaTestGenerationContextFactory
+                .createFromJavaRunConfiguration(javaRunConfiguration);
+
+        assertNotNull(context);
+        assertEquals("com.example.service.UserService.authenticate(String, String)", 
+                    context.getTargetMethodSignature());
+        assertEquals("com.example.service.UserService", context.getTargetClassName());
+        assertEquals("com.example.service", context.getPackageName());
+        assertEquals(tempDir, context.getOutputDirectory());
+        
+        // Verify default settings
+        assertEquals("junit5", context.getTestFramework());
+        assertEquals(50, context.getMaxTestCount());
+        assertTrue(context.isGenerateEdgeCases());
+        assertTrue(context.isGenerateNegativeTests());
+        assertEquals(TestNamingStrategy.DESCRIPTIVE, context.getNamingStrategy());
+    }
+
+    @Test
+    void testCreateFromJavaRunConfiguration_WithCustomSettings() {
+        TestGenerationSettings customSettings = TestGenerationSettings.builder()
+                .testFramework("junit4")
+                .maxTestCount(25)
+                .generateEdgeCases(false)
+                .generateNegativeTests(false)
+                .namingStrategy(TestNamingStrategy.SIMPLE)
+                .build();
+
+        TestGenerationContext context = JavaTestGenerationContextFactory
+                .createFromJavaRunConfiguration(javaRunConfiguration, customSettings);
+
+        assertNotNull(context);
+        assertEquals("com.example.service.UserService.authenticate(String, String)", 
+                    context.getTargetMethodSignature());
+        assertEquals("com.example.service.UserService", context.getTargetClassName());
+        assertEquals("com.example.service", context.getPackageName());
+        
+        // Verify custom settings
+        assertEquals("junit4", context.getTestFramework());
+        assertEquals(25, context.getMaxTestCount());
+        assertFalse(context.isGenerateEdgeCases());
+        assertFalse(context.isGenerateNegativeTests());
+        assertEquals(TestNamingStrategy.SIMPLE, context.getNamingStrategy());
+    }
+
+    @Test
+    void testCreateForTraceBasedGeneration() {
+        TestGenerationContext context = JavaTestGenerationContextFactory
+                .createForTraceBasedGeneration(javaRunConfiguration);
+
+        assertNotNull(context);
+        assertEquals("com.example.service.UserService.authenticate(String, String)", 
+                    context.getTargetMethodSignature());
+        assertEquals("com.example.service.UserService", context.getTargetClassName());
+        assertEquals("com.example.service", context.getPackageName());
+        
+        // Verify trace-based settings
+        assertEquals("junit5", context.getTestFramework());
+        assertEquals(20, context.getMaxTestCount());
+        assertTrue(context.isGenerateEdgeCases());
+        assertFalse(context.isGenerateNegativeTests()); // Trace data typically doesn't include error cases
+        assertEquals(TestNamingStrategy.DESCRIPTIVE, context.getNamingStrategy());
+        assertFalse(context.isGenerateParameterizedTests()); // Trace-based tests are usually scenario-specific
+    }
+
+    @Test
+    void testCreateForLLMBasedGeneration() {
+        TestGenerationContext context = JavaTestGenerationContextFactory
+                .createForLLMBasedGeneration(javaRunConfiguration);
+
+        assertNotNull(context);
+        assertEquals("com.example.service.UserService.authenticate(String, String)", 
+                    context.getTargetMethodSignature());
+        assertEquals("com.example.service.UserService", context.getTargetClassName());
+        assertEquals("com.example.service", context.getPackageName());
+        
+        // Verify LLM-based settings
+        assertEquals("junit5", context.getTestFramework());
+        assertEquals(10, context.getMaxTestCount());
+        assertTrue(context.isGenerateEdgeCases());
+        assertTrue(context.isGenerateNegativeTests());
+        assertEquals(TestNamingStrategy.DESCRIPTIVE, context.getNamingStrategy());
+        assertTrue(context.isGenerateParameterizedTests());
+        assertFalse(context.isIncludePerformanceAssertions());
+    }
+
+    @Test
+    void testCreateFromJavaRunConfiguration_WithNullMethod() {
+        JavaRunConfiguration configWithNullMethod = JavaRunConfiguration.builder()
+                .applicationPath(Path.of("test-app.jar"))
+                .sourceCodePath(Path.of("src/main/java"))
+                .targetMethod(null)
+                .outputDirectory(tempDir)
+                .build();
+
+        TestGenerationContext context = JavaTestGenerationContextFactory
+                .createFromJavaRunConfiguration(configWithNullMethod);
+
+        assertNotNull(context);
+        assertEquals("unknownMethod", context.getTargetMethodSignature());
+        assertEquals("UnknownClass", context.getTargetClassName());
+        assertEquals("", context.getPackageName());
+    }
+
+    @Test
+    void testCreateFromJavaRunConfiguration_WithNullConfiguration() {
+        assertThrows(IllegalArgumentException.class, () -> 
+            JavaTestGenerationContextFactory.createFromJavaRunConfiguration(null));
+    }
+}

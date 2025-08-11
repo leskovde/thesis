@@ -30,12 +30,27 @@ public interface TestGenerator {
     
     /**
      * Generates tests with additional context information.
-     * 
+     *
      * @param trace Runtime trace data
      * @param context Additional context for test generation
      * @return List of paths to generated test files
      */
     List<Path> generateTests(Trace trace, TestGenerationContext context);
+
+    /**
+     * Generates tests using RunConfiguration directly.
+     * This method creates TestGenerationContext internally from the RunConfiguration,
+     * eliminating the need for manual context construction.
+     *
+     * @param trace Runtime trace data
+     * @param configuration Run configuration containing structured identifiers
+     * @return List of paths to generated test files
+     */
+    default List<Path> generateTests(Trace trace, RunConfiguration configuration) {
+        // Default implementation creates context from configuration and delegates
+        TestGenerationContext context = TestGenerationContextFactory.createFromRunConfiguration(configuration);
+        return generateTests(trace, context);
+    }
     
     /**
      * Gets the test generation technique used by this generator.

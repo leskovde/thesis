@@ -1,10 +1,13 @@
 package cz.cuni.mff.d3s.autodebugger.testgenerator.java.llm;
 
 import cz.cuni.mff.d3s.autodebugger.model.common.trace.Trace;
+import cz.cuni.mff.d3s.autodebugger.model.java.JavaRunConfiguration;
+import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.*;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.common.AnthropicClient;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.common.LLMConfiguration;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.common.TestGenerationContext;
-import cz.cuni.mff.d3s.autodebugger.testgenerator.common.TestNamingStrategy;
+import cz.cuni.mff.d3s.autodebugger.testgenerator.common.exceptions.LLMConfigurationException;
+import cz.cuni.mff.d3s.autodebugger.testgenerator.java.llm.exceptions.TestGenerationWorkflowException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -69,18 +72,33 @@ class LLMBasedTestGeneratorTest {
             }
             """);
 
-        // Create test context
-        context = TestGenerationContext.builder()
-                .targetMethodSignature("Calculator.add")
-                .targetClassName("Calculator")
-                .packageName("com.example")
+        // Create structured identifiers for Calculator.add method
+        JavaPackageIdentifier packageIdentifier = new JavaPackageIdentifier("com.example");
+        JavaClassIdentifier classIdentifier = new JavaClassIdentifier(
+            ClassIdentifierParameters.builder()
+                .packageIdentifier(packageIdentifier)
+                .className("Calculator")
+                .build()
+        );
+        JavaMethodIdentifier methodIdentifier = new JavaMethodIdentifier(
+            MethodIdentifierParameters.builder()
+                .ownerClassIdentifier(classIdentifier)
+                .methodName("add")
+                .returnType("int")
+                .parameterTypes(List.of("int", "int"))
+                .build()
+        );
+
+        JavaRunConfiguration runConfiguration = JavaRunConfiguration.builder()
+                .applicationPath(Path.of("test-app.jar"))
+                .sourceCodePath(Path.of("src/main/java"))
+                .targetMethod(methodIdentifier)
                 .outputDirectory(tempDir)
-                .testFramework("JUnit5")
-                .maxTestCount(10)
-                .generateEdgeCases(true)
-                .generateNegativeTests(false)
-                .namingStrategy(TestNamingStrategy.DESCRIPTIVE)
                 .build();
+
+        // Create context from RunConfiguration for backward compatibility
+        // TODO: Update tests to use RunConfiguration directly when LLM generator supports it
+        context = (TestGenerationContext) runConfiguration.createTestGenerationContext();
     }
 
     @Test
@@ -97,7 +115,7 @@ class LLMBasedTestGeneratorTest {
 
     @Test
     void givenNullConfiguration_whenConfiguring_thenThrowsException() {
-        assertThrows(Exception.class, () -> generator.configure(null));
+        assertThrows(Exception.class, () -> generator.configure((LLMConfiguration) null));
     }
 
     @Test
@@ -155,7 +173,7 @@ class LLMBasedTestGeneratorTest {
     @Test
     void givenNullTrace_whenGeneratingTests_thenThrowsException() {
         // Generator is already configured in setUp
-        assertThrows(IllegalArgumentException.class, () ->
+        assertThrows(TestGenerationWorkflowException.class, () ->
             generator.generateTests((Trace) null, mockSourceFile, context));
     }
 
@@ -188,7 +206,7 @@ class LLMBasedTestGeneratorTest {
         generator.configure(config);
 
         assertThrows(RuntimeException.class, () ->
-            generator.generateTests(trace, mockSourceFile, null));
+            generator.generateTests(trace, mockSourceFile, (TestGenerationContext) null));
     }
 
     @Test
@@ -328,7 +346,7 @@ class LLMBasedTestGeneratorTest {
                 "Configuration should be valid when ANTHROPIC_API_KEY environment variable is set");
             assertEquals(envApiKey, config.getEffectiveApiKey());
         } else {
-            assertThrows(IllegalArgumentException.class, config::validate,
+            assertThrows(LLMConfigurationException.class, config::validate,
                 "Configuration should be invalid when no API key is provided and ANTHROPIC_API_KEY is not set");
             assertNull(config.getEffectiveApiKey());
         }

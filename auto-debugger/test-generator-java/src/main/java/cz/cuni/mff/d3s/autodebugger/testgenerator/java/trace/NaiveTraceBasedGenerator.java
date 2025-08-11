@@ -1,11 +1,14 @@
 package cz.cuni.mff.d3s.autodebugger.testgenerator.java.trace;
 
+import cz.cuni.mff.d3s.autodebugger.model.common.RunConfiguration;
 import cz.cuni.mff.d3s.autodebugger.model.common.trace.Trace;
+import cz.cuni.mff.d3s.autodebugger.model.java.JavaRunConfiguration;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.JavaArgumentIdentifier;
 import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.ExportableValue;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.JavaFieldIdentifier;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.JavaValueIdentifier;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.common.*;
+import cz.cuni.mff.d3s.autodebugger.testgenerator.java.JavaTestGenerationContextFactory;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -20,7 +23,7 @@ import java.util.*;
  * by replicating observed method calls with collected runtime values.
  */
 @Slf4j
-public class NaiveTraceBasedGenerator implements TraceBasedGenerator {
+public class NaiveTraceBasedGenerator implements TraceBasedGenerator, TestGenerationContextAware {
     
     private final Map<Integer, JavaValueIdentifier> identifierMapping;
     private TestGenerationContext context;
@@ -34,29 +37,77 @@ public class NaiveTraceBasedGenerator implements TraceBasedGenerator {
         return generateTests(trace, createDefaultContext());
     }
     
+    /**
+     * Override the default RunConfiguration method to use Java-specific factory.
+     * This ensures that JavaMethodIdentifier utility methods are used for accurate information extraction.
+     */
+    @Override
+    public List<Path> generateTests(Trace trace, RunConfiguration configuration) {
+        if (configuration instanceof JavaRunConfiguration) {
+            // Use Java-specific factory for better information extraction
+            TestGenerationContext context = JavaTestGenerationContextFactory
+                    .createFromJavaRunConfiguration((JavaRunConfiguration) configuration);
+            return generateTests(trace, context);
+        } else {
+            // Fallback to default implementation
+            return TraceBasedGenerator.super.generateTests(trace, configuration);
+        }
+    }
+
+    @Override
     public List<Path> generateTests(Trace trace, TestGenerationContext context) {
         this.context = context;
         log.info("Generating naive trace-based tests for method: {}", context.getTargetMethodSignature());
-        
+
+        // Check if trace is empty
+        if (trace == null || isTraceEmpty(trace)) {
+            log.warn("Trace is empty or null - cannot generate meaningful tests");
+            throw new IllegalArgumentException("Cannot generate tests from empty trace. Trace must contain at least one captured value.");
+        }
+
         try {
             TraceIdentifierMapper mapper = new TraceIdentifierMapper(trace, identifierMapping);
-            
+
             // Group values by execution scenarios
             List<TestScenario> scenarios = extractTestScenarios(mapper);
-            
+
+            if (scenarios.isEmpty()) {
+                log.warn("No test scenarios could be extracted from trace");
+                throw new IllegalArgumentException("No test scenarios could be extracted from the provided trace");
+            }
+
             // Generate test class
             String testClassContent = generateTestClass(scenarios);
-            
+
             // Write test file
             Path testFile = writeTestFile(testClassContent);
-            
+
             log.info("Generated {} test scenarios in file: {}", scenarios.size(), testFile);
             return List.of(testFile);
-            
+
         } catch (Exception e) {
             log.error("Failed to generate naive trace-based tests", e);
-            return List.of();
+            throw new RuntimeException("Test generation failed: " + e.getMessage(), e);
         }
+    }
+
+    private boolean isTraceEmpty(Trace trace) {
+        // Check if trace has any values in any slot
+        // We need to check all possible slots, but for practical purposes,
+        // we'll check a reasonable range of slots (0-100)
+        for (int slot = 0; slot < 100; slot++) {
+            if (!trace.getIntValues(slot).isEmpty() ||
+                !trace.getLongValues(slot).isEmpty() ||
+                !trace.getBooleanValues(slot).isEmpty() ||
+                !trace.getFloatValues(slot).isEmpty() ||
+                !trace.getDoubleValues(slot).isEmpty() ||
+                !trace.getCharValues(slot).isEmpty() ||
+                !trace.getByteValues(slot).isEmpty() ||
+                !trace.getShortValues(slot).isEmpty()) {
+                return false; // Found at least one value
+            }
+        }
+        return true; // No values found in any checked slot
     }
     
     private List<TestScenario> extractTestScenarios(TraceIdentifierMapper mapper) {
@@ -237,8 +288,9 @@ public class NaiveTraceBasedGenerator implements TraceBasedGenerator {
         sb.append("        ").append(methodCall).append("\n");
         
         sb.append("\n        // Assert\n");
-        sb.append("        // TODO: Add appropriate assertions based on expected behavior\n");
-        sb.append("        // Example: assertEquals(expectedValue, result);\n");
+        sb.append("        // Basic assertion to verify method execution completed without exception\n");
+        sb.append("        assertNotNull(result, \"Method should return a non-null result\");\n");
+        sb.append("        // Note: Add more specific assertions based on expected behavior\n");
         
         sb.append("    }\n");
         
@@ -296,7 +348,31 @@ public class NaiveTraceBasedGenerator implements TraceBasedGenerator {
         } else if (value instanceof String) {
             return "\"" + value.toString().replace("\"", "\\\"") + "\"";
         } else if (value instanceof Character) {
-            return "'" + value + "'";
+            char c = (Character) value;
+            // Handle special characters that need escaping
+            return switch (c) {
+                case '\n' -> "'\\n'";
+                case '\t' -> "'\\t'";
+                case '\r' -> "'\\r'";
+                case '\\' -> "'\\\\'";
+                case '\'' -> "'\\''";
+                default -> "'" + c + "'";
+            };
+        } else if (value instanceof Long) {
+            return value.toString() + "L";
+        } else if (value instanceof Float) {
+            return value.toString() + "f";
+        } else if (value instanceof Double) {
+            String doubleStr = value.toString();
+            // Ensure double literals have decimal point
+            if (!doubleStr.contains(".") && !doubleStr.contains("E") && !doubleStr.contains("e")) {
+                doubleStr += ".0";
+            }
+            return doubleStr;
+        } else if (value instanceof Byte) {
+            return "(byte) " + value.toString();
+        } else if (value instanceof Short) {
+            return "(short) " + value.toString();
         } else {
             return value.toString();
         }
@@ -322,9 +398,14 @@ public class NaiveTraceBasedGenerator implements TraceBasedGenerator {
     }
     
     private String extractClassNameFromMethod(String methodSignature) {
-        // Simple extraction - assumes format like "ClassName.methodName"
+        // Extract just the class name (not the full qualified name)
         if (methodSignature.contains(".")) {
-            return methodSignature.substring(0, methodSignature.lastIndexOf('.'));
+            String fullClassName = methodSignature.substring(0, methodSignature.lastIndexOf('.'));
+            // Return only the simple class name, not the full package path
+            if (fullClassName.contains(".")) {
+                return fullClassName.substring(fullClassName.lastIndexOf('.') + 1);
+            }
+            return fullClassName;
         }
         return "UnknownClass";
     }

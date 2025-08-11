@@ -77,29 +77,28 @@ class TemporalTraceBasedGeneratorTest {
         List<Path> generatedFiles = generator.generateTests(trace, context);
         
         assertNotNull(generatedFiles);
-        assertFalse(generatedFiles.isEmpty(), "Should generate tests from trace with data");
-        
+        assertEquals(1, generatedFiles.size(), "Should generate exactly one test file");
+
         // Verify the generated file exists and contains expected content
-        for (Path file : generatedFiles) {
-            assertTrue(Files.exists(file), "Generated file should exist: " + file);
-            
-            try {
-                String content = Files.readString(file);
-                assertTrue(content.contains("package com.example.test"), 
-                          "Generated file should contain package declaration");
-                assertTrue(content.contains("import org.junit.jupiter.api.Test"), 
-                          "Generated file should contain JUnit imports");
-                assertTrue(content.contains("public class"), 
-                          "Generated file should contain class declaration");
-                assertTrue(content.contains("@Test"), 
-                          "Generated file should contain test methods");
-                assertTrue(content.contains("@DisplayName"), 
-                          "Generated file should contain display names");
-                assertTrue(content.contains("event"), 
-                          "Generated file should reference event indices");
-            } catch (Exception e) {
-                fail("Failed to read generated file: " + e.getMessage());
-            }
+        Path testFile = generatedFiles.get(0);
+        assertTrue(Files.exists(testFile), "Generated file should exist: " + testFile);
+
+        try {
+            String content = Files.readString(testFile);
+            assertTrue(content.contains("package com.example.test"),
+                      "Generated file should contain package declaration");
+            assertTrue(content.contains("import org.junit.jupiter.api.Test"),
+                      "Generated file should contain JUnit imports");
+            assertTrue(content.contains("public class"),
+                      "Generated file should contain class declaration");
+            assertTrue(content.contains("@Test"),
+                      "Generated file should contain test methods");
+            assertTrue(content.contains("@DisplayName"),
+                      "Generated file should contain display names");
+            assertTrue(content.contains("event"),
+                      "Generated file should reference event indices");
+        } catch (Exception e) {
+            throw new AssertionError("Failed to read generated file: " + e.getMessage(), e);
         }
     }
     
@@ -142,7 +141,7 @@ class TemporalTraceBasedGeneratorTest {
         List<Path> generatedFiles = generator.generateTests(trace, context);
         
         assertNotNull(generatedFiles);
-        assertFalse(generatedFiles.isEmpty());
+        assertEquals(1, generatedFiles.size(), "Should generate exactly one test file");
         
         // Verify the generated content includes temporal information
         Path testFile = generatedFiles.get(0);
@@ -152,7 +151,7 @@ class TemporalTraceBasedGeneratorTest {
             assertTrue(content.contains("scenario"), "Should include scenario information");
             assertTrue(content.contains("State captured"), "Should mention state capture");
         } catch (Exception e) {
-            fail("Failed to read generated file: " + e.getMessage());
+            throw new AssertionError("Failed to read generated file: " + e.getMessage(), e);
         }
     }
     
@@ -249,7 +248,7 @@ class TemporalTraceBasedGeneratorTest {
                 assertTrue(testMethodCount <= 3, 
                           "Should not generate more than maxTestCount test methods");
             } catch (Exception e) {
-                fail("Failed to analyze generated file: " + e.getMessage());
+                throw new AssertionError("Failed to analyze generated file: " + e.getMessage(), e);
             }
         }
     }
@@ -270,17 +269,25 @@ class TemporalTraceBasedGeneratorTest {
         List<Path> generatedFiles = generator.generateTests(trace, context);
 
         assertNotNull(generatedFiles);
-        if (!generatedFiles.isEmpty()) {
-            Path testFile = generatedFiles.get(0);
-            try {
-                String content = Files.readString(testFile);
-                assertTrue(content.contains("Enhanced trace-based"),
-                          "Should mention enhanced trace-based generation");
-                assertTrue(content.contains("Trace summary"),
-                          "Should include trace summary in comments");
-            } catch (Exception e) {
-                fail("Failed to read generated file: " + e.getMessage());
-            }
+        assertEquals(1, generatedFiles.size(), "Should generate exactly one test file");
+
+        Path testFile = generatedFiles.get(0);
+        try {
+            String content = Files.readString(testFile);
+            assertTrue(content.contains("Enhanced trace-based"),
+                      "Should mention enhanced trace-based generation");
+            assertTrue(content.contains("Trace summary"),
+                      "Should include trace summary in comments");
+
+            // Verify proper test structure
+            assertTrue(content.contains("@Test"), "Should contain test methods");
+            assertTrue(content.contains("@DisplayName"), "Should contain display names");
+            assertTrue(content.contains("import org.junit.jupiter.api.Test"), "Should have proper imports");
+
+            // Verify temporal context is included
+            assertTrue(content.contains("event"), "Should reference event indices for temporal context");
+        } catch (Exception e) {
+            throw new AssertionError("Failed to read generated file: " + e.getMessage(), e);
         }
     }
 
@@ -344,7 +351,7 @@ class TemporalTraceBasedGeneratorTest {
         List<Path> generatedFiles = generator.generateTests(trace, testContext);
 
         assertNotNull(generatedFiles);
-        assertFalse(generatedFiles.isEmpty(), "Should generate test files");
+        assertEquals(1, generatedFiles.size(), "Should generate exactly one test file");
 
         Path testFile = generatedFiles.get(0);
         try {
@@ -375,7 +382,7 @@ class TemporalTraceBasedGeneratorTest {
                       "Should identify both invocation events 15 and 16");
 
         } catch (Exception e) {
-            fail("Failed to read generated file: " + e.getMessage());
+            throw new AssertionError("Failed to read generated file: " + e.getMessage(), e);
         }
     }
 
@@ -441,7 +448,7 @@ class TemporalTraceBasedGeneratorTest {
         List<Path> generatedFiles = generator.generateTests(trace, testContext);
 
         assertNotNull(generatedFiles);
-        assertFalse(generatedFiles.isEmpty(), "Should generate test files");
+        assertEquals(1, generatedFiles.size(), "Should generate exactly one test file");
 
         Path testFile = generatedFiles.get(0);
         try {
@@ -468,7 +475,7 @@ class TemporalTraceBasedGeneratorTest {
             assertTrue(hasSecondArgument, "Should have second argument value 500");
 
         } catch (Exception e) {
-            fail("Failed to read generated file: " + e.getMessage());
+            throw new AssertionError("Failed to read generated file: " + e.getMessage(), e);
         }
     }
 }

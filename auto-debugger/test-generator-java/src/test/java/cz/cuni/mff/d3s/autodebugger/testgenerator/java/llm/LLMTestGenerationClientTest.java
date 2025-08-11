@@ -2,6 +2,7 @@ package cz.cuni.mff.d3s.autodebugger.testgenerator.java.llm;
 
 import cz.cuni.mff.d3s.autodebugger.testgenerator.common.AnthropicClient;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.common.LLMConfiguration;
+import cz.cuni.mff.d3s.autodebugger.testgenerator.common.exceptions.LLMConfigurationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -47,7 +48,7 @@ class LLMTestGenerationClientTest {
 
     @Test
     void givenNullConfig_whenConfiguring_thenThrowsException() {
-        assertThrows(IllegalArgumentException.class, () -> client.configure(null));
+        assertThrows(LLMConfigurationException.class, () -> client.configure(null));
     }
 
     @Test
@@ -61,7 +62,7 @@ class LLMTestGenerationClientTest {
                     .temperature(0.7)
                     .build();
 
-            assertThrows(IllegalArgumentException.class, config::validate);
+            assertThrows(LLMConfigurationException.class, config::validate);
         }
     }
 
@@ -76,7 +77,7 @@ class LLMTestGenerationClientTest {
                     .temperature(0.7)
                     .build();
 
-            assertThrows(IllegalArgumentException.class, config::validate);
+            assertThrows(LLMConfigurationException.class, config::validate);
         }
     }
 
@@ -145,7 +146,7 @@ class LLMTestGenerationClientTest {
                     .apiKey(null)
                     .build();
 
-            assertThrows(IllegalArgumentException.class, missingApiKey::validate);
+            assertThrows(LLMConfigurationException.class, missingApiKey::validate);
         }
 
         // Test invalid max tokens
@@ -154,7 +155,7 @@ class LLMTestGenerationClientTest {
                 .maxTokens(-1)
                 .build();
 
-        assertThrows(IllegalArgumentException.class, invalidMaxTokens::validate);
+        assertThrows(LLMConfigurationException.class, invalidMaxTokens::validate);
 
         // Test invalid temperature
         LLMConfiguration invalidTemperature = LLMConfiguration.builder()
@@ -162,7 +163,7 @@ class LLMTestGenerationClientTest {
                 .temperature(1.5)
                 .build();
 
-        assertThrows(IllegalArgumentException.class, invalidTemperature::validate);
+        assertThrows(LLMConfigurationException.class, invalidTemperature::validate);
     }
 
     @Test

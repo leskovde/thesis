@@ -2,6 +2,7 @@ package cz.cuni.mff.d3s.autodebugger.testgenerator.java.llm;
 
 import cz.cuni.mff.d3s.autodebugger.testgenerator.common.AnthropicClient;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.common.LLMConfiguration;
+import cz.cuni.mff.d3s.autodebugger.testgenerator.common.exceptions.LLMConfigurationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
@@ -97,7 +98,7 @@ class AnthropicIntegrationTest {
                     .apiKey(null) // Missing API key
                     .build();
 
-            assertThrows(IllegalArgumentException.class, config::validate);
+            assertThrows(LLMConfigurationException.class, config::validate);
         }
     }
 
@@ -113,7 +114,7 @@ class AnthropicIntegrationTest {
 
         // This should pass validation if ANTHROPIC_API_KEY is set, fail otherwise
         if (originalApiKey == null) {
-            assertThrows(IllegalArgumentException.class, config::validate);
+            assertThrows(LLMConfigurationException.class, config::validate);
         } else {
             assertDoesNotThrow(config::validate);
         }

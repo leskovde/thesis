@@ -2,6 +2,7 @@ package cz.cuni.mff.d3s.autodebugger.testgenerator.java.llm;
 
 import cz.cuni.mff.d3s.autodebugger.testgenerator.common.AnthropicClient;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.common.LLMConfiguration;
+import cz.cuni.mff.d3s.autodebugger.testgenerator.common.exceptions.LLMConfigurationException;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -86,7 +87,7 @@ class QuickAnthropicTest {
                 .temperature(2.0) // Invalid temperature
                 .build();
 
-        assertThrows(IllegalArgumentException.class, invalidConfig::validate);
+        assertThrows(LLMConfigurationException.class, invalidConfig::validate);
 
         System.out.println("✅ Configuration validation works correctly!");
     }

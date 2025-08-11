@@ -148,7 +148,7 @@ class EnhancedWorkflowIntegrationTest {
                 System.out.println("📄 Generated file: " + file.getFileName());
                 
             } catch (Exception e) {
-                fail("Failed to read enhanced generated file: " + e.getMessage());
+                throw new AssertionError("Failed to read enhanced generated file: " + e.getMessage(), e);
             }
         }
     }
@@ -191,7 +191,7 @@ class EnhancedWorkflowIntegrationTest {
                 System.out.println("📊 Enhanced generator features: Temporal context, display names, event tracking");
                 
             } catch (Exception e) {
-                fail("Failed to compare generated files: " + e.getMessage());
+                throw new AssertionError("Failed to compare generated files: " + e.getMessage(), e);
             }
         }
     }
@@ -384,7 +384,7 @@ class EnhancedWorkflowIntegrationTest {
             System.out.println("📊 Legacy trace -> Enhanced trace -> Generated test file");
 
         } catch (Exception e) {
-            fail("Failed to read or validate generated test file: " + e.getMessage());
+            throw new AssertionError("Failed to read or validate generated test file: " + e.getMessage(), e);
         }
     }
 }

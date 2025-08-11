@@ -1,5 +1,6 @@
 package cz.cuni.mff.d3s.autodebugger.testgenerator.common;
 
+import cz.cuni.mff.d3s.autodebugger.model.common.RunConfiguration;
 import cz.cuni.mff.d3s.autodebugger.model.common.trace.Trace;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.common.exceptions.LLMConfigurationException;
 
@@ -39,4 +40,20 @@ public interface LLMBasedGenerator {
      * @throws LLMConfigurationException if the configuration is invalid
      */
     void configure(LLMConfiguration config) throws LLMConfigurationException;
+
+    /**
+     * Generates tests using RunConfiguration directly.
+     * This method creates TestGenerationContext internally from the RunConfiguration,
+     * eliminating the need for manual context construction.
+     *
+     * @param trace Runtime trace data
+     * @param sourceCodePath Path to the source code file containing the target method
+     * @param configuration Run configuration containing structured identifiers
+     * @return List of paths to generated test files
+     */
+    default List<Path> generateTests(Trace trace, Path sourceCodePath, RunConfiguration configuration) {
+        // Default implementation creates context from configuration and delegates
+        TestGenerationContext context = TestGenerationContextFactory.createFromRunConfiguration(configuration);
+        return generateTests(trace, sourceCodePath, context);
+    }
 }

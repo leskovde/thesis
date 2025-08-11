@@ -1,5 +1,6 @@
 package cz.cuni.mff.d3s.autodebugger.testgenerator.java.llm;
 
+import cz.cuni.mff.d3s.autodebugger.model.common.RunConfiguration;
 import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.ExportableValue;
 import cz.cuni.mff.d3s.autodebugger.model.common.trace.TemporalTrace;
 import cz.cuni.mff.d3s.autodebugger.model.common.trace.Trace;
@@ -23,12 +24,19 @@ import java.util.*;
  */
 @Slf4j
 @RequiredArgsConstructor
-public class LLMBasedTestGenerator implements LLMBasedGenerator {
+public class LLMBasedTestGenerator implements LLMBasedGenerator, TestGenerator {
 
     private LLMConfiguration llmConfig;
+    private RunConfiguration runConfiguration;
     private final AnthropicClient anthropicClient;
     private final PromptBuilder promptBuilder;
     private final CodeValidator codeValidator;
+
+    @Override
+    public void configure(RunConfiguration configuration) {
+        this.runConfiguration = configuration;
+        log.debug("Configured LLM-based test generator with run configuration");
+    }
 
     @Override
     public void configure(LLMConfiguration config) throws LLMConfigurationException {
@@ -44,8 +52,48 @@ public class LLMBasedTestGenerator implements LLMBasedGenerator {
     }
     
     @Override
+    public List<Path> generateTests(Trace trace) {
+        if (runConfiguration == null) {
+            throw new TestGenerationWorkflowException("RunConfiguration not set. Call configure() first.", "Configuration", null, null);
+        }
+        return generateTests(trace, runConfiguration);
+    }
+
+    @Override
+    public List<Path> generateTests(Trace trace, RunConfiguration configuration) {
+        // Use the RunConfiguration to get source code path and create context
+        Path sourceCodePath = configuration.getSourceCodePath();
+        TestGenerationContext context = TestGenerationContextFactory.createFromRunConfiguration(configuration);
+        return generateTests(trace, sourceCodePath, context);
+    }
+
+    @Override
+    public List<Path> generateTests(Trace trace, TestGenerationContext context) {
+        // Use the source code path from the run configuration if available
+        Path sourceCodePath = runConfiguration != null ? runConfiguration.getSourceCodePath() : null;
+        if (sourceCodePath == null) {
+            throw new TestGenerationWorkflowException("Source code path not available. Configure RunConfiguration first.", "Configuration", null, null);
+        }
+        return generateTests(trace, sourceCodePath, context);
+    }
+
+    @Override
     public List<Path> generateTests(Trace trace, Path sourceCodePath) {
         return generateTests(trace, sourceCodePath, createDefaultContext());
+    }
+
+    @Override
+    public String getGenerationTechnique() {
+        return "LLM-based";
+    }
+
+    @Override
+    public void validateTrace(Trace trace) {
+        if (trace == null) {
+            throw new IllegalArgumentException("Trace cannot be null");
+        }
+        // Additional validation can be added here if needed
+        log.debug("Trace validation passed for LLM-based test generation");
     }
     
     @Override
