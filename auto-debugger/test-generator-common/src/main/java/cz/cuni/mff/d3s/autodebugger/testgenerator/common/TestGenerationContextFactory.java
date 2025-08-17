@@ -1,7 +1,6 @@
 package cz.cuni.mff.d3s.autodebugger.testgenerator.common;
 
 import cz.cuni.mff.d3s.autodebugger.model.common.RunConfiguration;
-import cz.cuni.mff.d3s.autodebugger.model.common.TargetLanguage;
 import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.MethodIdentifier;
 
 /**
@@ -10,6 +9,8 @@ import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.MethodIdentifier;
  * the structured identifiers already present in RunConfiguration.
  */
 public class TestGenerationContextFactory {
+
+    private TestGenerationContextFactory() { }
 
     /**
      * Creates a TestGenerationContext from a RunConfiguration.
@@ -57,22 +58,10 @@ public class TestGenerationContextFactory {
                 .objectCreationStrategy(settings.getObjectCreationStrategy())
                 .generateParameterizedTests(settings.isGenerateParameterizedTests());
 
-        // Use structured identifiers when available, with string fallbacks for compatibility
+        // Use structured identifiers only; do not set deprecated string fields
         if (targetMethod != null) {
             builder.targetMethod(targetMethod);
-
-            // Also set deprecated string fields for backward compatibility
-            String methodSignature = targetMethod.toString();
-            builder.targetMethodSignature(methodSignature)
-                   .targetClassName("UnknownClass") // Will be overridden by language-specific factories
-                   .packageName(""); // Will be overridden by language-specific factories
-        } else {
-            // Fallback values if method identifier is not available
-            builder.targetMethodSignature("unknownMethod")
-                   .targetClassName("UnknownClass")
-                   .packageName("");
         }
-
         return builder.build();
     }
 
@@ -81,16 +70,14 @@ public class TestGenerationContextFactory {
     /**
      * Creates a TestGenerationContext with minimal information for testing purposes.
      * 
-     * @param targetMethodSignature The target method signature
+     * @param targetMethod The target method signature
      * @param outputDirectory The output directory for generated tests
      * @return A TestGenerationContext with minimal configuration
      */
-    public static TestGenerationContext createMinimal(String targetMethodSignature, 
+    public static TestGenerationContext createMinimal(MethodIdentifier targetMethod,
                                                      java.nio.file.Path outputDirectory) {
         return TestGenerationContext.builder()
-                .targetMethodSignature(targetMethodSignature)
-                .targetClassName("TestClass")
-                .packageName("com.example.test")
+                .targetMethod(targetMethod)
                 .outputDirectory(outputDirectory)
                 .build();
     }

@@ -1,12 +1,14 @@
 package cz.cuni.mff.d3s.autodebugger.testrunner.java;
 
+import cz.cuni.mff.d3s.autodebugger.testgenerator.common.TestGenerationContext;
+import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.MethodIdentifier;
+import java.util.List;
 import cz.cuni.mff.d3s.autodebugger.testrunner.common.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Path;
 import java.time.Duration;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -56,11 +58,15 @@ class DemoRunnerIntegrationTest {
         assertTrue(result.getTestResults().isEmpty());
 
         // 4. Demonstrate TestGenerationContext creation
-        cz.cuni.mff.d3s.autodebugger.testgenerator.common.TestGenerationContext generationContext =
-            cz.cuni.mff.d3s.autodebugger.testgenerator.common.TestGenerationContext.builder()
-                .targetMethodSignature("Calculator.add(int, int)")
-                .targetClassName("com.example.Calculator")
-                .packageName("com.example.test")
+        MethodIdentifier methodIdentifier = new MethodIdentifier("add", "int", List.of("int","int")) {
+            @Override public String getClassName() { return "com.example.Calculator"; }
+            @Override public String getPackageName() { return "com.example"; }
+            @Override public String getFullyQualifiedClassName() { return "com.example.Calculator"; }
+            @Override public String getFullyQualifiedSignature() { return "com.example.Calculator.add(int, int)"; }
+        };
+
+        TestGenerationContext generationContext = TestGenerationContext.builder()
+                .targetMethod(methodIdentifier)
                 .outputDirectory(tempDir)
                 .testFramework("junit5")
                 .maxTestCount(10)
@@ -69,7 +75,7 @@ class DemoRunnerIntegrationTest {
                 .build();
 
         assertNotNull(generationContext);
-        assertEquals("Calculator.add(int, int)", generationContext.getTargetMethodSignature());
+        assertEquals("com.example.Calculator.add(int, int)", generationContext.getTargetMethodSignature());
         assertEquals("com.example.Calculator", generationContext.getTargetClassName());
         assertEquals(10, generationContext.getMaxTestCount());
 

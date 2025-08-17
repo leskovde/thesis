@@ -14,13 +14,6 @@ import java.util.List;
 public interface TestGenerator {
     
     /**
-     * Configures the test generator with the given run configuration.
-     * 
-     * @param configuration The run configuration containing generation parameters
-     */
-    void configure(RunConfiguration configuration);
-    
-    /**
      * Generates tests from the provided trace data.
      * 
      * @param trace Runtime trace data collected during execution
@@ -32,10 +25,11 @@ public interface TestGenerator {
      * Generates tests with additional context information.
      *
      * @param trace Runtime trace data
+     * @param sourceCodePath Path to the source code file
      * @param context Additional context for test generation
      * @return List of paths to generated test files
      */
-    List<Path> generateTests(Trace trace, TestGenerationContext context);
+    List<Path> generateTests(Trace trace, Path sourceCodePath, TestGenerationContext context);
 
     /**
      * Generates tests using RunConfiguration directly.
@@ -49,7 +43,7 @@ public interface TestGenerator {
     default List<Path> generateTests(Trace trace, RunConfiguration configuration) {
         // Default implementation creates context from configuration and delegates
         TestGenerationContext context = TestGenerationContextFactory.createFromRunConfiguration(configuration);
-        return generateTests(trace, context);
+        return generateTests(trace, configuration.getSourceCodePath(), context);
     }
     
     /**

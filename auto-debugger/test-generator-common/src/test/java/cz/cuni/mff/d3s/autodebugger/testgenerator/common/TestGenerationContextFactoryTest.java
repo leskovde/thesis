@@ -30,6 +30,26 @@ class TestGenerationContextFactoryTest {
         mockMethodIdentifier = new MethodIdentifier("authenticate", "boolean",
                 List.of("java.lang.String", "java.lang.String")) {
             @Override
+            public String getClassName() {
+                return "UserService";
+            }
+
+            @Override
+            public String getPackageName() {
+                return "";
+            }
+
+            @Override
+            public String getFullyQualifiedClassName() {
+                return "UserService";
+            }
+
+            @Override
+            public String getFullyQualifiedSignature() {
+                return "UserService.authenticate(String, String)";
+            }
+
+            @Override
             public String toString() {
                 return "UserService.authenticate(String, String)";
             }
@@ -86,9 +106,9 @@ class TestGenerationContextFactoryTest {
 
         assertNotNull(context);
         assertEquals("UserService.authenticate(String, String)",
-                    context.getTargetMethodSignature());
-        assertEquals("UnknownClass", context.getTargetClassName()); // Fallback value in common factory
-        assertEquals("", context.getPackageName()); // Fallback value in common factory
+                    context.getTargetMethod().getFullyQualifiedSignature());
+        assertEquals("UserService", context.getTargetMethod().getFullyQualifiedClassName());
+        assertEquals("", context.getTargetMethod().getPackageName());
         assertEquals(tempDir, context.getOutputDirectory());
 
         // Verify default settings
@@ -114,9 +134,9 @@ class TestGenerationContextFactoryTest {
 
         assertNotNull(context);
         assertEquals("UserService.authenticate(String, String)",
-                    context.getTargetMethodSignature());
-        assertEquals("UnknownClass", context.getTargetClassName()); // Fallback value in common factory
-        assertEquals("", context.getPackageName()); // Fallback value in common factory
+                    context.getTargetMethod().getFullyQualifiedSignature());
+        assertEquals("UserService", context.getTargetMethod().getFullyQualifiedClassName());
+        assertEquals("", context.getTargetMethod().getPackageName());
 
         // Verify custom settings
         assertEquals("junit4", context.getTestFramework());
@@ -174,20 +194,25 @@ class TestGenerationContextFactoryTest {
                 .createFromRunConfiguration(configWithNullMethod);
 
         assertNotNull(context);
-        assertEquals("unknownMethod", context.getTargetMethodSignature());
-        assertEquals("UnknownClass", context.getTargetClassName());
-        assertEquals("", context.getPackageName());
+        assertThrows(IllegalStateException.class, context::getTargetMethodSignature);
+        assertThrows(IllegalStateException.class, context::getTargetClassName);
+        assertThrows(IllegalStateException.class, context::getPackageName);
     }
 
     @Test
     void testCreateMinimal() {
+        MethodIdentifier methodIdentifier = new MethodIdentifier("add", "int", List.of("int", "int")) {
+            @Override public String getClassName() { return "Calculator"; }
+            @Override public String getPackageName() { return ""; }
+            @Override public String getFullyQualifiedClassName() { return "Calculator"; }
+            @Override public String getFullyQualifiedSignature() { return "Calculator.add(int, int)"; }
+        };
+
         TestGenerationContext context = TestGenerationContextFactory
-                .createMinimal("Calculator.add(int, int)", tempDir);
+                .createMinimal(methodIdentifier, tempDir);
 
         assertNotNull(context);
-        assertEquals("Calculator.add(int, int)", context.getTargetMethodSignature());
-        assertEquals("TestClass", context.getTargetClassName());
-        assertEquals("com.example.test", context.getPackageName());
+        assertEquals("Calculator.add(int, int)", context.getTargetMethod().getFullyQualifiedSignature());
         assertEquals(tempDir, context.getOutputDirectory());
     }
 

@@ -125,14 +125,14 @@ class JavaRunConfigurationIntegrationTest {
         Object contextObj = configWithNullMethod.createTestGenerationContext();
         
         assertNotNull(contextObj);
-        assertTrue(contextObj instanceof TestGenerationContext);
+        assertInstanceOf(TestGenerationContext.class, contextObj);
         
         TestGenerationContext context = (TestGenerationContext) contextObj;
         
-        // Verify fallback values are used when method is null
-        assertEquals("unknownMethod", context.getTargetMethodSignature());
-        assertEquals("UnknownClass", context.getTargetClassName());
-        assertEquals("", context.getPackageName());
+        // Since targetMethod is null, getters depending on it should throw
+        assertThrows(IllegalStateException.class, context::getTargetMethodSignature);
+        assertThrows(IllegalStateException.class, context::getTargetClassName);
+        assertThrows(IllegalStateException.class, context::getPackageName);
     }
 
     @Test

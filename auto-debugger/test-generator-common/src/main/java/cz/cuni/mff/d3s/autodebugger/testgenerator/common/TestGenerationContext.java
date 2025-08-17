@@ -18,30 +18,6 @@ import java.util.Map;
 public class TestGenerationContext {
     
     /**
-     * Target method signature for which tests are being generated.
-     * @deprecated Use {@link #targetMethod} instead for better type safety and accuracy.
-     * This field will be removed in a future version.
-     */
-    @Deprecated(since = "1.1.0", forRemoval = true)
-    private final String targetMethodSignature;
-
-    /**
-     * Fully qualified class name containing the target method.
-     * @deprecated Use {@link #targetClass} instead for better type safety and accuracy.
-     * This field will be removed in a future version.
-     */
-    @Deprecated(since = "1.1.0", forRemoval = true)
-    private final String targetClassName;
-
-    /**
-     * Package name of the target class.
-     * @deprecated Use {@link #targetMethod} instead for better type safety.
-     * This field will be removed in a future version.
-     */
-    @Deprecated(since = "1.1.0", forRemoval = true)
-    private final String packageName;
-
-    /**
      * Structured identifier for the target method.
      * This provides type-safe access to method information without string parsing.
      * Preferred over the deprecated string-based fields.
@@ -125,107 +101,38 @@ public class TestGenerationContext {
     @Builder.Default
     private final boolean generateParameterizedTests = true;
 
-    // Migration helper methods
+    // Convenience computed getters
 
     /**
-     * Gets the target method signature, preferring structured identifier over deprecated string field.
-     * This method provides backward compatibility during the migration period.
-     *
-     * @return The method signature, either from structured identifier or deprecated string field
+     * Returns the fully-qualified method signature from the structured identifier.
+     * @throws IllegalStateException if targetMethod is null
      */
     public String getTargetMethodSignature() {
-        if (targetMethod != null) {
-            // Check if it's a Java method identifier with utility methods (using string comparison to avoid dependency)
-            if ("JavaMethodIdentifier".equals(targetMethod.getClass().getSimpleName())) {
-                try {
-                    // Use reflection to call getFullyQualifiedSignature() to avoid dependency on model-java
-                    java.lang.reflect.Method method = targetMethod.getClass().getMethod("getFullyQualifiedSignature");
-                    return (String) method.invoke(targetMethod);
-                } catch (Exception e) {
-                    // Fallback to toString if reflection fails
-                    return targetMethod.toString();
-                }
-            }
-            return targetMethod.toString();
+        if (targetMethod == null) {
+            throw new IllegalStateException("targetMethod is not set in TestGenerationContext");
         }
-        return targetMethodSignature;
+        return targetMethod.getFullyQualifiedSignature();
     }
 
     /**
-     * Gets the target class name, preferring structured identifier over deprecated string field.
-     * This method provides backward compatibility during the migration period.
-     *
-     * @return The class name, either from structured identifier or deprecated string field
+     * Returns the fully qualified class name containing the target method.
+     * @throws IllegalStateException if targetMethod is null
      */
     public String getTargetClassName() {
-        if (targetMethod != null) {
-            // Check if it's a Java method identifier with utility methods (using string comparison to avoid dependency)
-            if ("JavaMethodIdentifier".equals(targetMethod.getClass().getSimpleName())) {
-                try {
-                    // Use reflection to call getFullyQualifiedClassName() to avoid dependency on model-java
-                    java.lang.reflect.Method method = targetMethod.getClass().getMethod("getFullyQualifiedClassName");
-                    return (String) method.invoke(targetMethod);
-                } catch (Exception e) {
-                    // Fallback to string parsing if reflection fails
-                }
-            }
-
-            // Fallback: try to extract class name from method identifier string representation
-            String methodStr = targetMethod.toString();
-            int lastDot = methodStr.lastIndexOf('.');
-            if (lastDot > 0) {
-                int secondLastDot = methodStr.lastIndexOf('.', lastDot - 1);
-                if (secondLastDot > 0) {
-                    return methodStr.substring(0, lastDot);
-                }
-            }
+        if (targetMethod == null) {
+            throw new IllegalStateException("targetMethod is not set in TestGenerationContext");
         }
-        return targetClassName;
+        return targetMethod.getFullyQualifiedClassName();
     }
 
     /**
-     * Gets the package name, preferring structured identifier over deprecated string field.
-     * This method provides backward compatibility during the migration period.
-     *
-     * @return The package name, either from structured identifier or deprecated string field
+     * Returns the package name of the target method's class.
+     * @throws IllegalStateException if targetMethod is null
      */
     public String getPackageName() {
-        if (targetMethod != null) {
-            // Check if it's a Java method identifier with utility methods (using string comparison to avoid dependency)
-            if ("JavaMethodIdentifier".equals(targetMethod.getClass().getSimpleName())) {
-                try {
-                    // Use reflection to call getPackageName() to avoid dependency on model-java
-                    java.lang.reflect.Method method = targetMethod.getClass().getMethod("getPackageName");
-                    return (String) method.invoke(targetMethod);
-                } catch (Exception e) {
-                    // Fallback to string parsing if reflection fails
-                }
-            }
-
-            // Fallback: try to extract package name from method identifier string representation
-            String methodStr = targetMethod.toString();
-            int lastDot = methodStr.lastIndexOf('.');
-            if (lastDot > 0) {
-                int secondLastDot = methodStr.lastIndexOf('.', lastDot - 1);
-                if (secondLastDot > 0) {
-                    String className = methodStr.substring(0, lastDot);
-                    int classLastDot = className.lastIndexOf('.');
-                    if (classLastDot > 0) {
-                        return className.substring(0, classLastDot);
-                    }
-                }
-            }
-            return "";
+        if (targetMethod == null) {
+            throw new IllegalStateException("targetMethod is not set in TestGenerationContext");
         }
-        return packageName != null ? packageName : "";
-    }
-
-    /**
-     * Gets the structured method identifier.
-     *
-     * @return The method identifier, or null if not set
-     */
-    public MethodIdentifier getTargetMethod() {
-        return targetMethod;
+        return targetMethod.getPackageName();
     }
 }

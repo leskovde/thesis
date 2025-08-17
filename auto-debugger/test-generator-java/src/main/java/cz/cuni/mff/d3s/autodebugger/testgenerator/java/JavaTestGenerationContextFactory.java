@@ -66,16 +66,8 @@ public class JavaTestGenerationContextFactory extends TestGenerationContextFacto
         // Use structured identifiers with Java-specific methods
         if (targetMethod != null) {
             builder.targetMethod(targetMethod);
-
-            // Also set deprecated string fields for backward compatibility
-            builder.targetMethodSignature(targetMethod.getFullyQualifiedSignature())
-                   .targetClassName(targetMethod.getFullyQualifiedClassName())
-                   .packageName(targetMethod.getPackageName());
         } else {
-            // Fallback values if method identifier is not available
-            builder.targetMethodSignature("unknownMethod")
-                   .targetClassName("UnknownClass")
-                   .packageName("");
+            // No target method available; leave unset (callers should ensure it is provided where required)
         }
 
         return builder.build();

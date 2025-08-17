@@ -23,41 +23,97 @@ import java.util.*;
  * by replicating observed method calls with collected runtime values.
  */
 @Slf4j
-public class NaiveTraceBasedGenerator implements TraceBasedGenerator, TestGenerationContextAware {
-    
+public class NaiveTraceBasedGenerator implements TestGenerator {
+
     private final Map<Integer, JavaValueIdentifier> identifierMapping;
     private TestGenerationContext context;
-    
+
     public NaiveTraceBasedGenerator(Map<Integer, JavaValueIdentifier> identifierMapping) {
         this.identifierMapping = identifierMapping;
     }
-    
+
+    /**
+     * Convenience constructor that loads identifier mapping from a serialized file.
+     */
+    @SuppressWarnings("unchecked")
+    public NaiveTraceBasedGenerator(Path identifierMappingFile) {
+        Map<Integer, JavaValueIdentifier> loaded;
+        try {
+            try (java.io.FileInputStream fileReader = new java.io.FileInputStream(identifierMappingFile.toFile());
+                 java.io.ObjectInputStream objectStream = new java.io.ObjectInputStream(fileReader)) {
+                loaded = (HashMap<Integer, JavaValueIdentifier>) objectStream.readObject();
+            }
+        } catch (Exception e) {
+            log.error("Failed to load identifier mapping from {}", identifierMappingFile, e);
+            throw new RuntimeException("Failed to load identifier mapping", e);
+        }
+        this.identifierMapping = loaded;
+    }
+
+
+
     @Override
     public List<Path> generateTests(Trace trace) {
         return generateTests(trace, createDefaultContext());
     }
-    
+
+    @Override
+    public List<Path> generateTests(Trace trace, Path sourceCodePath, TestGenerationContext context) {
+        log.info("Generating naive trace-based tests with source code path: {}", sourceCodePath);
+        // Source code path is not used by naive generator, delegate to context-based method
+        return generateTests(trace, context);
+    }
+
     /**
      * Override the default RunConfiguration method to use Java-specific factory.
      * This ensures that JavaMethodIdentifier utility methods are used for accurate information extraction.
      */
     @Override
     public List<Path> generateTests(Trace trace, RunConfiguration configuration) {
-        if (configuration instanceof JavaRunConfiguration) {
+        if (configuration instanceof JavaRunConfiguration javaRunConfiguration) {
             // Use Java-specific factory for better information extraction
             TestGenerationContext context = JavaTestGenerationContextFactory
-                    .createFromJavaRunConfiguration((JavaRunConfiguration) configuration);
+                    .createFromJavaRunConfiguration(javaRunConfiguration);
             return generateTests(trace, context);
         } else {
             // Fallback to default implementation
-            return TraceBasedGenerator.super.generateTests(trace, configuration);
+            return TestGenerator.super.generateTests(trace, configuration);
         }
     }
 
     @Override
+    public String getGenerationTechnique() {
+        return "Naive Trace-Based";
+    }
+
+    @Override
+    public void validateTrace(Trace trace) {
+        if (trace == null) {
+            throw new IllegalArgumentException("Trace cannot be null");
+        }
+
+        // Check if trace has any captured values
+        if (isTraceEmpty(trace)) {
+            throw new IllegalArgumentException("Trace is empty - no captured values found. Cannot generate meaningful tests.");
+        }
+
+        log.debug("Trace validation passed for naive trace-based test generation");
+    }
+
+    /**
+     * Generates tests using TestGenerationContext.
+     * This method provides the core functionality for test generation.
+     *
+     * @param trace The runtime trace data
+     * @param context The test generation context
+     * @return List of generated test file paths
+     */
     public List<Path> generateTests(Trace trace, TestGenerationContext context) {
         this.context = context;
-        log.info("Generating naive trace-based tests for method: {}", context.getTargetMethodSignature());
+        String methodSig = context.getTargetMethod() != null
+                ? context.getTargetMethod().getFullyQualifiedSignature()
+                : "UnknownClass.unknownMethod()";
+        log.info("Generating naive trace-based tests for method: {}", methodSig);
 
         // Check if trace is empty
         if (trace == null || isTraceEmpty(trace)) {
@@ -222,8 +278,9 @@ public class NaiveTraceBasedGenerator implements TraceBasedGenerator, TestGenera
         StringBuilder sb = new StringBuilder();
         
         // Package declaration
-        if (context.getPackageName() != null && !context.getPackageName().isEmpty()) {
-            sb.append("package ").append(context.getPackageName()).append(";\n\n");
+        String pkg = context.getTargetMethod() != null ? context.getTargetMethod().getPackageName() : "";
+        if (pkg != null && !pkg.isEmpty()) {
+            sb.append("package ").append(pkg).append(";\n\n");
         }
         
         // Imports
@@ -232,16 +289,19 @@ public class NaiveTraceBasedGenerator implements TraceBasedGenerator, TestGenera
         sb.append("import static org.junit.jupiter.api.Assertions.*;\n\n");
         
         // Class declaration
-        String testClassName = extractClassNameFromMethod(context.getTargetMethodSignature()) + "Test";
+        String testClassSig = context.getTargetMethod() != null
+                ? context.getTargetMethod().getFullyQualifiedSignature()
+                : "UnknownClass.unknownMethod()";
+        String testClassName = extractClassNameFromMethod(testClassSig) + "Test";
         sb.append("/**\n");
-        sb.append(" * Generated test class for ").append(context.getTargetMethodSignature()).append("\n");
+        sb.append(" * Generated test class for ").append(testClassSig).append("\n");
         sb.append(" * Generated on: ").append(LocalDateTime.now()).append("\n");
         sb.append(" * Generation strategy: Naive Trace-Based\n");
         sb.append(" */\n");
         sb.append("public class ").append(testClassName).append(" {\n\n");
         
         // Instance variable for the class under test
-        String targetClass = context.getTargetClassName();
+        String targetClass = context.getTargetMethod() != null ? context.getTargetMethod().getFullyQualifiedClassName() : "UnknownClass";
         String instanceName = targetClass.substring(targetClass.lastIndexOf('.') + 1).toLowerCase();
         sb.append("    private ").append(targetClass).append(" ").append(instanceName).append(";\n\n");
         
@@ -303,7 +363,7 @@ public class NaiveTraceBasedGenerator implements TraceBasedGenerator, TestGenera
         }
         
         StringBuilder name = new StringBuilder("test");
-        String methodName = extractMethodNameFromSignature(context.getTargetMethodSignature());
+        String methodName = extractMethodNameFromSignature(context.getTargetMethod() != null ? context.getTargetMethod().getFullyQualifiedSignature() : "unknownMethod");
         name.append(capitalize(methodName));
         
         if (context.getNamingStrategy() == TestNamingStrategy.PARAMETER_BASED) {
@@ -322,7 +382,7 @@ public class NaiveTraceBasedGenerator implements TraceBasedGenerator, TestGenera
     }
     
     private String generateMethodCall(TestScenario scenario, String instanceName) {
-        String methodName = extractMethodNameFromSignature(context.getTargetMethodSignature());
+        String methodName = extractMethodNameFromSignature(context.getTargetMethod() != null ? context.getTargetMethod().getFullyQualifiedSignature() : "unknownMethod");
         
         StringBuilder call = new StringBuilder();
         call.append("var result = ").append(instanceName).append(".").append(methodName).append("(");
@@ -379,7 +439,8 @@ public class NaiveTraceBasedGenerator implements TraceBasedGenerator, TestGenera
     }
     
     private Path writeTestFile(String testClassContent) throws IOException {
-        String testClassName = extractClassNameFromMethod(context.getTargetMethodSignature()) + "Test";
+        String sig = context.getTargetMethod() != null ? context.getTargetMethod().getFullyQualifiedSignature() : "UnknownClass.unknownMethod()";
+        String testClassName = extractClassNameFromMethod(sig) + "Test";
         Path testFile = context.getOutputDirectory().resolve(testClassName + ".java");
         
         Files.createDirectories(testFile.getParent());
@@ -390,9 +451,6 @@ public class NaiveTraceBasedGenerator implements TraceBasedGenerator, TestGenera
     
     private TestGenerationContext createDefaultContext() {
         return TestGenerationContext.builder()
-                .targetMethodSignature("unknownMethod")
-                .targetClassName("UnknownClass")
-                .packageName("")
                 .outputDirectory(Path.of("generated-tests"))
                 .build();
     }

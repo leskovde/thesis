@@ -60,10 +60,10 @@ class JavaTestGenerationContextFactoryTest {
                 .createFromJavaRunConfiguration(javaRunConfiguration);
 
         assertNotNull(context);
-        assertEquals("com.example.service.UserService.authenticate(String, String)", 
-                    context.getTargetMethodSignature());
-        assertEquals("com.example.service.UserService", context.getTargetClassName());
-        assertEquals("com.example.service", context.getPackageName());
+        assertEquals("com.example.service.UserService.authenticate(String, String)",
+                    context.getTargetMethod().getFullyQualifiedSignature());
+        assertEquals("com.example.service.UserService", context.getTargetMethod().getFullyQualifiedClassName());
+        assertEquals("com.example.service", context.getTargetMethod().getPackageName());
         assertEquals(tempDir, context.getOutputDirectory());
         
         // Verify default settings
@@ -88,10 +88,10 @@ class JavaTestGenerationContextFactoryTest {
                 .createFromJavaRunConfiguration(javaRunConfiguration, customSettings);
 
         assertNotNull(context);
-        assertEquals("com.example.service.UserService.authenticate(String, String)", 
-                    context.getTargetMethodSignature());
-        assertEquals("com.example.service.UserService", context.getTargetClassName());
-        assertEquals("com.example.service", context.getPackageName());
+        assertEquals("com.example.service.UserService.authenticate(String, String)",
+                    context.getTargetMethod().getFullyQualifiedSignature());
+        assertEquals("com.example.service.UserService", context.getTargetMethod().getFullyQualifiedClassName());
+        assertEquals("com.example.service", context.getTargetMethod().getPackageName());
         
         // Verify custom settings
         assertEquals("junit4", context.getTestFramework());
@@ -107,10 +107,10 @@ class JavaTestGenerationContextFactoryTest {
                 .createForTraceBasedGeneration(javaRunConfiguration);
 
         assertNotNull(context);
-        assertEquals("com.example.service.UserService.authenticate(String, String)", 
-                    context.getTargetMethodSignature());
-        assertEquals("com.example.service.UserService", context.getTargetClassName());
-        assertEquals("com.example.service", context.getPackageName());
+        assertEquals("com.example.service.UserService.authenticate(String, String)",
+                    context.getTargetMethod().getFullyQualifiedSignature());
+        assertEquals("com.example.service.UserService", context.getTargetMethod().getFullyQualifiedClassName());
+        assertEquals("com.example.service", context.getTargetMethod().getPackageName());
         
         // Verify trace-based settings
         assertEquals("junit5", context.getTestFramework());
@@ -127,10 +127,10 @@ class JavaTestGenerationContextFactoryTest {
                 .createForLLMBasedGeneration(javaRunConfiguration);
 
         assertNotNull(context);
-        assertEquals("com.example.service.UserService.authenticate(String, String)", 
-                    context.getTargetMethodSignature());
-        assertEquals("com.example.service.UserService", context.getTargetClassName());
-        assertEquals("com.example.service", context.getPackageName());
+        assertEquals("com.example.service.UserService.authenticate(String, String)",
+                    context.getTargetMethod().getFullyQualifiedSignature());
+        assertEquals("com.example.service.UserService", context.getTargetMethod().getFullyQualifiedClassName());
+        assertEquals("com.example.service", context.getTargetMethod().getPackageName());
         
         // Verify LLM-based settings
         assertEquals("junit5", context.getTestFramework());
@@ -155,9 +155,9 @@ class JavaTestGenerationContextFactoryTest {
                 .createFromJavaRunConfiguration(configWithNullMethod);
 
         assertNotNull(context);
-        assertEquals("unknownMethod", context.getTargetMethodSignature());
-        assertEquals("UnknownClass", context.getTargetClassName());
-        assertEquals("", context.getPackageName());
+        assertThrows(IllegalStateException.class, context::getTargetMethodSignature);
+        assertThrows(IllegalStateException.class, context::getTargetClassName);
+        assertThrows(IllegalStateException.class, context::getPackageName);
     }
 
     @Test

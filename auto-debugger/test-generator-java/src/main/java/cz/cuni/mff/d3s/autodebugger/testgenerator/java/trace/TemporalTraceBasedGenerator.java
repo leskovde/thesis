@@ -1,11 +1,17 @@
 package cz.cuni.mff.d3s.autodebugger.testgenerator.java.trace;
 
-import cz.cuni.mff.d3s.autodebugger.model.common.trace.TemporalTrace;
-import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.JavaArgumentIdentifier;
+import cz.cuni.mff.d3s.autodebugger.model.common.RunConfiguration;
 import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.ExportableValue;
+import cz.cuni.mff.d3s.autodebugger.model.common.trace.TemporalTrace;
+import cz.cuni.mff.d3s.autodebugger.model.common.trace.Trace;
+import cz.cuni.mff.d3s.autodebugger.model.java.JavaRunConfiguration;
+import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.JavaArgumentIdentifier;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.JavaFieldIdentifier;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.common.TestGenerationContext;
+import cz.cuni.mff.d3s.autodebugger.testgenerator.common.TestGenerationContextFactory;
+import cz.cuni.mff.d3s.autodebugger.testgenerator.common.TestGenerator;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.common.TestNamingStrategy;
+import cz.cuni.mff.d3s.autodebugger.testgenerator.java.JavaTestGenerationContextFactory;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -25,10 +31,13 @@ import java.util.stream.Collectors;
  * - Reconstruct precise state at specific execution points
  * - Generate tests that capture state evolution over time
  * - Create parameterized tests for different execution scenarios
+ * <p>
+ * This implementation properly implements the TestGenerator interface
+ * and can work with both regular Trace and TemporalTrace objects.
  */
 @Slf4j
-public class TemporalTraceBasedGenerator {
-    
+public class TemporalTraceBasedGenerator implements TestGenerator {
+
     private TestGenerationContext context;
     
     /**
@@ -41,32 +50,120 @@ public class TemporalTraceBasedGenerator {
      */
     public List<Path> generateTests(TemporalTrace trace, TestGenerationContext context) {
         this.context = context;
-        log.info("Generating enhanced trace-based tests for method: {}", context.getTargetMethodSignature());
-        
+        String sig = context.getTargetMethod() != null ? context.getTargetMethod().getFullyQualifiedSignature() : "UnknownClass.unknownMethod()";
+        log.info("Generating enhanced trace-based tests for method: {}", sig);
+
         try {
+            // Validate inputs
+            if (context == null) {
+                throw new IllegalArgumentException("TestGenerationContext cannot be null");
+            }
+
+            validateTemporalTrace(trace);
+
             // Analyze the trace to identify test scenarios
             List<TestScenario> scenarios = analyzeTraceForScenarios(trace);
-            
+
             if (scenarios.isEmpty()) {
                 log.warn("No test scenarios found in trace");
                 return List.of();
             }
-            
+
             // Generate test class content
             String testClassContent = generateTestClass(scenarios, trace);
-            
+
             // Write test file
             Path testFile = writeTestFile(testClassContent);
-            
+
             log.info("Generated {} test scenarios in file: {}", scenarios.size(), testFile);
             return List.of(testFile);
-            
+
         } catch (Exception e) {
             log.error("Failed to generate enhanced trace-based tests", e);
             return List.of();
         }
     }
-    
+
+    // TestGenerator interface implementation
+
+    @Override
+    public List<Path> generateTests(Trace trace) {
+        log.info("Generating temporal trace-based tests from basic Trace");
+
+        // TemporalTrace and Trace are separate classes, so this generator can't work with regular Trace
+        log.error("Regular Trace provided to TemporalTraceBasedGenerator. This generator only works with TemporalTrace objects.");
+        throw new IllegalArgumentException("TemporalTraceBasedGenerator requires a TemporalTrace object, but received a regular Trace. " +
+                "Use generateTests(TemporalTrace, TestGenerationContext) instead or use a different generator for regular Trace objects.");
+    }
+
+    @Override
+    public List<Path> generateTests(Trace trace, Path sourceCodePath, TestGenerationContext context) {
+        log.info("Generating temporal trace-based tests with source code path: {}", sourceCodePath);
+
+        // TemporalTrace and Trace are separate classes, so this generator can't work with regular Trace
+        log.error("Regular Trace provided to TemporalTraceBasedGenerator. This generator only works with TemporalTrace objects.");
+        throw new IllegalArgumentException("TemporalTraceBasedGenerator requires a TemporalTrace object, but received a regular Trace. " +
+                "Use generateTests(TemporalTrace, TestGenerationContext) instead or use a different generator for regular Trace objects.");
+    }
+
+    @Override
+    public List<Path> generateTests(Trace trace, RunConfiguration configuration) {
+        log.info("Generating temporal trace-based tests with RunConfiguration");
+
+        // Create context from configuration
+        TestGenerationContext context;
+        if (configuration instanceof JavaRunConfiguration javaRunConfiguration) {
+            // Use Java-specific factory for better information extraction
+            context = JavaTestGenerationContextFactory.createFromJavaRunConfiguration(javaRunConfiguration);
+        } else {
+            // Fallback to default implementation
+            context = TestGenerationContextFactory.createFromRunConfiguration(configuration);
+        }
+
+        return generateTests(trace, configuration.getSourceCodePath(), context);
+    }
+
+    @Override
+    public String getGenerationTechnique() {
+        return "Enhanced Temporal Trace-Based";
+    }
+
+    @Override
+    public void validateTrace(Trace trace) {
+        if (trace == null) {
+            throw new IllegalArgumentException("Trace cannot be null");
+        }
+
+        // Since TemporalTrace and Trace are separate classes, this will always fail for regular Trace
+        throw new IllegalArgumentException("TemporalTraceBasedGenerator requires a TemporalTrace object, but received: " +
+                trace.getClass().getSimpleName() + ". Use validateTemporalTrace(TemporalTrace) instead.");
+    }
+
+    /**
+     * Validates a TemporalTrace for test generation.
+     *
+     * @param temporalTrace The temporal trace to validate
+     * @throws IllegalArgumentException if the trace is invalid
+     */
+    public void validateTemporalTrace(TemporalTrace temporalTrace) {
+        if (temporalTrace == null) {
+            throw new IllegalArgumentException("TemporalTrace cannot be null");
+        }
+
+        // Check if trace has any tracked identifiers
+        if (temporalTrace.getTrackedIdentifiers().isEmpty()) {
+            throw new IllegalArgumentException("TemporalTrace has no tracked identifiers - cannot generate meaningful tests.");
+        }
+
+        // Check if trace has any events
+        Optional<int[]> eventRange = temporalTrace.getEventIndexRange();
+        if (eventRange.isEmpty()) {
+            throw new IllegalArgumentException("TemporalTrace contains no events - cannot generate meaningful tests.");
+        }
+
+        log.debug("TemporalTrace validation passed for enhanced trace-based test generation");
+    }
+
     /**
      * Analyzes the trace to identify distinct test scenarios based on
      * method invocation points and state changes.
@@ -198,8 +295,9 @@ public class TemporalTraceBasedGenerator {
         StringBuilder sb = new StringBuilder();
         
         // Package declaration
-        if (context.getPackageName() != null && !context.getPackageName().isEmpty()) {
-            sb.append("package ").append(context.getPackageName()).append(";\n\n");
+        String pkg = context.getTargetMethod() != null ? context.getTargetMethod().getPackageName() : "";
+        if (pkg != null && !pkg.isEmpty()) {
+            sb.append("package ").append(pkg).append(";\n\n");
         }
         
         // Imports
@@ -209,9 +307,10 @@ public class TemporalTraceBasedGenerator {
         sb.append("import static org.junit.jupiter.api.Assertions.*;\n\n");
         
         // Class declaration with documentation
-        String testClassName = extractClassNameFromMethod(context.getTargetMethodSignature()) + "EnhancedTest";
+        String sig = context.getTargetMethod() != null ? context.getTargetMethod().getFullyQualifiedSignature() : "UnknownClass.unknownMethod()";
+        String testClassName = extractClassNameFromMethod(sig) + "EnhancedTest";
         sb.append("/**\n");
-        sb.append(" * Enhanced trace-based test class for ").append(context.getTargetMethodSignature()).append("\n");
+        sb.append(" * Enhanced trace-based test class for ").append(sig).append("\n");
         sb.append(" * Generated on: ").append(LocalDateTime.now()).append("\n");
         sb.append(" * Generation strategy: Enhanced Trace-Based\n");
         sb.append(" * Trace summary: ").append(trace.getSummary().replace("\n", "\n * ")).append("\n");
@@ -219,7 +318,7 @@ public class TemporalTraceBasedGenerator {
         sb.append("public class ").append(testClassName).append(" {\n\n");
         
         // Instance variable for the class under test
-        String targetClass = context.getTargetClassName();
+        String targetClass = context.getTargetMethod() != null ? context.getTargetMethod().getFullyQualifiedClassName() : "UnknownClass";
         String instanceName = targetClass.substring(targetClass.lastIndexOf('.') + 1).toLowerCase();
         sb.append("    private ").append(targetClass).append(" ").append(instanceName).append(";\n\n");
         
@@ -280,7 +379,7 @@ public class TemporalTraceBasedGenerator {
     }
     
     private String generateTestMethodName(TestScenario scenario) {
-        String baseName = extractMethodNameFromSignature(context.getTargetMethodSignature());
+        String baseName = extractMethodNameFromSignature(context.getTargetMethod() != null ? context.getTargetMethod().getFullyQualifiedSignature() : "unknownMethod");
         
         if (context.getNamingStrategy() == TestNamingStrategy.SIMPLE) {
             return "test" + capitalize(baseName) + "Scenario" + scenario.scenarioNumber;
@@ -292,13 +391,13 @@ public class TemporalTraceBasedGenerator {
     }
     
     private String generateDisplayName(TestScenario scenario) {
-        String methodName = extractMethodNameFromSignature(context.getTargetMethodSignature());
+        String methodName = extractMethodNameFromSignature(context.getTargetMethod() != null ? context.getTargetMethod().getFullyQualifiedSignature() : "unknownMethod");
         return String.format("Test %s at execution event %d (scenario %d)", 
                             methodName, scenario.eventIndex, scenario.scenarioNumber);
     }
     
     private String generateMethodCall(TestScenario scenario, String instanceName) {
-        String methodName = extractMethodNameFromSignature(context.getTargetMethodSignature());
+        String methodName = extractMethodNameFromSignature(context.getTargetMethod() != null ? context.getTargetMethod().getFullyQualifiedSignature() : context.getTargetMethodSignature());
         
         StringBuilder call = new StringBuilder();
         call.append("var result = ").append(instanceName).append(".").append(methodName).append("(");
@@ -332,7 +431,8 @@ public class TemporalTraceBasedGenerator {
     }
     
     private Path writeTestFile(String testClassContent) throws IOException {
-        String testClassName = extractClassNameFromMethod(context.getTargetMethodSignature()) + "EnhancedTest";
+        String methodSignatureForClass = context.getTargetMethod() != null ? context.getTargetMethod().getFullyQualifiedSignature() : "UnknownClass.unknownMethod()";
+        String testClassName = extractClassNameFromMethod(methodSignatureForClass) + "EnhancedTest";
         Path testFile = context.getOutputDirectory().resolve(testClassName + ".java");
         
         Files.createDirectories(testFile.getParent());

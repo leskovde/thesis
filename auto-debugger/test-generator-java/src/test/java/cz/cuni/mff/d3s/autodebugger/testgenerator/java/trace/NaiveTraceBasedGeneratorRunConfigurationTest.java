@@ -3,6 +3,7 @@ package cz.cuni.mff.d3s.autodebugger.testgenerator.java.trace;
 import cz.cuni.mff.d3s.autodebugger.model.common.trace.Trace;
 import cz.cuni.mff.d3s.autodebugger.model.java.JavaRunConfiguration;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.*;
+import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.MethodIdentifier;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.common.TestGenerationContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -98,7 +99,7 @@ class NaiveTraceBasedGeneratorRunConfigurationTest {
         assertNotNull(generatedFiles);
         assertEquals(1, generatedFiles.size(), "Should generate exactly one test file");
         
-        Path testFile = generatedFiles.get(0);
+        Path testFile = generatedFiles.getFirst();
         assertTrue(Files.exists(testFile), "Generated test file should exist");
         
         String content = Files.readString(testFile);
@@ -120,10 +121,14 @@ class NaiveTraceBasedGeneratorRunConfigurationTest {
     @Test
     void testGenerateTests_RunConfigurationVsManualContext() throws Exception {
         // Given - create manual TestGenerationContext for comparison
+        MethodIdentifier methodIdentifier = new MethodIdentifier("add", "int", List.of("int","int")) {
+            @Override public String getClassName() { return "Calculator"; }
+            @Override public String getPackageName() { return "com.example.math"; }
+            @Override public String getFullyQualifiedClassName() { return "com.example.math.Calculator"; }
+            @Override public String getFullyQualifiedSignature() { return "com.example.math.Calculator.add(int, int)"; }
+        };
         TestGenerationContext manualContext = TestGenerationContext.builder()
-                .targetMethodSignature("com.example.math.Calculator.add(int, int)")
-                .targetClassName("com.example.math.Calculator")
-                .packageName("com.example.math")
+                .targetMethod(methodIdentifier)
                 .outputDirectory(tempDir.resolve("manual"))
                 .build();
 
@@ -135,8 +140,8 @@ class NaiveTraceBasedGeneratorRunConfigurationTest {
         assertEquals(1, configBasedFiles.size());
         assertEquals(1, contextBasedFiles.size());
         
-        String configBasedContent = Files.readString(configBasedFiles.get(0));
-        String contextBasedContent = Files.readString(contextBasedFiles.get(0));
+        String configBasedContent = Files.readString(configBasedFiles.getFirst());
+        String contextBasedContent = Files.readString(contextBasedFiles.getFirst());
         
         // Both should contain the same key elements
         assertTrue(configBasedContent.contains("com.example.math.Calculator"));
@@ -175,7 +180,7 @@ class NaiveTraceBasedGeneratorRunConfigurationTest {
         List<Path> generatedFiles = generator.generateTests(trace, runConfiguration);
 
         // Then - verify that the utility methods from JavaMethodIdentifier are used
-        String content = Files.readString(generatedFiles.get(0));
+        String content = Files.readString(generatedFiles.getFirst());
         
         // Verify fully qualified signature is used (from getFullyQualifiedSignature())
         assertTrue(content.contains("com.example.math.Calculator.add(int, int)"));

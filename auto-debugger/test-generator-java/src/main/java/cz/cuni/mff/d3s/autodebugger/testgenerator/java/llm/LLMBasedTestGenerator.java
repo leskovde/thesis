@@ -21,24 +21,27 @@ import java.util.*;
  * LLM-based test generator that uses Large Language Models to generate
  * semantically rich and comprehensive test suites based on runtime traces
  * and source code analysis.
+ *
+ * This implementation follows the simplified TestGenerator interface and
+ * consolidates all test generation logic into clean, single-responsibility methods.
  */
 @Slf4j
 @RequiredArgsConstructor
-public class LLMBasedTestGenerator implements LLMBasedGenerator, TestGenerator {
+public class LLMBasedTestGenerator implements TestGenerator {
 
     private LLMConfiguration llmConfig;
-    private RunConfiguration runConfiguration;
     private final AnthropicClient anthropicClient;
     private final PromptBuilder promptBuilder;
     private final CodeValidator codeValidator;
+    private String generationTechnique = "LLM-based";
 
-    @Override
-    public void configure(RunConfiguration configuration) {
-        this.runConfiguration = configuration;
-        log.debug("Configured LLM-based test generator with run configuration");
-    }
-
-    @Override
+    /**
+     * Configures the LLM-based test generator with the specified configuration.
+     * This method must be called before generating tests.
+     *
+     * @param config The LLM configuration containing model settings and API credentials
+     * @throws LLMConfigurationException if the configuration is invalid
+     */
     public void configure(LLMConfiguration config) throws LLMConfigurationException {
         if (config == null) {
             throw new LLMConfigurationException("LLM configuration cannot be null");
@@ -50,17 +53,18 @@ public class LLMBasedTestGenerator implements LLMBasedGenerator, TestGenerator {
 
         log.info("Configured LLM-based test generator with model: {}", config.getModelName());
     }
-    
+
     @Override
     public List<Path> generateTests(Trace trace) {
-        if (runConfiguration == null) {
-            throw new TestGenerationWorkflowException("RunConfiguration not set. Call configure() first.", "Configuration", null, null);
-        }
-        return generateTests(trace, runConfiguration);
+        log.info("Generating LLM-based tests from trace without additional context");
+        throw new TestGenerationWorkflowException(
+            "LLM-based test generation requires source code path and context. Use generateTests(Trace, Path, TestGenerationContext) instead.",
+            "Configuration", null, null);
     }
 
     @Override
     public List<Path> generateTests(Trace trace, RunConfiguration configuration) {
+        log.info("Generating LLM-based tests from trace with RunConfiguration");
         // Use the RunConfiguration to get source code path and create context
         Path sourceCodePath = configuration.getSourceCodePath();
         TestGenerationContext context = TestGenerationContextFactory.createFromRunConfiguration(configuration);
@@ -68,23 +72,18 @@ public class LLMBasedTestGenerator implements LLMBasedGenerator, TestGenerator {
     }
 
     @Override
-    public List<Path> generateTests(Trace trace, TestGenerationContext context) {
-        // Use the source code path from the run configuration if available
-        Path sourceCodePath = runConfiguration != null ? runConfiguration.getSourceCodePath() : null;
-        if (sourceCodePath == null) {
-            throw new TestGenerationWorkflowException("Source code path not available. Configure RunConfiguration first.", "Configuration", null, null);
-        }
-        return generateTests(trace, sourceCodePath, context);
-    }
-
-    @Override
-    public List<Path> generateTests(Trace trace, Path sourceCodePath) {
-        return generateTests(trace, sourceCodePath, createDefaultContext());
-    }
-
-    @Override
     public String getGenerationTechnique() {
-        return "LLM-based";
+        return generationTechnique;
+    }
+
+    /**
+     * Allows the factory or caller to set a human-friendly technique label.
+     * This supports scenarios where UI or tests expect a specific technique id like "ai-assisted".
+     */
+    public void setGenerationTechnique(String technique) {
+        if (technique != null && !technique.isBlank()) {
+            this.generationTechnique = technique;
+        }
     }
 
     @Override
@@ -92,60 +91,33 @@ public class LLMBasedTestGenerator implements LLMBasedGenerator, TestGenerator {
         if (trace == null) {
             throw new IllegalArgumentException("Trace cannot be null");
         }
-        // Additional validation can be added here if needed
+
+        if (llmConfig == null) {
+            throw new IllegalStateException("LLM configuration must be set before validating trace. Call configure() first.");
+        }
+
         log.debug("Trace validation passed for LLM-based test generation");
     }
     
     @Override
     public List<Path> generateTests(Trace trace, Path sourceCodePath, TestGenerationContext context) {
-        // Validate parameters
-        if (trace == null) {
-            throw new TestGenerationWorkflowException("Trace cannot be null", "Parameter Validation", sourceCodePath != null ? sourceCodePath.toString() : null, null);
-        }
-        if (sourceCodePath == null) {
-            throw new TestGenerationWorkflowException("Source code path cannot be null", "Parameter Validation", null, null);
-        }
-        if (context == null) {
-            throw new TestGenerationWorkflowException("Test generation context cannot be null", "Parameter Validation", sourceCodePath.toString(), null);
-        }
-        if (!Files.exists(sourceCodePath)) {
-            throw new TestGenerationWorkflowException("Source code path does not exist: " + sourceCodePath, "Parameter Validation", sourceCodePath.toString(), null);
-        }
-        if (!Files.isRegularFile(sourceCodePath)) {
-            throw new TestGenerationWorkflowException("Source code path must be a file, not a directory: " + sourceCodePath, "Parameter Validation", sourceCodePath.toString(), null);
-        }
+        String methodSig = context.getTargetMethod() != null ? context.getTargetMethod().getFullyQualifiedSignature() : "UnknownClass.unknownMethod()";
+        String classFqcn = context.getTargetMethod() != null ? context.getTargetMethod().getFullyQualifiedClassName() : "UnknownClass";
+        String pkg = context.getTargetMethod() != null ? context.getTargetMethod().getPackageName() : "";
+        log.info("Generating LLM-based tests for method: {}", methodSig);
 
-        log.info("Generating LLM-based tests for method: {}", context.getTargetMethodSignature());
-
-        if (llmConfig == null) {
-            throw new IllegalStateException("LLM configuration must be set before generating tests");
-        }
+        // Validate all parameters
+        validateParameters(trace, sourceCodePath, context);
 
         try {
             // Read source code
             String sourceCode = Files.readString(sourceCodePath);
 
-            // Build context for LLM prompt
+            // Build context for LLM prompt (handles both regular and temporal traces)
             LLMPromptContext promptContext = buildPromptContext(trace, sourceCode, context);
 
-            // Generate initial test suite
-            String prompt = promptBuilder.buildTestGenerationPrompt(promptContext);
-            String generatedCode = anthropicClient.generateCode(prompt);
-
-            // Validate and refine if needed
-            if (llmConfig.isEnableIterativeRefinement()) {
-                generatedCode = refineGeneratedCode(generatedCode, promptContext);
-            }
-
-            // Validate final code
-            if (llmConfig.isValidateGeneratedCode()) {
-                CodeValidationResult validation = codeValidator.validate(generatedCode);
-                if (!validation.isValid()) {
-                    log.warn("Generated code validation failed: {}", validation.getErrors());
-                    // Attempt one more refinement
-                    generatedCode = fixValidationErrors(generatedCode, validation, promptContext);
-                }
-            }
+            // Generate and refine test code
+            String generatedCode = generateAndRefineCode(promptContext);
 
             // Write test file
             Path testFile = writeTestFile(generatedCode, context);
@@ -162,113 +134,204 @@ public class LLMBasedTestGenerator implements LLMBasedGenerator, TestGenerator {
                 "LLM-based test generation failed: " + e.getMessage(),
                 "Test Generation",
                 sourceCodePath.toString(),
-                context.getTargetMethodSignature(),
+                methodSig,
                 e
             );
         }
     }
 
     /**
-     * Enhanced method that generates tests from an TemporalTrace with temporal information.
-     * This provides richer context to the LLM for generating more sophisticated tests.
+     * Validates all required parameters for test generation.
+     *
+     * @param trace The runtime trace data
+     * @param sourceCodePath The path to the source code file
+     * @param context The test generation context
+     * @throws TestGenerationWorkflowException if any parameter is invalid
      */
-    public List<Path> generateTests(TemporalTrace enhancedTrace, Path sourceCodePath, TestGenerationContext context) {
-        // Validate parameters
-        if (enhancedTrace == null) {
-            throw new IllegalArgumentException("Enhanced trace cannot be null");
+    private void validateParameters(Trace trace, Path sourceCodePath, TestGenerationContext context) {
+        if (trace == null) {
+            throw new TestGenerationWorkflowException("Trace cannot be null", "Parameter Validation",
+                sourceCodePath != null ? sourceCodePath.toString() : null, null);
         }
         if (sourceCodePath == null) {
-            throw new IllegalArgumentException("Source code path cannot be null");
+            throw new TestGenerationWorkflowException("Source code path cannot be null", "Parameter Validation", null, null);
         }
         if (context == null) {
-            throw new IllegalArgumentException("Test generation context cannot be null");
+            throw new TestGenerationWorkflowException("Test generation context cannot be null", "Parameter Validation",
+                sourceCodePath.toString(), null);
         }
         if (!Files.exists(sourceCodePath)) {
-            throw new IllegalArgumentException("Source code path does not exist: " + sourceCodePath);
+            throw new TestGenerationWorkflowException("Source code path does not exist: " + sourceCodePath,
+                "Parameter Validation", sourceCodePath.toString(), null);
         }
         if (!Files.isRegularFile(sourceCodePath)) {
-            throw new IllegalArgumentException("Source code path must be a file, not a directory: " + sourceCodePath);
+            throw new TestGenerationWorkflowException("Source code path must be a file, not a directory: " + sourceCodePath,
+                "Parameter Validation", sourceCodePath.toString(), null);
         }
-
-        log.info("Generating LLM-based tests from enhanced trace for method: {}", context.getTargetMethodSignature());
-
         if (llmConfig == null) {
-            throw new IllegalStateException("LLM configuration must be set before generating tests");
+            throw new IllegalStateException("LLM configuration must be set before generating tests. Call configure() first.");
         }
+    }
+
+    /**
+     * Generates and refines test code using the LLM.
+     *
+     * @param promptContext The context for building LLM prompts
+     * @return The generated and refined test code
+     * @throws Exception if code generation fails
+     */
+    private String generateAndRefineCode(LLMPromptContext promptContext) throws Exception {
+        // Generate initial test suite
+        String prompt = promptBuilder.buildTestGenerationPrompt(promptContext);
+        String generatedCode = anthropicClient.generateCode(prompt);
+
+        // Validate and refine if needed
+        if (llmConfig.isEnableIterativeRefinement()) {
+            generatedCode = refineGeneratedCode(generatedCode, promptContext);
+        }
+
+        // Validate final code
+        if (llmConfig.isValidateGeneratedCode()) {
+            CodeValidationResult validation = codeValidator.validate(generatedCode);
+            if (!validation.isValid()) {
+                log.warn("Generated code validation failed: {}", validation.getErrors());
+                // Attempt one more refinement
+                generatedCode = fixValidationErrors(generatedCode, validation, promptContext);
+            }
+        }
+
+        return generatedCode;
+    }
+
+    /**
+     * Enhanced method that generates tests from a TemporalTrace with temporal information.
+     * This provides richer context to the LLM for generating more sophisticated tests.
+     *
+     * @param enhancedTrace The temporal trace with execution timeline data
+     * @param sourceCodePath The path to the source code file
+     * @param context The test generation context
+     * @return List of generated test file paths
+     * @deprecated Use {@link #generateTests(Trace, Path, TestGenerationContext)} instead.
+     *             The main method now automatically detects and handles TemporalTrace objects.
+     */
+    @Deprecated(since = "1.1.0", forRemoval = true)
+    public List<Path> generateTests(TemporalTrace enhancedTrace, Path sourceCodePath, TestGenerationContext context) {
+        log.warn("generateTests(TemporalTrace, Path, TestGenerationContext) is deprecated. " +
+                "Use generateTests(Trace, Path, TestGenerationContext) for regular traces.");
+
+        // Handle TemporalTrace directly since it doesn't extend Trace
+        String methodSig = context.getTargetMethod() != null ? context.getTargetMethod().getFullyQualifiedSignature() : "UnknownClass.unknownMethod()";
+        log.info("Generating LLM-based tests from TemporalTrace for method: {}", methodSig);
+
+        // Validate all parameters
+        validateTemporalTraceParameters(enhancedTrace, sourceCodePath, context);
 
         try {
             // Read source code
             String sourceCode = Files.readString(sourceCodePath);
 
-            // Build enhanced context for LLM prompt with temporal data
-            LLMPromptContext promptContext = buildEnhancedPromptContext(enhancedTrace, sourceCode, context);
+            // Build context for LLM prompt with temporal data
+            LLMPromptContext promptContext = buildTemporalPromptContext(enhancedTrace, sourceCode, context);
 
-            // Generate initial test suite
-            String prompt = promptBuilder.buildTestGenerationPrompt(promptContext);
-            String generatedCode = anthropicClient.generateCode(prompt);
-
-            // Validate and refine if needed
-            if (llmConfig.isEnableIterativeRefinement()) {
-                generatedCode = refineGeneratedCode(generatedCode, promptContext);
-            }
-
-            // Validate final code
-            if (llmConfig.isValidateGeneratedCode()) {
-                CodeValidationResult validation = codeValidator.validate(generatedCode);
-                if (!validation.isValid()) {
-                    log.warn("Generated code validation failed: {}", validation.getErrors());
-                    // Attempt one more refinement
-                    generatedCode = fixValidationErrors(generatedCode, validation, promptContext);
-                }
-            }
+            // Generate and refine test code
+            String generatedCode = generateAndRefineCode(promptContext);
 
             // Write test file
             Path testFile = writeTestFile(generatedCode, context);
 
-            log.info("Successfully generated enhanced LLM-based test file: {}", testFile);
+            log.info("Successfully generated LLM-based test file from TemporalTrace: {}", testFile);
             return List.of(testFile);
 
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            // Re-throw validation exceptions
+        } catch (TestGenerationWorkflowException e) {
+            // Re-throw workflow exceptions
             throw e;
         } catch (Exception e) {
-            log.error("Failed to generate enhanced LLM-based tests", e);
-            return List.of();
+            log.error("Failed to generate LLM-based tests from TemporalTrace", e);
+            throw new TestGenerationWorkflowException(
+                "LLM-based test generation from TemporalTrace failed: " + e.getMessage(),
+                "Test Generation",
+                sourceCodePath.toString(),
+                (context.getTargetMethod() != null ? context.getTargetMethod().getFullyQualifiedSignature() : "UnknownClass.unknownMethod()"),
+                e
+            );
         }
     }
-    
-    private LLMPromptContext buildPromptContext(Trace trace, String sourceCode, TestGenerationContext context) {
-        return LLMPromptContext.builder()
-                .sourceCode(sourceCode)
-                .targetMethodSignature(context.getTargetMethodSignature())
-                .targetClassName(context.getTargetClassName())
-                .packageName(context.getPackageName())
-                .testFramework(context.getTestFramework())
-                .traceData(formatTraceData(trace))
-                .maxTestCount(context.getMaxTestCount())
-                .generateEdgeCases(context.isGenerateEdgeCases())
-                .generateNegativeTests(context.isGenerateNegativeTests())
-                .namingStrategy(context.getNamingStrategy())
-                .build();
-    }
-    
+
     /**
-     * Builds enhanced prompt context from an TemporalTrace with temporal information.
+     * Validates parameters for TemporalTrace-based test generation.
      */
-    private LLMPromptContext buildEnhancedPromptContext(TemporalTrace enhancedTrace, String sourceCode, TestGenerationContext context) {
+    private void validateTemporalTraceParameters(TemporalTrace trace, Path sourceCodePath, TestGenerationContext context) {
+        if (trace == null) {
+            throw new TestGenerationWorkflowException("TemporalTrace cannot be null", "Parameter Validation",
+                sourceCodePath != null ? sourceCodePath.toString() : null, null);
+        }
+        if (sourceCodePath == null) {
+            throw new TestGenerationWorkflowException("Source code path cannot be null", "Parameter Validation", null, null);
+        }
+        if (context == null) {
+            throw new TestGenerationWorkflowException("Test generation context cannot be null", "Parameter Validation",
+                sourceCodePath.toString(), null);
+        }
+        if (!Files.exists(sourceCodePath)) {
+            throw new TestGenerationWorkflowException("Source code path does not exist: " + sourceCodePath,
+                "Parameter Validation", sourceCodePath.toString(), null);
+        }
+        if (!Files.isRegularFile(sourceCodePath)) {
+            throw new TestGenerationWorkflowException("Source code path must be a file, not a directory: " + sourceCodePath,
+                "Parameter Validation", sourceCodePath.toString(), null);
+        }
+        if (llmConfig == null) {
+            throw new IllegalStateException("LLM configuration must be set before generating tests. Call configure() first.");
+        }
+    }
+
+    /**
+     * Builds prompt context specifically for TemporalTrace data.
+     */
+    private LLMPromptContext buildTemporalPromptContext(TemporalTrace trace, String sourceCode, TestGenerationContext context) {
+        String methodSig = context.getTargetMethod() != null ? context.getTargetMethod().getFullyQualifiedSignature() : "UnknownClass.unknownMethod()";
+        String classFqcn = context.getTargetMethod() != null ? context.getTargetMethod().getFullyQualifiedClassName() : "UnknownClass";
+        String pkg = context.getTargetMethod() != null ? context.getTargetMethod().getPackageName() : "";
         return LLMPromptContext.builder()
                 .sourceCode(sourceCode)
-                .targetMethodSignature(context.getTargetMethodSignature())
-                .targetClassName(context.getTargetClassName())
-                .packageName(context.getPackageName())
+                .targetMethodSignature(methodSig)
+                .targetClassName(classFqcn)
+                .packageName(pkg)
                 .testFramework(context.getTestFramework())
-                .traceData(formatTemporalTraceData(enhancedTrace))
+                .traceData(formatTemporalTraceData(trace))
                 .maxTestCount(context.getMaxTestCount())
                 .generateEdgeCases(context.isGenerateEdgeCases())
                 .generateNegativeTests(context.isGenerateNegativeTests())
                 .namingStrategy(context.getNamingStrategy())
                 .additionalInstructions("This trace contains temporal execution data with precise event ordering. " +
                                        "Use this information to generate tests that capture the evolution of state over time.")
+                .build();
+    }
+    
+    /**
+     * Builds prompt context for LLM with regular Trace data.
+     *
+     * @param trace The runtime trace data
+     * @param sourceCode The source code content
+     * @param context The test generation context
+     * @return LLM prompt context with trace formatting
+     */
+    private LLMPromptContext buildPromptContext(Trace trace, String sourceCode, TestGenerationContext context) {
+        log.debug("Using basic trace formatting for LLM prompt");
+        String methodSig = context.getTargetMethod() != null ? context.getTargetMethod().getFullyQualifiedSignature() : "UnknownClass.unknownMethod()";
+        String classFqcn = context.getTargetMethod() != null ? context.getTargetMethod().getFullyQualifiedClassName() : "UnknownClass";
+        String pkg = context.getTargetMethod() != null ? context.getTargetMethod().getPackageName() : "";
+        return LLMPromptContext.builder()
+                .sourceCode(sourceCode)
+                .targetMethodSignature(methodSig)
+                .targetClassName(classFqcn)
+                .packageName(pkg)
+                .testFramework(context.getTestFramework())
+                .traceData(formatTraceData(trace))
+                .maxTestCount(context.getMaxTestCount())
+                .generateEdgeCases(context.isGenerateEdgeCases())
+                .generateNegativeTests(context.isGenerateNegativeTests())
+                .namingStrategy(context.getNamingStrategy())
                 .build();
     }
 
@@ -404,7 +467,8 @@ public class LLMBasedTestGenerator implements LLMBasedGenerator, TestGenerator {
             // Extract class name from generated code
             String className = extractClassNameFromCode(testCode);
             if (className == null) {
-                className = extractClassNameFromMethod(context.getTargetMethodSignature()) + "Test";
+                String methodSig = context.getTargetMethod() != null ? context.getTargetMethod().getFullyQualifiedSignature() : "UnknownClass.unknownMethod()";
+                className = extractClassNameFromMethod(methodSig) + "Test";
             }
 
             Path testFile = context.getOutputDirectory().resolve(className + ".java");
@@ -447,19 +511,5 @@ public class LLMBasedTestGenerator implements LLMBasedGenerator, TestGenerator {
             return methodSignature.substring(0, methodSignature.lastIndexOf('.'));
         }
         return "UnknownClass";
-    }
-    
-    private TestGenerationContext createDefaultContext() {
-        return TestGenerationContext.builder()
-                .targetMethodSignature("unknownMethod")
-                .targetClassName("UnknownClass")
-                .packageName("")
-                .outputDirectory(Path.of("generated-tests"))
-                .testFramework("junit5")
-                .maxTestCount(20)
-                .generateEdgeCases(true)
-                .generateNegativeTests(true)
-                .namingStrategy(TestNamingStrategy.DESCRIPTIVE)
-                .build();
     }
 }

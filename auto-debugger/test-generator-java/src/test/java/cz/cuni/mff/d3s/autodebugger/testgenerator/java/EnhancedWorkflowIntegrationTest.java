@@ -4,6 +4,7 @@ import cz.cuni.mff.d3s.autodebugger.model.common.trace.TemporalTrace;
 import cz.cuni.mff.d3s.autodebugger.model.common.trace.Trace;
 import cz.cuni.mff.d3s.autodebugger.model.java.TraceAdapter;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.*;
+import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.MethodIdentifier;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.JavaArgumentIdentifier;
 import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.ExportableValue;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.common.TestGenerationContext;
@@ -74,10 +75,14 @@ class EnhancedWorkflowIntegrationTest {
         identifierMapping.put(2, field1);
         
         // Create test generation context
+        MethodIdentifier methodIdentifier = new MethodIdentifier("divide", "int", List.of("int","int")) {
+            @Override public String getClassName() { return "Calculator"; }
+            @Override public String getPackageName() { return "com.example.test"; }
+            @Override public String getFullyQualifiedClassName() { return "com.example.Calculator"; }
+            @Override public String getFullyQualifiedSignature() { return "com.example.Calculator.divide(int, int)"; }
+        };
         context = TestGenerationContext.builder()
-                .targetMethodSignature("Calculator.divide(int, int)")
-                .targetClassName("com.example.Calculator")
-                .packageName("com.example.test")
+                .targetMethod(methodIdentifier)
                 .outputDirectory(tempDir)
                 .testFramework("junit5")
                 .namingStrategy(TestNamingStrategy.DESCRIPTIVE)
@@ -324,10 +329,14 @@ class EnhancedWorkflowIntegrationTest {
         workflowIdentifierMapping.put(1, statusField);
 
         // 3. Create test generation context for updateStatus method
+        MethodIdentifier methodIdentifier2 = new MethodIdentifier("updateStatus", "void", List.of("int")) {
+            @Override public String getClassName() { return "StatusManager"; }
+            @Override public String getPackageName() { return "com.example.test"; }
+            @Override public String getFullyQualifiedClassName() { return "StatusManager"; }
+            @Override public String getFullyQualifiedSignature() { return "StatusManager.updateStatus(int)"; }
+        };
         TestGenerationContext workflowContext = TestGenerationContext.builder()
-                .targetMethodSignature("StatusManager.updateStatus(int)")
-                .targetClassName("StatusManager")
-                .packageName("com.example.test")
+                .targetMethod(methodIdentifier2)
                 .outputDirectory(tempDir)
                 .testFramework("junit5")
                 .namingStrategy(TestNamingStrategy.DESCRIPTIVE)
@@ -361,7 +370,7 @@ class EnhancedWorkflowIntegrationTest {
         assertFalse(generatedFiles.isEmpty(), "Should generate at least one test file");
 
         // The TemporalTraceBasedGenerator must successfully generate a compilable .java test file
-        Path testFile = generatedFiles.get(0);
+        Path testFile = generatedFiles.getFirst();
         assertTrue(Files.exists(testFile), "Generated test file must exist");
         assertTrue(testFile.toString().endsWith(".java"), "Generated file must be a .java file");
 

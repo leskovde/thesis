@@ -3,6 +3,7 @@ package cz.cuni.mff.d3s.autodebugger.testgenerator.java.trace;
 import cz.cuni.mff.d3s.autodebugger.model.common.trace.Trace;
 import cz.cuni.mff.d3s.autodebugger.model.java.JavaRunConfiguration;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.*;
+import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.MethodIdentifier;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.common.TestGenerationContext;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.common.TestNamingStrategy;
 import org.junit.jupiter.api.BeforeEach;
@@ -116,7 +117,7 @@ class NaiveTraceBasedGeneratorTest {
         assertNotNull(generatedFiles);
         assertEquals(1, generatedFiles.size(), "Should generate exactly one test file");
 
-        Path testFile = generatedFiles.get(0);
+        Path testFile = generatedFiles.getFirst();
         assertTrue(Files.exists(testFile), "Generated file should exist");
         assertEquals("CalculatorTest.java", testFile.getFileName().toString());
 
@@ -250,7 +251,7 @@ class NaiveTraceBasedGeneratorTest {
         assertNotNull(generatedFiles);
         assertEquals(1, generatedFiles.size());
 
-        String content = Files.readString(generatedFiles.get(0));
+        String content = Files.readString(generatedFiles.getFirst());
 
         // Verify the method call contains properly formatted literals
         assertTrue(content.contains("var result = configurator.configure("),
@@ -343,10 +344,14 @@ class NaiveTraceBasedGeneratorTest {
 
         // For this test, use TestGenerationContext to specify SIMPLE naming strategy
         // TODO: Update when RunConfiguration supports custom naming strategies
+        MethodIdentifier methodIdentifier = new MethodIdentifier("add", "int", List.of("int")) {
+            @Override public String getClassName() { return "Calculator"; }
+            @Override public String getPackageName() { return "com.example"; }
+            @Override public String getFullyQualifiedClassName() { return "Calculator"; }
+            @Override public String getFullyQualifiedSignature() { return "Calculator.add(int)"; }
+        };
         TestGenerationContext context = TestGenerationContext.builder()
-                .targetMethodSignature("Calculator.add(int)")
-                .targetClassName("Calculator")
-                .packageName("com.example")
+                .targetMethod(methodIdentifier)
                 .outputDirectory(tempDir)
                 .namingStrategy(TestNamingStrategy.SIMPLE)
                 .build();
@@ -356,7 +361,7 @@ class NaiveTraceBasedGeneratorTest {
         assertNotNull(generatedFiles);
         assertEquals(1, generatedFiles.size(), "Should generate exactly one test file");
 
-        String content = Files.readString(generatedFiles.get(0));
+        String content = Files.readString(generatedFiles.getFirst());
 
         // Verify that the content contains method call with correct parameter
         assertTrue(content.contains("var result = calculator.add(42);"),
@@ -435,7 +440,7 @@ class NaiveTraceBasedGeneratorTest {
         assertNotNull(generatedFiles);
         assertEquals(1, generatedFiles.size(), "Should generate exactly one test file");
 
-        String content = Files.readString(generatedFiles.get(0));
+        String content = Files.readString(generatedFiles.getFirst());
 
         // Verify that DESCRIPTIVE naming strategy generates test method names
         // Both SIMPLE and DESCRIPTIVE may generate similar patterns in the current implementation

@@ -21,4 +21,33 @@ public abstract class MethodIdentifier implements Identifier, Serializable {
     public String getName() {
         return methodName;
     }
+
+    /**
+     * Gets the fully qualified signature of the method.
+     * This should include the full class name and method signature.
+     *
+     * @return The fully qualified method signature
+     */
+    public abstract String getFullyQualifiedSignature();
+
+    /**
+     * Gets the fully qualified class name that contains this method.
+     *
+     * @return The fully qualified class name
+     */
+    public abstract String getFullyQualifiedClassName();
+
+    /**
+     * Gets the package name of the class that contains this method.
+     *
+     * @return The package name, or empty string if no package
+     */
+    public abstract String getPackageName();
+
+    /**
+     * Gets the simple class name (without package) that contains this method.
+     *
+     * @return The simple class name
+     */
+    public abstract String getClassName();
 }

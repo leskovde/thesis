@@ -19,32 +19,41 @@ class TestGenerationContextMigrationTest {
     Path tempDir;
 
     @Test
-    void testBackwardCompatibility_StringFieldsStillWork() {
-        // Given - old approach using deprecated string fields
+    void testBackwardCompatibility_StringFieldsRemoved() {
+        // Deprecated string fields were removed; ensure context requires targetMethod
         TestGenerationContext context = TestGenerationContext.builder()
-                .targetMethodSignature("com.example.Calculator.add(int, int)")
-                .targetClassName("com.example.Calculator")
-                .packageName("com.example")
                 .outputDirectory(tempDir)
                 .build();
-
-        // When - accessing through getter methods
-        String methodSignature = context.getTargetMethodSignature();
-        String className = context.getTargetClassName();
-        String packageName = context.getPackageName();
-
-        // Then - values should be accessible
-        assertEquals("com.example.Calculator.add(int, int)", methodSignature);
-        assertEquals("com.example.Calculator", className);
-        assertEquals("com.example", packageName);
-        assertEquals(tempDir, context.getOutputDirectory());
+        assertThrows(IllegalStateException.class, context::getTargetMethodSignature);
+        assertThrows(IllegalStateException.class, context::getTargetClassName);
+        assertThrows(IllegalStateException.class, context::getPackageName);
     }
 
     @Test
     void testNewApproach_StructuredIdentifiers() {
         // Given - new approach using structured identifiers
-        MethodIdentifier methodIdentifier = new MethodIdentifier("add", "int", 
+        MethodIdentifier methodIdentifier = new MethodIdentifier("add", "int",
                 List.of("int", "int")) {
+            @Override
+            public String getClassName() {
+                return "Calculator";
+            }
+
+            @Override
+            public String getPackageName() {
+                return "com.example";
+            }
+
+            @Override
+            public String getFullyQualifiedClassName() {
+                return "com.example.Calculator";
+            }
+
+            @Override
+            public String getFullyQualifiedSignature() {
+                return "com.example.Calculator.add(int, int)";
+            }
+
             @Override
             public String toString() {
                 return "com.example.Calculator.add(int, int)";
@@ -57,52 +66,80 @@ class TestGenerationContextMigrationTest {
                 .build();
 
         // When - accessing through getter methods
-        String methodSignature = context.getTargetMethodSignature();
         MethodIdentifier retrievedMethod = context.getTargetMethod();
 
-        // Then - structured identifier should be preferred
-        assertEquals("com.example.Calculator.add(int, int)", methodSignature);
+        // Then - structured identifier should be present
         assertSame(methodIdentifier, retrievedMethod);
+        assertEquals("com.example.Calculator.add(int, int)", context.getTargetMethodSignature());
         assertEquals(tempDir, context.getOutputDirectory());
     }
 
     @Test
     void testMigrationCompatibility_BothApproachesProduceSameResults() {
         // Given - same information using both approaches
-        MethodIdentifier methodIdentifier = new MethodIdentifier("add", "int", 
+        MethodIdentifier methodIdentifier = new MethodIdentifier("add", "int",
                 List.of("int", "int")) {
+            @Override
+            public String getClassName() {
+                return "Calculator";
+            }
+
+            @Override
+            public String getPackageName() {
+                return "com.example";
+            }
+
+            @Override
+            public String getFullyQualifiedClassName() {
+                return "com.example.Calculator";
+            }
+
+            @Override
+            public String getFullyQualifiedSignature() {
+                return "com.example.Calculator.add(int, int)";
+            }
+
             @Override
             public String toString() {
                 return "com.example.Calculator.add(int, int)";
             }
         };
 
-        TestGenerationContext oldApproach = TestGenerationContext.builder()
-                .targetMethodSignature("com.example.Calculator.add(int, int)")
-                .targetClassName("com.example.Calculator")
-                .packageName("com.example")
-                .outputDirectory(tempDir)
-                .build();
-
         TestGenerationContext newApproach = TestGenerationContext.builder()
                 .targetMethod(methodIdentifier)
                 .outputDirectory(tempDir)
                 .build();
 
-        // When - accessing the same information
-        String oldSignature = oldApproach.getTargetMethodSignature();
-        String newSignature = newApproach.getTargetMethodSignature();
-
-        // Then - results should be equivalent
-        assertEquals(oldSignature, newSignature);
-        assertEquals(oldApproach.getOutputDirectory(), newApproach.getOutputDirectory());
+        // Then - results should be correct
+        assertEquals("com.example.Calculator.add(int, int)", newApproach.getTargetMethodSignature());
+        assertEquals(tempDir, newApproach.getOutputDirectory());
     }
 
     @Test
     void testStructuredIdentifierPreference() {
         // Given - context with both structured identifier and deprecated string fields
-        MethodIdentifier methodIdentifier = new MethodIdentifier("multiply", "double", 
+        MethodIdentifier methodIdentifier = new MethodIdentifier("multiply", "double",
                 List.of("double", "double")) {
+            @Override
+            public String getClassName() {
+                return "Calculator";
+            }
+
+            @Override
+            public String getPackageName() {
+                return "com.example";
+            }
+
+            @Override
+            public String getFullyQualifiedClassName() {
+                return "com.example.Calculator";
+            }
+
+            @Override
+            public String getFullyQualifiedSignature() {
+                return "com.example.Calculator.multiply(double, double)";
+            }
+
             @Override
             public String toString() {
                 return "com.example.Calculator.multiply(double, double)";
@@ -111,49 +148,52 @@ class TestGenerationContextMigrationTest {
 
         TestGenerationContext context = TestGenerationContext.builder()
                 .targetMethod(methodIdentifier)
-                // Also set deprecated fields (should be ignored in favor of structured identifier)
-                .targetMethodSignature("com.example.Calculator.add(int, int)")
-                .targetClassName("com.example.Calculator")
-                .packageName("com.example")
                 .outputDirectory(tempDir)
                 .build();
 
-        // When - accessing method signature
-        String signature = context.getTargetMethodSignature();
-
-        // Then - structured identifier should take precedence
-        assertEquals("com.example.Calculator.multiply(double, double)", signature);
-        assertNotEquals("com.example.Calculator.add(int, int)", signature);
+        // Then - structured identifier should be used
+        assertEquals("com.example.Calculator.multiply(double, double)", context.getTargetMethodSignature());
     }
 
     @Test
     void testFallbackToDeprecatedFields() {
         // Given - context with only deprecated string fields (no structured identifiers)
         TestGenerationContext context = TestGenerationContext.builder()
-                .targetMethodSignature("com.example.Calculator.subtract(int, int)")
-                .targetClassName("com.example.Calculator")
-                .packageName("com.example")
                 .outputDirectory(tempDir)
                 .build();
 
-        // When - accessing information
-        String signature = context.getTargetMethodSignature();
-        String className = context.getTargetClassName();
-        String packageName = context.getPackageName();
-        MethodIdentifier method = context.getTargetMethod();
-
-        // Then - should fall back to deprecated fields
-        assertEquals("com.example.Calculator.subtract(int, int)", signature);
-        assertEquals("com.example.Calculator", className);
-        assertEquals("com.example", packageName);
-        assertNull(method); // No structured identifier was provided
+        // Then - should throw when accessing missing targetMethod-dependent values
+        assertThrows(IllegalStateException.class, context::getTargetMethodSignature);
+        assertThrows(IllegalStateException.class, context::getTargetClassName);
+        assertThrows(IllegalStateException.class, context::getPackageName);
+        assertNull(context.getTargetMethod());
     }
 
     @Test
     void testBuilderWithNewFields() {
         // Given - using builder with new structured fields
-        MethodIdentifier methodIdentifier = new MethodIdentifier("divide", "double", 
+        MethodIdentifier methodIdentifier = new MethodIdentifier("divide", "double",
                 List.of("double", "double")) {
+            @Override
+            public String getClassName() {
+                return "Calculator";
+            }
+
+            @Override
+            public String getPackageName() {
+                return "com.example";
+            }
+
+            @Override
+            public String getFullyQualifiedClassName() {
+                return "com.example.Calculator";
+            }
+
+            @Override
+            public String getFullyQualifiedSignature() {
+                return "com.example.Calculator.divide(double, double)";
+            }
+
             @Override
             public String toString() {
                 return "com.example.Calculator.divide(double, double)";
@@ -184,19 +224,12 @@ class TestGenerationContextMigrationTest {
         // In a real scenario, these would show compiler warnings
         
         // Given - using deprecated fields (should generate warnings in IDE/compiler)
-        @SuppressWarnings("deprecation") // Suppressing for test purposes
         TestGenerationContext context = TestGenerationContext.builder()
-                .targetMethodSignature("com.example.Calculator.power(double, double)")
-                .targetClassName("com.example.Calculator")
-                .packageName("com.example")
                 .outputDirectory(tempDir)
                 .build();
 
-        // When - accessing deprecated fields directly (not recommended)
-        // These field accesses would normally generate deprecation warnings
-        
-        // Then - values should still be accessible for backward compatibility
+        // Then - deprecated fields were removed; getters should throw when targetMethod is absent
         assertNotNull(context);
-        assertEquals("com.example.Calculator.power(double, double)", context.getTargetMethodSignature());
+        assertThrows(IllegalStateException.class, context::getTargetMethodSignature);
     }
 }

@@ -6,6 +6,7 @@ import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.JavaArgumentIdentifie
 import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.ExportableValue;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.common.TestGenerationContext;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.common.TestNamingStrategy;
+import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.MethodIdentifier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -30,10 +31,14 @@ class TemporalTraceBasedGeneratorTest {
         generator = new TemporalTraceBasedGenerator();
         trace = new TemporalTrace();
         
+        MethodIdentifier methodIdentifier = new MethodIdentifier("divide", "int", List.of("int","int")) {
+            @Override public String getClassName() { return "Calculator"; }
+            @Override public String getPackageName() { return "com.example.test"; }
+            @Override public String getFullyQualifiedClassName() { return "com.example.Calculator"; }
+            @Override public String getFullyQualifiedSignature() { return "com.example.Calculator.divide(int, int)"; }
+        };
         context = TestGenerationContext.builder()
-                .targetMethodSignature("Calculator.divide(int, int)")
-                .targetClassName("com.example.Calculator")
-                .packageName("com.example.test")
+                .targetMethod(methodIdentifier)
                 .outputDirectory(tempDir)
                 .testFramework("junit5")
                 .namingStrategy(TestNamingStrategy.DESCRIPTIVE)
@@ -80,7 +85,7 @@ class TemporalTraceBasedGeneratorTest {
         assertEquals(1, generatedFiles.size(), "Should generate exactly one test file");
 
         // Verify the generated file exists and contains expected content
-        Path testFile = generatedFiles.get(0);
+        Path testFile = generatedFiles.getFirst();
         assertTrue(Files.exists(testFile), "Generated file should exist: " + testFile);
 
         try {
@@ -144,7 +149,7 @@ class TemporalTraceBasedGeneratorTest {
         assertEquals(1, generatedFiles.size(), "Should generate exactly one test file");
         
         // Verify the generated content includes temporal information
-        Path testFile = generatedFiles.get(0);
+        Path testFile = generatedFiles.getFirst();
         try {
             String content = Files.readString(testFile);
             assertTrue(content.contains("event"), "Should reference event indices");
@@ -169,9 +174,7 @@ class TemporalTraceBasedGeneratorTest {
 
         // Test with SIMPLE naming strategy
         TestGenerationContext simpleContext = TestGenerationContext.builder()
-                .targetMethodSignature(context.getTargetMethodSignature())
-                .targetClassName(context.getTargetClassName())
-                .packageName(context.getPackageName())
+                .targetMethod(context.getTargetMethod())
                 .outputDirectory(context.getOutputDirectory())
                 .testFramework(context.getTestFramework())
                 .maxTestCount(context.getMaxTestCount())
@@ -185,9 +188,7 @@ class TemporalTraceBasedGeneratorTest {
 
         // Test with BDD_STYLE naming strategy
         TestGenerationContext bddContext = TestGenerationContext.builder()
-                .targetMethodSignature(context.getTargetMethodSignature())
-                .targetClassName(context.getTargetClassName())
-                .packageName(context.getPackageName())
+                .targetMethod(context.getTargetMethod())
                 .outputDirectory(context.getOutputDirectory())
                 .testFramework(context.getTestFramework())
                 .maxTestCount(context.getMaxTestCount())
@@ -222,9 +223,7 @@ class TemporalTraceBasedGeneratorTest {
         
         // Set a low max test count
         TestGenerationContext limitedContext = TestGenerationContext.builder()
-                .targetMethodSignature(context.getTargetMethodSignature())
-                .targetClassName(context.getTargetClassName())
-                .packageName(context.getPackageName())
+                .targetMethod(context.getTargetMethod())
                 .outputDirectory(context.getOutputDirectory())
                 .testFramework(context.getTestFramework())
                 .generateEdgeCases(context.isGenerateEdgeCases())
@@ -238,7 +237,7 @@ class TemporalTraceBasedGeneratorTest {
         assertNotNull(generatedFiles);
         if (!generatedFiles.isEmpty()) {
             // Verify that the generator respects the maxTestCount limit
-            Path testFile = generatedFiles.get(0);
+            Path testFile = generatedFiles.getFirst();
             try {
                 String content = Files.readString(testFile);
                 long testMethodCount = content.lines()
@@ -271,7 +270,7 @@ class TemporalTraceBasedGeneratorTest {
         assertNotNull(generatedFiles);
         assertEquals(1, generatedFiles.size(), "Should generate exactly one test file");
 
-        Path testFile = generatedFiles.get(0);
+        Path testFile = generatedFiles.getFirst();
         try {
             String content = Files.readString(testFile);
             assertTrue(content.contains("Enhanced trace-based"),
@@ -336,10 +335,14 @@ class TemporalTraceBasedGeneratorTest {
         trace.addValue(paramC, 16, "test");
 
         // Update context for this test
+        MethodIdentifier methodIdentifier3 = new MethodIdentifier("myMethod", "void", List.of("int","String")) {
+            @Override public String getClassName() { return "TestClass"; }
+            @Override public String getPackageName() { return "com.example.test"; }
+            @Override public String getFullyQualifiedClassName() { return "com.example.test.TestClass"; }
+            @Override public String getFullyQualifiedSignature() { return "com.example.test.TestClass.myMethod(int, String)"; }
+        };
         TestGenerationContext testContext = TestGenerationContext.builder()
-                .targetMethodSignature("TestClass.myMethod(int, String)")
-                .targetClassName("TestClass")
-                .packageName("com.example.test")
+                .targetMethod(methodIdentifier3)
                 .outputDirectory(tempDir)
                 .testFramework("junit5")
                 .namingStrategy(TestNamingStrategy.DESCRIPTIVE)
@@ -353,7 +356,7 @@ class TemporalTraceBasedGeneratorTest {
         assertNotNull(generatedFiles);
         assertEquals(1, generatedFiles.size(), "Should generate exactly one test file");
 
-        Path testFile = generatedFiles.get(0);
+        Path testFile = generatedFiles.getFirst();
         try {
             String content = Files.readString(testFile);
 
@@ -433,10 +436,14 @@ class TemporalTraceBasedGeneratorTest {
         trace.addValue(paramC, 36, "second");
 
         // Update context for this test
+        MethodIdentifier methodIdentifier4 = new MethodIdentifier("myMethod", "void", List.of("int","String")) {
+            @Override public String getClassName() { return "TestClass"; }
+            @Override public String getPackageName() { return "com.example.test"; }
+            @Override public String getFullyQualifiedClassName() { return "com.example.test.TestClass"; }
+            @Override public String getFullyQualifiedSignature() { return "com.example.test.TestClass.myMethod(int, String)"; }
+        };
         TestGenerationContext testContext = TestGenerationContext.builder()
-                .targetMethodSignature("TestClass.myMethod(int, String)")
-                .targetClassName("TestClass")
-                .packageName("com.example.test")
+                .targetMethod(methodIdentifier4)
                 .outputDirectory(tempDir)
                 .testFramework("junit5")
                 .namingStrategy(TestNamingStrategy.DESCRIPTIVE)
@@ -450,7 +457,7 @@ class TemporalTraceBasedGeneratorTest {
         assertNotNull(generatedFiles);
         assertEquals(1, generatedFiles.size(), "Should generate exactly one test file");
 
-        Path testFile = generatedFiles.get(0);
+        Path testFile = generatedFiles.getFirst();
         try {
             String content = Files.readString(testFile);
 
