@@ -2,7 +2,6 @@ package cz.cuni.mff.d3s.autodebugger.instrumentor.java;
 
 import cz.cuni.mff.d3s.autodebugger.analyzer.java.DiSLAnalyzer;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling.DiSLModel;
-import cz.cuni.mff.d3s.autodebugger.model.common.trace.Trace;
 import cz.cuni.mff.d3s.autodebugger.model.java.JavaRunConfiguration;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -278,7 +277,7 @@ public class DiSLCollectorIntegrationTest {
 
             // then - Verify instrumentation was generated
             assertEquals(1, instrumentationPaths.size(), "Should generate one instrumentation JAR");
-            assertTrue(Files.exists(instrumentationPaths.get(0)), "Instrumentation JAR should exist");
+            assertTrue(Files.exists(instrumentationPaths.getFirst()), "Instrumentation JAR should exist");
 
             System.out.println("Instrumentation generation test passed successfully");
         } catch (Exception e) {
@@ -353,7 +352,7 @@ public class DiSLCollectorIntegrationTest {
 
         // then - Verify instrumentation was generated
         assertEquals(1, instrumentationPaths.size(), "Should generate one instrumentation JAR");
-        assertTrue(Files.exists(instrumentationPaths.get(0)), "Instrumentation JAR should exist");
+        assertTrue(Files.exists(instrumentationPaths.getFirst()), "Instrumentation JAR should exist");
 
         // Verify the test collector template was processed
         Path generatedCollector = testOutputDirectory.resolve("Collector.java");
@@ -366,7 +365,7 @@ public class DiSLCollectorIntegrationTest {
         // Run the DiSL analyzer to execute the instrumented application
         try {
             DiSLAnalyzer analyzer = new DiSLAnalyzer(runConfiguration);
-            Trace trace = analyzer.runAnalysis(instrumentationPaths);
+            var generated = analyzer.runAnalysis(instrumentationPaths);
 
             // Verify the collector output file was created and contains expected values
             assertTrue(Files.exists(testCollectorOutputFile), "Collector output file should exist");
@@ -454,7 +453,7 @@ public class DiSLCollectorIntegrationTest {
 
         // then - Verify instrumentation was generated
         assertEquals(1, instrumentationPaths.size(), "Should generate one instrumentation JAR");
-        assertTrue(Files.exists(instrumentationPaths.get(0)), "Instrumentation JAR should exist");
+        assertTrue(Files.exists(instrumentationPaths.getFirst()), "Instrumentation JAR should exist");
 
         // Verify the generated DiSLClass contains correct slot references
         Path dislClassSource = testOutputDirectory.resolve("DiSLClass.java");
@@ -469,7 +468,7 @@ public class DiSLCollectorIntegrationTest {
         // Run the DiSL analyzer to verify correct slot-to-value mapping
         try {
             DiSLAnalyzer analyzer = new DiSLAnalyzer(runConfiguration);
-            Trace trace = analyzer.runAnalysis(instrumentationPaths);
+            var generated = analyzer.runAnalysis(instrumentationPaths);
 
             // Verify the collector output file was created and contains correct slot mapping
             assertTrue(Files.exists(testCollectorOutputFile), "Collector output file should exist");

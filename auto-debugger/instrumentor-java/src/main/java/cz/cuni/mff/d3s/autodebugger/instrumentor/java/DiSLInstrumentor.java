@@ -40,9 +40,17 @@ public class DiSLInstrumentor implements Instrumentor {
     @Getter @Builder.Default
     private Path jarOutputPath = Path.of("analyzer-disl/build/libs/instrumentation.jar");
 
+    // Injected from the runner to control generation technique and credentials
+    private final String strategyId;
+    private final String apiKey;
+
     @Override
     public List<Path> generateInstrumentation(InstrumentationModel model) {
-        var identifierMapping = serializeIdentifiers(Path.of("../identifiers"));
+        // Determine temp directory for identifier mapping files; allow override for tests
+        Path identifiersBaseDir = Optional.ofNullable(System.getenv("AUTODEBUGGER_IDENTIFIERS_DIR"))
+                .map(Path::of)
+                .orElse(runConfiguration.getOutputDirectory().resolve("identifiers"));
+        var identifierMapping = serializeIdentifiers(identifiersBaseDir);
         var templateHandler = new JavaTemplateHandler(new JavaTemplateTransformer("${%s}"));
 
         // Ensure the Collector.jt template and CollectorRE.java are available in the output directory
@@ -50,10 +58,34 @@ public class DiSLInstrumentor implements Instrumentor {
         ensureCollectorTemplateExists(collectorTemplate);
         ensureCollectorREExists(generatedCodeOutputDirectory.resolve("CollectorRE.java"));
 
+        Path resultsBaseDir = Optional.ofNullable(System.getenv("AUTODEBUGGER_RESULTS_DIR"))
+                .map(Path::of)
+                .orElse(runConfiguration.getOutputDirectory());
+        var resultsListPath = ensureResultsListFileWithRunId(resultsBaseDir, model);
+        // No need to set a system property; analyzer will read from runConfiguration output directory
+
+        // Extract minimal generation context from the model if possible
+        String targetPackage = "";
+        String targetClass = "";
+        String targetMethod = "";
+        try {
+            if (model instanceof cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling.DiSLModel dislModel) {
+                var tm = dislModel.getTargetMethod();
+                targetPackage = tm.getPackageName();
+                targetClass = tm.getClassName();
+                targetMethod = tm.getSimpleSignature();
+            }
+        } catch (Exception ignore) {}
+
         templateHandler.transformFile(
                 collectorTemplate,
                 generatedCodeOutputDirectory.resolve("Collector.java"),
-                Pair.with("PATH", identifierMapping.toAbsolutePath().toString()));
+                Pair.with("PATH", identifierMapping.toAbsolutePath().toString()),
+                Pair.with("RESULTS", resultsListPath.toAbsolutePath().toString()),
+                Pair.with("TARGET_PACKAGE", targetPackage),
+                Pair.with("TARGET_CLASS", targetClass),
+                Pair.with("TARGET_METHOD", targetMethod),
+                Pair.with("STRATEGY", strategyId != null ? strategyId : "trace-based-naive"));
         var instrumentationJarPath = generateDiSLClass(model).flatMap(this::compileDiSLClass);
         return List.of(instrumentationJarPath.orElseThrow());
     }
@@ -80,7 +112,7 @@ public class DiSLInstrumentor implements Instrumentor {
 
         try {
             // First, try to copy from the analyzer-disl module (for production use)
-            Path sourceTemplate = Path.of("analyzer-disl/src/main/java/cz/cuni/mff/d3s/autodebugger/analyzer/disl/Collector.jt");
+            Path sourceTemplate = Path.of("../analyzer-disl/src/main/java/cz/cuni/mff/d3s/autodebugger/analyzer/disl/Collector.jt");
             if (Files.exists(sourceTemplate)) {
                 Files.createDirectories(targetTemplate.getParent());
                 Files.copy(sourceTemplate, targetTemplate);
@@ -119,7 +151,7 @@ public class DiSLInstrumentor implements Instrumentor {
 
         try {
             // First, try to copy from the analyzer-disl module
-            Path sourceCollectorRE = Path.of("analyzer-disl/src/main/java/cz/cuni/mff/d3s/autodebugger/analyzer/disl/CollectorRE.java");
+            Path sourceCollectorRE = Path.of("../analyzer-disl/src/main/java/cz/cuni/mff/d3s/autodebugger/analyzer/disl/CollectorRE.java");
             if (Files.exists(sourceCollectorRE)) {
                 Files.createDirectories(targetCollectorRE.getParent());
                 Files.copy(sourceCollectorRE, targetCollectorRE);
@@ -176,7 +208,7 @@ public class DiSLInstrumentor implements Instrumentor {
             import ch.usi.dag.dislreserver.remoteanalysis.RemoteAnalysis;
             import ch.usi.dag.dislreserver.shadow.ShadowObject;
             import cz.cuni.mff.d3s.autodebugger.model.java.Trace;
-            import cz.cuni.mff.d3s.autodebugger.testgenerator.java.trace.TraceBasedUnitTestGenerator;
+            import cz.cuni.mff.d3s.autodebugger.testgenerator.java.trace.NaiveTraceBasedGenerator;
             import java.nio.file.Path;
 
             public class Collector extends RemoteAnalysis {
@@ -201,7 +233,7 @@ public class DiSLInstrumentor implements Instrumentor {
               public void atExit() {
                 System.out.println(String.format(messageFormat, processName, "Exiting analysis..."));
                 trace.printSlotValues();
-                TraceBasedUnitTestGenerator generator = new TraceBasedUnitTestGenerator(Path.of(identifierMappingFilePath));
+                NaiveTraceBasedGenerator generator = new NaiveTraceBasedGenerator(Path.of(identifierMappingFilePath));
                 generator.generateTests(trace);
               }
 
@@ -230,7 +262,7 @@ public class DiSLInstrumentor implements Instrumentor {
                 }
             }
             File mappingFile =
-                    File.createTempFile("identifierMapping", ".json", outputDirectory.toFile());
+                    File.createTempFile("identifierMapping", ".ser", outputDirectory.toFile());
 
             try (FileOutputStream fileOutput = new FileOutputStream(mappingFile);
                  ObjectOutputStream objectStream = new ObjectOutputStream(fileOutput)) {
@@ -240,6 +272,22 @@ public class DiSLInstrumentor implements Instrumentor {
         } catch (IOException e) {
             log.error("Failed to serialize identifier mapping", e);
             return null;
+        }
+    }
+
+    private Path ensureResultsListFileWithRunId(Path outputDirectory, InstrumentationModel model) {
+        try {
+            if (!Files.exists(outputDirectory)) {
+                Files.createDirectories(outputDirectory);
+            }
+            String runId = java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss-SSS")
+                    .format(java.time.LocalDateTime.now()) + "-" + java.util.UUID.randomUUID();
+            String fileName = String.format("generated-tests-%s.lst", runId);
+            Path resultsFile = outputDirectory.resolve(fileName);
+            return resultsFile;
+        } catch (IOException e) {
+            log.error("Failed to create results list file", e);
+            throw new RuntimeException(e);
         }
     }
 }

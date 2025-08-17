@@ -35,28 +35,6 @@ class DiSLInstrumentorTests {
     Files.createDirectories(testOutputDirectory);
     Files.createDirectories(testIdentifierDirectory);
 
-    // Copy the Collector.jt template to the test output directory
-    Path collectorTemplate = testOutputDirectory.resolve("Collector.jt");
-    try (InputStream templateStream = getClass().getResourceAsStream("/Collector.jt")) {
-      if (templateStream == null) {
-        // Create a minimal template for testing
-        String templateContent = """
-          import ch.usi.dag.dislreserver.remoteanalysis.RemoteAnalysis;
-          import cz.cuni.mff.d3s.autodebugger.model.java.Trace;
-
-          public class Collector extends RemoteAnalysis {
-            private final String identifierMappingFilePath = "${PATH}";
-
-            public void collectInt(final int slot, final int i) {
-              // Test method
-            }
-          }
-          """;
-        Files.writeString(collectorTemplate, templateContent);
-      } else {
-        Files.copy(templateStream, collectorTemplate);
-      }
-    }
 
     // Copy the CollectorRE.java file to the test output directory
     Path collectorRESource = Path.of("../analyzer-disl/src/main/java/cz/cuni/mff/d3s/autodebugger/analyzer/disl/CollectorRE.java");
@@ -93,6 +71,23 @@ class DiSLInstrumentorTests {
     // given - Test just the template transformation part, not the full compilation
     Path testMappingPath = testIdentifierDirectory.resolve("identifierMapping-test.json");
 
+    // Create a minimal Collector.jt for this transformation test
+    Path templatePath = testOutputDirectory.resolve("Collector.jt");
+    String templateContent = """
+      import ch.usi.dag.dislreserver.remoteanalysis.RemoteAnalysis;
+      import cz.cuni.mff.d3s.autodebugger.model.java.Trace;
+
+      public class Collector extends RemoteAnalysis {
+        private final String identifierMappingFilePath = "${PATH}";
+        private final String resultsFilePath = "${RESULTS}";
+        private final String targetPackage = "${TARGET_PACKAGE}";
+        private final String targetClass = "${TARGET_CLASS}";
+        private final String targetMethod = "${TARGET_METHOD}";
+      }
+      """;
+    Files.writeString(templatePath, templateContent);
+
+
     // Create a test identifier mapping file
     Files.writeString(testMappingPath, "test mapping content");
 
@@ -103,9 +98,13 @@ class DiSLInstrumentorTests {
 
     // when
     templateHandler.transformFile(
-            collectorTemplate,
+            templatePath,
             collectorOutput,
-            org.javatuples.Pair.with("PATH", testMappingPath.toAbsolutePath().toString()));
+            org.javatuples.Pair.with("PATH", testMappingPath.toAbsolutePath().toString()),
+            org.javatuples.Pair.with("RESULTS", "/tmp/results.lst"),
+            org.javatuples.Pair.with("TARGET_PACKAGE", "com.example"),
+            org.javatuples.Pair.with("TARGET_CLASS", "Example"),
+            org.javatuples.Pair.with("TARGET_METHOD", "foo(int)"));
 
     // then
     assertTrue(Files.exists(collectorOutput), "Collector.java should be generated");
@@ -131,6 +130,12 @@ class DiSLInstrumentorTests {
       }
     }
     assertTrue(foundAbsolutePath, "Should find absolute path assignment");
+
+    // Validate that additional placeholders are replaced
+    assertTrue(collectorContent.contains("/tmp/results.lst"), "Should contain RESULTS placeholder value");
+    assertTrue(collectorContent.contains("targetPackage = \"com.example\""), "Should contain TARGET_PACKAGE");
+    assertTrue(collectorContent.contains("targetClass = \"Example\""), "Should contain TARGET_CLASS");
+    assertTrue(collectorContent.contains("targetMethod = \"foo(int)\""), "Should contain TARGET_METHOD");
   }
 
   /**
@@ -385,14 +390,16 @@ class DiSLInstrumentorTests {
     // Check required imports for test generation
     assertTrue(collectorContent.contains("import cz.cuni.mff.d3s.autodebugger.model.java.Trace"),
         "Collector should import Trace class");
-    assertTrue(collectorContent.contains("import cz.cuni.mff.d3s.autodebugger.testgenerator.java.trace.TraceBasedUnitTestGenerator"),
-        "Collector should import TraceBasedUnitTestGenerator");
+    assertTrue(collectorContent.contains("import cz.cuni.mff.d3s.autodebugger.testgenerator.java.trace.NaiveTraceBasedGenerator"),
+        "Collector should import NaiveTraceBasedGenerator");
+    assertTrue(collectorContent.contains("import cz.cuni.mff.d3s.autodebugger.testgenerator.java.llm.LLMBasedTestGenerator"),
+        "Collector should import LLMBasedTestGenerator");
 
-    // Check that test generation technique is properly inserted
-    assertTrue(collectorContent.contains("TraceBasedUnitTestGenerator generator"),
-        "Collector should instantiate TraceBasedUnitTestGenerator");
-    assertTrue(collectorContent.contains("generator.generateTests(trace)"),
-        "Collector should call generateTests method");
+    // Check that test generation technique is baked into the Collector (no system property reliance)
+    assertTrue(collectorContent.contains("private final String strategy = "),
+        "Collector should include a baked-in strategy constant");
+    assertTrue(collectorContent.contains("testPaths = naive.generateTests(trace)"),
+        "Collector should call generateTests on naive generator by default");
 
     // Verify CollectorRE exists (it should be copied/available)
     // Note: CollectorRE is typically a static file, but we should verify it has the right structure
@@ -476,7 +483,7 @@ class DiSLInstrumentorTests {
 
     // when
     var resultPaths = instrumentor.generateInstrumentation(model);
-    
+
     // then
     assertEquals(1, resultPaths.size());
     assertEquals(instrumentationJarPath, resultPaths.getFirst());

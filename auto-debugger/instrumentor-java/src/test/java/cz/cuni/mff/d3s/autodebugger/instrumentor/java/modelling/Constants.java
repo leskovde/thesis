@@ -83,6 +83,8 @@ public class Constants {
     public static final JavaPackage javaPackage = new JavaPackage(new JavaPackageIdentifier("cz.cuni.mff.d3s.test"));
 
     public static String normalizeVariableNames(String code) {
-        return code.replaceAll("generatedVariable\\d+", "generatedVariableX");
+        return code
+            .replaceAll("generatedVariable\\d+", "generatedVariableX")
+            .replaceAll("generatedMethod\\d+", "generatedMethodX");
     }
 }

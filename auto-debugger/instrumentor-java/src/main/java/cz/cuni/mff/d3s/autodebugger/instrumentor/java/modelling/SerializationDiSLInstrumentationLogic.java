@@ -23,9 +23,7 @@ public class SerializationDiSLInstrumentationLogic extends DiSLInstrumentationLo
             append(variable.emitCode());
             append("\n");
         }
-        append("FileOutputStream fileOut;");
-        // TODO: Remove redundant '\n'
-        append("ObjectOutputStream out;\n");
+        append("FileOutputStream fileOut;ObjectOutputStream out;\n");
         append("try {\n");
         // TODO: Not going to work for multiple values
         for (JavaValue variable : exports) {

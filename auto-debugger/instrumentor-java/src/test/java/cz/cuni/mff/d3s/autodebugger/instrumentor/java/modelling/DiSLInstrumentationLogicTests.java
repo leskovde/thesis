@@ -3,6 +3,10 @@ package cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling;
 import static cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling.Constants.normalizeVariableNames;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.List;
+import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.JavaArgumentIdentifier;
+import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.ArgumentIdentifierParameters;
+
 import org.junit.jupiter.api.Test;
 
 public class DiSLInstrumentationLogicTests {
@@ -54,4 +58,29 @@ public class DiSLInstrumentationLogicTests {
       """;
     assertEquals(normalizeVariableNames(expectedCode), normalizeVariableNames(code));
   }
+
+  @Test
+  public void givenMultipleExports_whenSerializing_thenWritesEachValue() {
+    // given
+    var idParams = Constants.instrumentationLogicIdentifierParameters;
+    var methodId = Constants.instrumentationLogicMethodIdentifier;
+    var annotation = Constants.dislAnnotation;
+
+    var arg1 = new JavaArgument(0, new JavaArgumentIdentifier(
+        ArgumentIdentifierParameters.builder().argumentSlot(0).variableType("int").build()));
+    var arg2 = new JavaArgument(1, new JavaArgumentIdentifier(
+        ArgumentIdentifierParameters.builder().argumentSlot(1).variableType("java.lang.String").build()));
+
+    var logic = new SerializationDiSLInstrumentationLogic(
+        methodId, annotation, List.of(arg1, arg2));
+
+    // when
+    String code = logic.emitCode();
+
+    // then
+    // Expect two writeObject blocks present in the emitted code
+    int occurrences = code.split("out\\.writeObject\\(").length - 1;
+    org.junit.jupiter.api.Assertions.assertTrue(occurrences >= 2, "Expected at least two out.writeObject(...) calls, got: " + occurrences);
+  }
+
 }

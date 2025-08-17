@@ -13,6 +13,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -22,6 +23,9 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class DiSLModel extends InstrumentationModel {
+
+  @Getter
+  private final JavaMethodIdentifier targetMethod;
 
   private final String DEFAULT_PACKAGE_NAME = "cz.cuni.mff.d3s.autodebugger.analyzer.disl";
   private final JavaPackage DEFAULT_PACKAGE =
@@ -44,6 +48,7 @@ public class DiSLModel extends InstrumentationModel {
           "java.io.ObjectOutputStream");
 
   public DiSLModel(JavaMethodIdentifier targetMethod, List<JavaValueIdentifier> exportedValues) {
+    this.targetMethod = targetMethod;
     var classBuilder = DiSLClass.builder();
     List<JavaPackageImport> imports =
         Stream.concat(DISL_LIBRARY_IMPORTS.stream(), JAVA_IMPORTS.stream())
