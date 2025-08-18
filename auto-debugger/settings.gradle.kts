@@ -12,6 +12,7 @@ include("analyzer-disl")
 include("analyzer-common")
 include("analyzer-java")
 include("intellij-plugin")
+include("test-utils")
 
 pluginManagement {
     repositories {
