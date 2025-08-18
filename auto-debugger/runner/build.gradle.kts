@@ -25,6 +25,7 @@ dependencies {
     implementation(libs.picocli)
     implementation(libs.log4j)
     testImplementation(libs.bundles.junit)
+    testImplementation(project(":test-utils"))
 }
 
 tasks.test {

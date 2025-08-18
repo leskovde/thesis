@@ -40,6 +40,7 @@ public class RunConfigurationFactory {
             // Parse paths
             Path applicationPath = Path.of(arguments.applicationJarPath);
             Path sourceCodePath = Path.of(arguments.sourceCodePath);
+            Path outputDir = arguments.outputDirectory != null ? Path.of(arguments.outputDirectory) : Path.of("auto-debugger-output");
             Path dislHomePath = Path.of(arguments.dislHomePath);
             List<Path> classpathEntries = arguments.classpath.stream().map(Path::of).toList();
 
@@ -66,6 +67,7 @@ public class RunConfigurationFactory {
                     .runtimeArguments(arguments.runtimeArguments)
                     .classpathEntries(classpathEntries)
                     .dislHomePath(dislHomePath)
+                    .outputDirectory(outputDir)
                     .build();
 
             // Validate the configuration

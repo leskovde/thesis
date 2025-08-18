@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class TestGenerationStrategyProviderTest {
 
     @Test
-    public void testGetAvailableStrategies() {
+    public void givenStrategyProvider_whenGetAvailableStrategies_thenReturnsValidList() {
         List<TestGenerationStrategy> strategies = TestGenerationStrategyProvider.getAvailableStrategies();
         
         assertNotNull(strategies);
@@ -70,13 +70,13 @@ public class TestGenerationStrategyProviderTest {
     }
 
     @Test
-    public void testStrategyToString() {
+    public void givenStrategy_whenToString_thenReturnsDisplayName() {
         TestGenerationStrategy strategy = new TestGenerationStrategy("test-id", "Test Display Name", "Test Description", false);
         assertEquals("Test Display Name", strategy.toString());
     }
 
     @Test
-    public void testAllExpectedStrategiesPresent() {
+    public void givenExpectedStrategies_whenCheckingPresence_thenAllAreAvailable() {
         List<TestGenerationStrategy> strategies = TestGenerationStrategyProvider.getAvailableStrategies();
         
         // Check that all expected strategies are present

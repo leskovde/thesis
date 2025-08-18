@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class OrchestratorDemoTest {
     
     @Test
-    void testDemonstrateOrchestratorAPI() {
+    void givenOrchestratorDemo_whenDemonstrateAPI_thenRunsWithoutException() {
         // This test verifies that the orchestrator API demonstration runs without exceptions
         assertDoesNotThrow(() -> {
             OrchestratorDemo.demonstrateOrchestratorAPI();
@@ -15,7 +15,7 @@ class OrchestratorDemoTest {
     }
     
     @Test
-    void testDemonstrateMainWorkflow() {
+    void givenOrchestratorDemo_whenDemonstrateMainWorkflow_thenRunsWithoutException() {
         // This test verifies that the main workflow demonstration runs without exceptions
         assertDoesNotThrow(() -> {
             OrchestratorDemo.demonstrateMainWorkflow();

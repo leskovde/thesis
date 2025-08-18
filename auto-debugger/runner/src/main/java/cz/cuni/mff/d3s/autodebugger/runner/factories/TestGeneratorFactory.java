@@ -10,7 +10,7 @@ import cz.cuni.mff.d3s.autodebugger.testgenerator.java.llm.LLMBasedTestGenerator
 import cz.cuni.mff.d3s.autodebugger.testgenerator.common.AnthropicClient;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.java.llm.PromptBuilder;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.java.llm.CodeValidator;
-import cz.cuni.mff.d3s.autodebugger.testgenerator.java.trace.TraceBasedUnitTestGenerator;
+import cz.cuni.mff.d3s.autodebugger.testgenerator.java.trace.NaiveTraceBasedGenerator;
 import lombok.extern.slf4j.Slf4j;
 
 import java.nio.file.Path;
@@ -62,18 +62,18 @@ public class TestGeneratorFactory {
                             .build();
 
                     llmGenerator.configure(llmConfig);
-                    llmGenerator.configure(runConfiguration);
+                    // Set technique label for UI/tests compatibility
+                    llmGenerator.setGenerationTechnique("ai-assisted");
 
-                    log.info("Successfully created LLM-based Java test generator with Claude - using RunConfiguration directly");
+                    log.info("Successfully created LLM-based Java test generator with Claude");
                     return llmGenerator;
 
                 } else if (strategyId.startsWith("trace-based")) {
                     // Create the trace-based test generator
                     Path identifiersPath = javaRunConfiguration.getSourceCodePath().resolve("identifiers");
-                    TraceBasedUnitTestGenerator generator = new TraceBasedUnitTestGenerator(identifiersPath);
-                    generator.configure(runConfiguration);
+                    NaiveTraceBasedGenerator generator = new NaiveTraceBasedGenerator(identifiersPath);
 
-                    log.info("Successfully created Java test generator with strategy: {} - using RunConfiguration directly", strategyId);
+                    log.info("Successfully created Java test generator with strategy: {}", strategyId);
                     return generator;
                 } else {
                     throw new UnsupportedOperationException("Test generation technique not yet supported: " + strategyId);

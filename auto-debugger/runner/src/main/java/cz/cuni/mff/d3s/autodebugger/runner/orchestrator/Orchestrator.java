@@ -3,7 +3,7 @@ package cz.cuni.mff.d3s.autodebugger.runner.orchestrator;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.common.modelling.InstrumentationModel;
 import cz.cuni.mff.d3s.autodebugger.model.common.RunConfiguration;
 import cz.cuni.mff.d3s.autodebugger.model.common.TargetLanguage;
-import cz.cuni.mff.d3s.autodebugger.model.common.trace.Trace;
+
 import cz.cuni.mff.d3s.autodebugger.runner.args.Arguments;
 import cz.cuni.mff.d3s.autodebugger.runner.factories.AnalyzerFactory;
 import cz.cuni.mff.d3s.autodebugger.runner.factories.InstrumentationModelFactory;
@@ -35,6 +35,12 @@ public class Orchestrator {
         runConfiguration = RunConfigurationFactory.createRunConfiguration(arguments);
         testGenerationStrategy = arguments.testGenerationStrategy;
         apiKey = arguments.apiKey;
+        // Validate strategy early (strict mode)
+        boolean valid = java.util.Arrays.stream(getAvailableTestGenerationTechniques()).anyMatch(s -> s.equals(testGenerationStrategy));
+        if (!valid) {
+            throw new IllegalArgumentException("Unknown test generation strategy: " + testGenerationStrategy);
+        }
+
     }
 
     /**
@@ -52,7 +58,7 @@ public class Orchestrator {
      * Delegates to factory-created instrumentor to generate instrumentation files.
      */
     public List<Path> createInstrumentation(InstrumentationModel instrumentationModel) {
-        var instrumentor = InstrumentorFactory.createInstrumentor(runConfiguration);
+        var instrumentor = InstrumentorFactory.createInstrumentor(runConfiguration, testGenerationStrategy, apiKey);
         return instrumentor.generateInstrumentation(instrumentationModel);
     }
 
@@ -60,19 +66,26 @@ public class Orchestrator {
      * Executes the instrumented application and collects runtime traces.
      * Uses factory-created analyzer to run the instrumented application and capture data.
      */
-    public Trace runAnalysis(List<Path> instrumentationPaths) {
+    public List<Path> runAnalysis(List<Path> instrumentationPaths) {
         var analyzer = AnalyzerFactory.createAnalyzer(runConfiguration);
-        return analyzer.runAnalysis(instrumentationPaths);
+        List<Path> results = analyzer.runAnalysis(instrumentationPaths);
+        if (results == null || results.isEmpty()) {
+            log.warn("Analysis completed but generated no test files. Terminating.");
+            throw new IllegalStateException("Analysis produced no test files");
+        }
+        return results;
     }
 
     /**
      * Generates test files from collected runtime traces.
      * Uses strategy pattern to select appropriate test generation technique.
      */
-    public List<Path> generateTests(Trace trace) {
-        var testGenerator = TestGeneratorFactory.createTestGenerator(runConfiguration, testGenerationStrategy, apiKey);
-        return testGenerator.generateTests(trace);
-    }
+    // Test generation now occurs inside the analysis process; this method is unused.
+    @Deprecated
+    public List<Path> generateTests() { return List.of(); }
+
+    public String getApiKey() { return apiKey; }
+
 
     /**
      * Executes generated test files and returns results.

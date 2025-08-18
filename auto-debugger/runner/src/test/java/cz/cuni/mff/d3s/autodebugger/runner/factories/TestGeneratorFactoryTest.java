@@ -1,7 +1,7 @@
 package cz.cuni.mff.d3s.autodebugger.runner.factories;
 
 import cz.cuni.mff.d3s.autodebugger.model.java.JavaRunConfiguration;
-import cz.cuni.mff.d3s.autodebugger.runner.orchestrator.LLMTestGeneratorAdapter;
+import cz.cuni.mff.d3s.autodebugger.testgenerator.java.llm.LLMBasedTestGenerator;
 import cz.cuni.mff.d3s.autodebugger.testgenerator.common.TestGenerator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -43,7 +43,7 @@ class TestGeneratorFactoryTest {
 
         // then
         assertNotNull(generator);
-        assertInstanceOf(LLMTestGeneratorAdapter.class, generator);
+        assertInstanceOf(LLMBasedTestGenerator.class, generator);
         assertEquals("ai-assisted", generator.getGenerationTechnique());
     }
 
@@ -95,11 +95,10 @@ class TestGeneratorFactoryTest {
 
         // then
         assertNotNull(generator);
-        assertInstanceOf(LLMTestGeneratorAdapter.class, generator);
+        assertInstanceOf(LLMBasedTestGenerator.class, generator);
 
         // Verify the generator was configured properly by checking it doesn't throw on basic operations
         assertDoesNotThrow(() -> {
-            generator.configure(runConfiguration);
             assertEquals("ai-assisted", generator.getGenerationTechnique());
         });
     }

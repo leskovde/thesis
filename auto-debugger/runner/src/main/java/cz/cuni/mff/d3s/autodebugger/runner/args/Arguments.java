@@ -22,6 +22,9 @@ public class Arguments {
     @CommandLine.Option(names = { "-s", "--source" }, paramLabel = "SOURCE", description = "Path to the target application's source code", required = true)
     public String sourceCodePath;
 
+    @CommandLine.Option(names = { "-o", "--output-dir" }, paramLabel = "OUTPUT", description = "Output directory for generated artifacts (results, identifiers)")
+    public String outputDirectory;
+
     @CommandLine.Option(names = { "-d", "--disl-home" }, paramLabel = "DISL_HOME", description = "Path to the DiSL project (required for DiSL-based analysis)")
     public String dislHomePath;
 

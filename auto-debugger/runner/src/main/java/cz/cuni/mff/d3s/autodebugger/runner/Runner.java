@@ -73,11 +73,8 @@ public class Runner {
     }
 
     log.info("Running analysis...");
-    var trace = orchestrator.runAnalysis(instrumentationPaths);
-    log.info("Analysis completed. Trace collected.");
-
-    var tests = orchestrator.generateTests(trace);
-    log.info("Test generation completed. Generated {} test files: {}", tests.size(), tests);
+    var tests = orchestrator.runAnalysis(instrumentationPaths);
+    log.info("Analysis completed and tests generated. {} test files: {}", tests.size(), tests);
 
     var testResults = orchestrator.runTests(tests);
     log.info("Test execution completed. Results: {}", testResults);

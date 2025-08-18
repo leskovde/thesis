@@ -19,22 +19,25 @@ public class InstrumentorFactory {
      * Creates a language-specific Instrumentor from run configuration.
      * Dispatches to appropriate language-specific factory method based on target language.
      */
-    public static Instrumentor createInstrumentor(RunConfiguration runConfiguration) {
+    public static Instrumentor createInstrumentor(RunConfiguration runConfiguration, String strategyId, String apiKey) {
         TargetLanguage language = runConfiguration.getLanguage();
         if (language == TargetLanguage.JAVA) {
-            return createJavaInstrumentor(runConfiguration);
+            return createJavaInstrumentor(runConfiguration, strategyId, apiKey);
         }
 
         throw new IllegalArgumentException("Unsupported language: " + language);
     }
 
-    private static DiSLInstrumentor createJavaInstrumentor(RunConfiguration runConfiguration) {
+    private static DiSLInstrumentor createJavaInstrumentor(RunConfiguration runConfiguration, String strategyId, String apiKey) {
         log.info("Building DiSL instrumentor");
 
         if (runConfiguration instanceof JavaRunConfiguration javaRunConfiguration) {
             DiSLInstrumentor instrumentor = DiSLInstrumentor.builder()
                 .runConfiguration(javaRunConfiguration)
+                .strategyId(strategyId)
+                .apiKey(apiKey)
                 .build();
+
             log.info("Successfully built DiSL instrumentor");
             return instrumentor;
         }

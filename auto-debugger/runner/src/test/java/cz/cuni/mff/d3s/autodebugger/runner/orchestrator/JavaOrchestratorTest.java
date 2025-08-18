@@ -54,7 +54,7 @@ class JavaOrchestratorTest {
     }
     
     @Test
-    void testGetSupportedLanguage() {
+    void givenJavaOrchestrator_whenGetSupportedLanguage_thenReturnsJava() {
         assertEquals(TargetLanguage.JAVA, orchestrator.getSupportedLanguage());
     }
 
