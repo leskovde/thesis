@@ -289,7 +289,7 @@ class DiSLInstrumentorTests {
 
     // then
     assertEquals(1, resultPaths.size(), "Should return exactly one JAR path");
-    Path generatedJar = resultPaths.get(0);
+    Path generatedJar = resultPaths.getFirst();
     assertNotNull(generatedJar, "JAR path should not be null");
     assertTrue(Files.exists(generatedJar), "Generated JAR file should exist");
 

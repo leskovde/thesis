@@ -5,6 +5,7 @@ import cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling.DiSLModel;
 import cz.cuni.mff.d3s.autodebugger.model.java.JavaRunConfiguration;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.*;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -29,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Integration tests for Collector & Data Transfer functionality.
  * These tests verify end-to-end data collection from instrumented applications.
  */
-public class DiSLCollectorIntegrationTest {
+class DiSLCollectorIntegrationTest {
 
     @TempDir
     Path tempDir;
@@ -215,7 +216,9 @@ public class DiSLCollectorIntegrationTest {
      * and verifies that all primitive values are correctly captured and written to the output file.
      */
     @Test
-    void testEndToEndDataTransferForAllPrimitiveTypes() throws IOException {
+    @Disabled("Not yet implemented")
+    // TODO
+    void givenPrimitiveExerciser_whenCollectingAllTypes_thenWritesAllValues() {
         // Skip this test for now to debug the instrumentation generation issue
         System.out.println("Skipping end-to-end test - debugging instrumentation generation");
     }
@@ -224,7 +227,7 @@ public class DiSLCollectorIntegrationTest {
      * Simple test to verify instrumentation generation works
      */
     @Test
-    void testInstrumentationGeneration() throws IOException {
+    void givenMinimalTargetJar_whenGeneratingInstrumentation_thenProducesJar() throws IOException {
         // given - Create a simple target JAR
         Path targetJar = createPrimitiveExerciserJar();
 
@@ -293,7 +296,8 @@ public class DiSLCollectorIntegrationTest {
         }
     }
 
-    void testEndToEndDataTransferForAllPrimitiveTypesOld() throws IOException {
+    // TODO
+    void givenPrimitiveExerciser_whenCollectingAllTypes_thenWritesAllValues_old() throws IOException {
         // given
         Path targetJar = createPrimitiveExerciserJar();
 
@@ -396,7 +400,7 @@ public class DiSLCollectorIntegrationTest {
      * This test ensures that values are not mixed up between parameter slots.
      */
     @Test
-    void testCorrectSlotToValueMapping() throws IOException {
+    void testCorrectSlotToValueMapping() {
         // Skip this test for now to debug the instrumentation generation issue
         System.out.println("Skipping slot mapping test - debugging instrumentation generation");
     }

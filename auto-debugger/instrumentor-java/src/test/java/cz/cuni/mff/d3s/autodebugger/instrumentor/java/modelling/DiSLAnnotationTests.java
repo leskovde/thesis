@@ -7,10 +7,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling.enums.ActivationTime;
 import org.junit.jupiter.api.Test;
 
-public class DiSLAnnotationTests {
+class DiSLAnnotationTests {
 
   @Test
-  public void givenValidDiSLAnnotation_whenGeneratingCode_thenCodeIsGenerated() {
+  void givenValidDiSLAnnotation_whenGeneratingCode_thenCodeIsGenerated() {
     // given
     DiSLAnnotation dislAnnotation =
         new DiSLAnnotation(ActivationTime.BEFORE, dislMarker, dislScope);

@@ -4,10 +4,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class DiSLMarkerTests {
+class DiSLMarkerTests {
 
     @Test
-    public void givenDiSLBodyMarker_whenGeneratingCode_thenCodeIsGenerated() {
+    void givenDiSLBodyMarker_whenGeneratingCode_thenCodeIsGenerated() {
         // given
         DiSLMarker dislMarker = Constants.dislMarker;
 

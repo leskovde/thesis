@@ -5,10 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
-public class JavaFieldTests {
+class JavaFieldTests {
 
   @Test
-  public void givenValidJavaField_whenGeneratingCode_thenCodeIsGenerated() {
+  void givenValidJavaField_whenGeneratingCode_thenCodeIsGenerated() {
     // given
     JavaField javaField = Constants.javaField;
 

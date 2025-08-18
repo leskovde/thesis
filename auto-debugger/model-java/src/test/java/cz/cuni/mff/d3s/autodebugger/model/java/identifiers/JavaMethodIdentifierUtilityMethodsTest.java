@@ -77,7 +77,7 @@ class JavaMethodIdentifierUtilityMethodsTest {
     }
 
     @Test
-    void testGetPackageName() {
+    void givenMethodIdentifiers_whenGettingPackageName_thenReturnsExpected() {
         assertEquals("com.example.service", methodWithPackage.getPackageName());
         assertEquals("", methodWithoutPackage.getPackageName());
         assertEquals("com.example.service", methodWithComplexParams.getPackageName());
@@ -85,7 +85,7 @@ class JavaMethodIdentifierUtilityMethodsTest {
     }
 
     @Test
-    void testGetClassName() {
+    void givenMethodIdentifiers_whenGettingClassName_thenReturnsExpected() {
         assertEquals("UserService", methodWithPackage.getClassName());
         assertEquals("Calculator", methodWithoutPackage.getClassName());
         assertEquals("UserService", methodWithComplexParams.getClassName());
@@ -93,7 +93,7 @@ class JavaMethodIdentifierUtilityMethodsTest {
     }
 
     @Test
-    void testGetFullyQualifiedClassName() {
+    void givenMethodIdentifiers_whenGettingFqcn_thenReturnsExpected() {
         assertEquals("com.example.service.UserService", methodWithPackage.getFullyQualifiedClassName());
         assertEquals("Calculator", methodWithoutPackage.getFullyQualifiedClassName());
         assertEquals("com.example.service.UserService", methodWithComplexParams.getFullyQualifiedClassName());
@@ -101,7 +101,7 @@ class JavaMethodIdentifierUtilityMethodsTest {
     }
 
     @Test
-    void testGetSimpleSignature() {
+    void givenMethodIdentifiers_whenGettingSimpleSignature_thenReturnsExpected() {
         assertEquals("authenticate(String, String)", methodWithPackage.getSimpleSignature());
         assertEquals("add(int, int)", methodWithoutPackage.getSimpleSignature());
         assertEquals("processData(Map, int[], boolean)", methodWithComplexParams.getSimpleSignature());
@@ -109,7 +109,7 @@ class JavaMethodIdentifierUtilityMethodsTest {
     }
 
     @Test
-    void testGetFullyQualifiedSignature() {
+    void givenMethodIdentifiers_whenGettingFullyQualifiedSignature_thenReturnsExpected() {
         assertEquals("com.example.service.UserService.authenticate(String, String)", 
                     methodWithPackage.getFullyQualifiedSignature());
         assertEquals("Calculator.add(int, int)", 
@@ -121,7 +121,7 @@ class JavaMethodIdentifierUtilityMethodsTest {
     }
 
     @Test
-    void testGetTestFriendlySignature() {
+    void givenMethodIdentifiers_whenGettingTestFriendlySignature_thenReturnsExpected() {
         assertEquals("UserService.authenticate(String, String)", 
                     methodWithPackage.getTestFriendlySignature());
         assertEquals("Calculator.add(int, int)", 
@@ -133,7 +133,7 @@ class JavaMethodIdentifierUtilityMethodsTest {
     }
 
     @Test
-    void testNullOwnerClassIdentifier() {
+    void givenNullOwnerClassIdentifier_whenConstructingMethodIdentifier_thenHandlesGracefully() {
         JavaMethodIdentifier methodWithNullOwner = new JavaMethodIdentifier(
             MethodIdentifierParameters.builder()
                 .ownerClassIdentifier(null)

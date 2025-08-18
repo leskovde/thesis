@@ -52,6 +52,5 @@ class JavaValueCollectorEmissionTests {
   @Test void givenFloatArg_thenCollectFloat() { assertTrue(argOfType("float").emitCollectorCode().contains("collectFloat(")); }
   @Test void givenDoubleArg_thenCollectDouble() { assertTrue(argOfType("double").emitCollectorCode().contains("collectDouble(")); }
   @Test void givenBooleanArg_thenCollectBoolean() { assertTrue(argOfType("boolean").emitCollectorCode().contains("collectBoolean(")); }
-
 }
 

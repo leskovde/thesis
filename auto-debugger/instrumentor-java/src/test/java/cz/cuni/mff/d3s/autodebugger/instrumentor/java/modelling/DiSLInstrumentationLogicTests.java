@@ -3,16 +3,16 @@ package cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling;
 import static cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling.Constants.normalizeVariableNames;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.util.List;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.JavaArgumentIdentifier;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.ArgumentIdentifierParameters;
-
 import org.junit.jupiter.api.Test;
 
-public class DiSLInstrumentationLogicTests {
+import java.util.List;
+
+class DiSLInstrumentationLogicTests {
 
   @Test
-  public void givenValidSerializationInstrumentationLogic_whenGeneratingCode_thenCodeIsGenerated() {
+  void givenValidSerializationInstrumentationLogic_whenGeneratingCode_thenCodeIsGenerated() {
     // given
     DiSLInstrumentationLogic logic =
         new SerializationDiSLInstrumentationLogic(
@@ -38,7 +38,7 @@ public class DiSLInstrumentationLogicTests {
   }
 
   @Test
-  public void givenValidShadowInstrumentationLogic_whenGeneratingCode_thenCodeIsGenerated() {
+  void givenValidShadowInstrumentationLogic_whenGeneratingCode_thenCodeIsGenerated() {
     // given
     DiSLInstrumentationLogic logic =
         new ShadowDiSLInstrumentationLogic(
@@ -60,7 +60,7 @@ public class DiSLInstrumentationLogicTests {
   }
 
   @Test
-  public void givenMultipleExports_whenSerializing_thenWritesEachValue() {
+  void givenMultipleExports_whenSerializing_thenWritesEachValue() {
     // given
     var idParams = Constants.instrumentationLogicIdentifierParameters;
     var methodId = Constants.instrumentationLogicMethodIdentifier;

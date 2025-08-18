@@ -4,10 +4,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class JavaPackageImportTests {
+class JavaPackageImportTests {
 
   @Test
-  public void givenValidJavaPackageImport_whenGeneratingCode_thenCodeIsGenerated() {
+  void givenValidJavaPackageImport_whenGeneratingCode_thenCodeIsGenerated() {
     // given
     JavaPackageImport javaPackageImport = Constants.javaPackageImport;
 

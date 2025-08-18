@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Tests model construction, code generation, and import handling
  * for various instrumentation scenarios.
  */
-public class DiSLModelTests {
+class DiSLModelTests {
 
     /**
      * Test Case 1.1: Instrument a single primitive parameter.
@@ -21,7 +21,7 @@ public class DiSLModelTests {
      * Exportable Value: The int count parameter (slot 0)
      */
     @Test
-    public void givenSinglePrimitiveParameter_whenConstructingModel_thenInstrumentationIsGenerated() {
+    void givenSinglePrimitiveParameter_whenConstructingModel_thenInstrumentationIsGenerated() {
         // given
         JavaClassIdentifier processorClass = new JavaClassIdentifier(
                 ClassIdentifierParameters.builder()
@@ -75,7 +75,7 @@ public class DiSLModelTests {
      * Exportable Values: Both parameters and both fields
      */
     @Test
-    public void givenMultipleParametersAndFields_whenConstructingModel_thenAllValuesAreInstrumented() {
+    void givenMultipleParametersAndFields_whenConstructingModel_thenAllValuesAreInstrumented() {
         // given
         JavaClassIdentifier taskRunnerClass = new JavaClassIdentifier(
                 ClassIdentifierParameters.builder()
@@ -154,7 +154,7 @@ public class DiSLModelTests {
      * Note: The current implementation imports the owner class, not the field type
      */
     @Test
-    public void givenFieldFromExternalPackage_whenConstructingModel_thenOwnerClassIsImported() {
+    void givenFieldFromExternalPackage_whenConstructingModel_thenOwnerClassIsImported() {
         // given
         JavaClassIdentifier repositoryClass = new JavaClassIdentifier(
                 ClassIdentifierParameters.builder()
@@ -205,14 +205,8 @@ public class DiSLModelTests {
      * Note: The current implementation imports the owner class, not the field type
      */
     @Test
-    public void givenFieldFromCustomPackage_whenConstructingModel_thenOwnerClassIsImported() {
+    void givenFieldFromCustomPackage_whenConstructingModel_thenOwnerClassIsImported() {
         // given
-        JavaClassIdentifier userClass = new JavaClassIdentifier(
-                ClassIdentifierParameters.builder()
-                        .className("User")
-                        .packageIdentifier(new JavaPackageIdentifier("com.example.model"))
-                        .build());
-
         JavaClassIdentifier userServiceClass = new JavaClassIdentifier(
                 ClassIdentifierParameters.builder()
                         .className("UserService")
@@ -262,7 +256,7 @@ public class DiSLModelTests {
      * is not fully implemented in the code emission.
      */
     @Test
-    public void givenReturnValueIdentifier_whenConstructingModel_thenInstrumentationIsGenerated() {
+    void givenReturnValueIdentifier_whenConstructingModel_thenInstrumentationIsGenerated() {
         // given
         JavaClassIdentifier formatterClass = new JavaClassIdentifier(
                 ClassIdentifierParameters.builder()
@@ -308,7 +302,7 @@ public class DiSLModelTests {
      * Activation Times: Both ActivationTime.BEFORE and ActivationTime.AFTER
      */
     @Test
-    public void givenFieldIdentifier_whenConstructingModel_thenBeforeAndAfterInstrumentationIsGenerated() {
+    void givenFieldIdentifier_whenConstructingModel_thenBeforeAndAfterInstrumentationIsGenerated() {
         // given
         JavaClassIdentifier stateManagerClass = new JavaClassIdentifier(
                 ClassIdentifierParameters.builder()
@@ -369,7 +363,7 @@ public class DiSLModelTests {
      * This should not fail but should generate instrumentation methods without a value collection.
      */
     @Test
-    public void givenEmptyExportableValues_whenConstructingModel_thenBasicInstrumentationIsGenerated() {
+    void givenEmptyExportableValues_whenConstructingModel_thenBasicInstrumentationIsGenerated() {
         // given
         JavaClassIdentifier testClass = new JavaClassIdentifier(
                 ClassIdentifierParameters.builder()

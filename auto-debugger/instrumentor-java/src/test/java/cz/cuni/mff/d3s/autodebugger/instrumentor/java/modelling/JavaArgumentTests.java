@@ -5,10 +5,10 @@ import org.junit.jupiter.api.Test;
 import static cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling.Constants.normalizeVariableNames;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class JavaArgumentTests {
+class JavaArgumentTests {
 
     @Test
-    public void givenValidJavaArgument_whenGeneratingCode_thenCodeIsGenerated() {
+    void givenValidJavaArgument_whenGeneratingCode_thenCodeIsGenerated() {
         // given
         JavaArgument javaArgument = Constants.javaArgument;
 

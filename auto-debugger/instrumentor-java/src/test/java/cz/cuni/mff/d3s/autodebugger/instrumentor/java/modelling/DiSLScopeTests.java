@@ -4,10 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
-public class DiSLScopeTests {
+class DiSLScopeTests {
 
   @Test
-  public void givenValidDiSLScope_whenGeneratingCode_thenCodeIsGenerated() {
+  void givenValidDiSLScope_whenGeneratingCode_thenCodeIsGenerated() {
     // given
     DiSLScope dislScope = Constants.dislScope;
 
