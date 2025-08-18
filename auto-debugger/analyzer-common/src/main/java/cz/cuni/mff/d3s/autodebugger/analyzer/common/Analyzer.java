@@ -1,7 +1,5 @@
 package cz.cuni.mff.d3s.autodebugger.analyzer.common;
 
-import cz.cuni.mff.d3s.autodebugger.model.common.trace.Trace;
-
 import java.nio.file.Path;
 import java.util.List;
 
@@ -13,12 +11,12 @@ import java.util.List;
 public interface Analyzer {
     
     /**
-     * Runs analysis on the instrumented application and collects runtime traces.
-     * 
+     * Runs analysis on the instrumented application and generates tests inside the analysis process.
+     *
      * @param instrumentationPaths Path to the instrumented application's components
-     * @return Trace object containing the collected runtime data
+     * @return List of generated test file paths produced by the analysis process
      */
-    Trace runAnalysis(List<Path> instrumentationPaths);
+    List<Path> runAnalysis(List<Path> instrumentationPaths);
     
     /**
      * Validates that the analyzer can process the given instrumentation.

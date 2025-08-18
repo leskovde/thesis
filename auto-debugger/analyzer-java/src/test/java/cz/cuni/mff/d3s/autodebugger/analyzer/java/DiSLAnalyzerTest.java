@@ -85,7 +85,7 @@ class DiSLAnalyzerTest {
     }
 
     @Test
-    void testBuildExecutionCommand_StandardConfiguration() {
+    void givenStandardConfiguration_whenBuildExecutionCommand_thenBuildsProperCommand() {
         // Given
         DiSLAnalyzer analyzer = new DiSLAnalyzer(standardConfig);
 
@@ -115,7 +115,7 @@ class DiSLAnalyzerTest {
     }
 
     @Test
-    void testBuildExecutionCommand_NoRuntimeArguments() {
+    void givenNoRuntimeArguments_whenBuildExecutionCommand_thenOmitsRuntimeArgs() {
         // Given
         DiSLAnalyzer analyzer = new DiSLAnalyzer(configWithoutRuntimeArgs);
 
@@ -141,7 +141,7 @@ class DiSLAnalyzerTest {
     }
 
     @Test
-    void testBuildExecutionCommand_PathsWithSpaces() {
+    void givenPathsWithSpaces_whenBuildExecutionCommand_thenProperlyQuotesArgs() {
         // Given
         DiSLAnalyzer analyzer = new DiSLAnalyzer(configWithSpacesInPaths);
 
@@ -167,7 +167,7 @@ class DiSLAnalyzerTest {
     }
 
     @Test
-    void testRunAnalysis_WithInvalidInstrumentationPath() {
+    void givenInvalidInstrumentationPath_whenRunAnalysis_thenThrows() {
         // Given
         DiSLAnalyzer analyzer = new DiSLAnalyzer(standardConfig);
         Path nonExistentJar = Path.of("/non/existent/instrumentation.jar");
@@ -181,7 +181,7 @@ class DiSLAnalyzerTest {
     }
 
     @Test
-    void testRunAnalysis_WithEmptyInstrumentationPaths() {
+    void givenEmptyInstrumentationPaths_whenRunAnalysis_thenThrows() {
         // Given
         DiSLAnalyzer analyzer = new DiSLAnalyzer(standardConfig);
 
@@ -194,7 +194,7 @@ class DiSLAnalyzerTest {
     }
 
     @Test
-    void testRunAnalysis_WithNullInstrumentationPaths() {
+    void givenNullInstrumentationPaths_whenRunAnalysis_thenThrows() {
         // Given
         DiSLAnalyzer analyzer = new DiSLAnalyzer(standardConfig);
 
@@ -211,7 +211,7 @@ class DiSLAnalyzerTest {
      * This test creates a simple executable that simulates DiSL behavior.
      */
     @Test
-    void testRunAnalysis_ProcessExecution() throws IOException {
+    void givenMockInstrumentationJar_whenRunAnalysis_thenHandlesProcessExecution() throws IOException {
         // Given - Create a mock instrumentation jar file
         Path mockInstrumentationJar = tempDir.resolve("mock-instrumentation.jar");
         Files.createFile(mockInstrumentationJar);
@@ -279,25 +279,11 @@ class DiSLAnalyzerTest {
         // When & Then - This test demonstrates the structure for testing process execution
         // The test may succeed or fail depending on the system setup, but it should not crash
         try {
-            Trace result = analyzer.runAnalysis(List.of(mockInstrumentationJar));
+            var generated = analyzer.runAnalysis(List.of(mockInstrumentationJar));
 
-            // If it succeeds, we should get a trace and verify its structure
-            assertNotNull(result, "Analysis should return a non-null trace");
-
-            // Verify specific trace characteristics
-            assertNotNull(result.toString(), "Trace should have a valid string representation");
-
-            // Check that trace has proper structure for different data types
-            for (int slot = 0; slot < 5; slot++) {
-                assertNotNull(result.getIntValues(slot), "Int values should be initialized for slot " + slot);
-                assertNotNull(result.getLongValues(slot), "Long values should be initialized for slot " + slot);
-                assertNotNull(result.getBooleanValues(slot), "Boolean values should be initialized for slot " + slot);
-                assertNotNull(result.getFloatValues(slot), "Float values should be initialized for slot " + slot);
-                assertNotNull(result.getDoubleValues(slot), "Double values should be initialized for slot " + slot);
-            }
-
-            // Verify that the trace is properly constructed (not just a default empty trace)
-            assertTrue(result.toString().length() >= 0, "Trace should have been processed successfully");
+            // If it succeeds, we should get a list of generated test paths
+            assertNotNull(generated, "Analysis should return a non-null list of generated tests");
+            assertTrue(generated.size() >= 0, "Generated tests list should be returned");
 
         } catch (Exception e) {
             // If it fails, it should be due to process execution issues

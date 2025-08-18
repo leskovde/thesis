@@ -17,6 +17,7 @@ dependencies {
     implementation(libs.log4j)
     testImplementation(libs.bundles.junit)
     testImplementation(libs.mockito)
+    testImplementation(project(":test-utils"))
 }
 
 tasks.test {
