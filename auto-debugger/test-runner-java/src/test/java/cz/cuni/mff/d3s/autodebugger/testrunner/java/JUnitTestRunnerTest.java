@@ -37,12 +37,12 @@ class JUnitTestRunnerTest {
     }
     
     @Test
-    void testConfigureTestRunner() {
+    void givenValidConfiguration_whenConfigure_thenSucceeds() {
         assertDoesNotThrow(() -> testRunner.configure(configuration));
     }
     
     @Test
-    void testExecuteTestsWithEmptyList() {
+    void givenEmptyList_whenExecuteTests_thenReportsZeroTests() {
         TestExecutionResult result = testRunner.executeTests(List.of());
         
         assertNotNull(result);
@@ -52,7 +52,7 @@ class JUnitTestRunnerTest {
     }
     
     @Test
-    void testExecuteTestsWithoutConfiguration() {
+    void givenUnconfiguredRunner_whenExecuteTests_thenThrows() {
         JUnitTestRunner unconfiguredRunner = new JUnitTestRunner();
         
         assertThrows(IllegalStateException.class, () -> 
@@ -60,7 +60,7 @@ class JUnitTestRunnerTest {
     }
     
     @Test
-    void testExecuteTestWithSimpleTestFile() throws Exception {
+    void givenSimpleTestFile_whenExecuteTest_thenReturnsResult() throws Exception {
         // Create a simple test file
         Path testFile = createSimpleTestFile();
         

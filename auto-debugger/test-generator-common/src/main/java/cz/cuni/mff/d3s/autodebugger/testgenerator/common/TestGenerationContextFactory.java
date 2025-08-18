@@ -10,7 +10,7 @@ import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.MethodIdentifier;
  */
 public class TestGenerationContextFactory {
 
-    private TestGenerationContextFactory() { }
+    protected TestGenerationContextFactory() { }
 
     /**
      * Creates a TestGenerationContext from a RunConfiguration.
