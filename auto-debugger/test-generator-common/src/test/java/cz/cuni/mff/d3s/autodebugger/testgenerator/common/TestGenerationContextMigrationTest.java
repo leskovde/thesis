@@ -19,7 +19,7 @@ class TestGenerationContextMigrationTest {
     Path tempDir;
 
     @Test
-    void testBackwardCompatibility_StringFieldsRemoved() {
+    void givenContextWithoutTargetMethod_whenAccessingMethodInfo_thenThrows() {
         // Deprecated string fields were removed; ensure context requires targetMethod
         TestGenerationContext context = TestGenerationContext.builder()
                 .outputDirectory(tempDir)
@@ -30,7 +30,7 @@ class TestGenerationContextMigrationTest {
     }
 
     @Test
-    void testNewApproach_StructuredIdentifiers() {
+    void givenStructuredIdentifiers_whenBuildingContext_thenExposesStructuredValues() {
         // Given - new approach using structured identifiers
         MethodIdentifier methodIdentifier = new MethodIdentifier("add", "int",
                 List.of("int", "int")) {
@@ -75,7 +75,7 @@ class TestGenerationContextMigrationTest {
     }
 
     @Test
-    void testMigrationCompatibility_BothApproachesProduceSameResults() {
+    void givenNewApproach_whenBuildingContext_thenProducesConsistentResults() {
         // Given - same information using both approaches
         MethodIdentifier methodIdentifier = new MethodIdentifier("add", "int",
                 List.of("int", "int")) {
@@ -116,7 +116,7 @@ class TestGenerationContextMigrationTest {
     }
 
     @Test
-    void testStructuredIdentifierPreference() {
+    void givenStructuredAndDeprecatedFields_whenBuilding_thenPrefersStructuredIdentifier() {
         // Given - context with both structured identifier and deprecated string fields
         MethodIdentifier methodIdentifier = new MethodIdentifier("multiply", "double",
                 List.of("double", "double")) {
@@ -156,7 +156,7 @@ class TestGenerationContextMigrationTest {
     }
 
     @Test
-    void testFallbackToDeprecatedFields() {
+    void givenContextWithoutStructuredIdentifiers_whenAccessingFields_thenThrows() {
         // Given - context with only deprecated string fields (no structured identifiers)
         TestGenerationContext context = TestGenerationContext.builder()
                 .outputDirectory(tempDir)
@@ -170,7 +170,7 @@ class TestGenerationContextMigrationTest {
     }
 
     @Test
-    void testBuilderWithNewFields() {
+    void givenNewStructuredFields_whenUsingBuilder_thenCreatesValidContext() {
         // Given - using builder with new structured fields
         MethodIdentifier methodIdentifier = new MethodIdentifier("divide", "double",
                 List.of("double", "double")) {
@@ -219,7 +219,7 @@ class TestGenerationContextMigrationTest {
     }
 
     @Test
-    void testDeprecationWarnings() {
+    void givenDeprecatedFieldUsage_whenAccessingContext_thenDocumentsExpectedBehavior() {
         // This test documents that deprecated fields should generate warnings
         // In a real scenario, these would show compiler warnings
         

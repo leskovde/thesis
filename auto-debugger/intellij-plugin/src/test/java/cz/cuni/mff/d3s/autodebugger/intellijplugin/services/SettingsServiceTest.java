@@ -22,7 +22,7 @@ public class SettingsServiceTest extends LightJavaCodeInsightFixtureTestCase5 {
     }
 
     @Test
-    public void testSettingsServiceBasicOperations() {
+    public void givenSettingsService_whenPerformingBasicOperations_thenWorksCorrectly() {
         
         // Test setting and getting a single value
         settingsService.setConfigurationValue("test.key", "test.value");
@@ -51,7 +51,7 @@ public class SettingsServiceTest extends LightJavaCodeInsightFixtureTestCase5 {
     }
 
     @Test
-    public void testEmptyAndNullValues() {
+    public void givenEmptyAndNullValues_whenStoringAndRetrieving_thenHandlesCorrectly() {
         
         // Test null value
         assertNull(settingsService.getConfigurationValue("nonexistent.key"));

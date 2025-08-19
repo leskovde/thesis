@@ -28,7 +28,7 @@ public class TestGenerationStrategyProviderTest {
     }
 
     @Test
-    public void testGetDefaultStrategy() {
+    public void givenStrategyProvider_whenGettingDefaultStrategy_thenReturnsCorrectDefault() {
         TestGenerationStrategy defaultStrategy = TestGenerationStrategyProvider.getDefaultStrategy();
         
         assertNotNull(defaultStrategy);
@@ -38,7 +38,7 @@ public class TestGenerationStrategyProviderTest {
     }
 
     @Test
-    public void testGetStrategyById() {
+    public void givenStrategyId_whenGettingStrategy_thenReturnsCorrectStrategy() {
         TestGenerationStrategy strategy = TestGenerationStrategyProvider.getStrategyById("trace-based-basic");
         
         assertNotNull(strategy);
@@ -51,14 +51,14 @@ public class TestGenerationStrategyProviderTest {
     }
 
     @Test
-    public void testHasStrategy() {
+    public void givenStrategyId_whenCheckingExistence_thenReturnsCorrectResult() {
         assertTrue(TestGenerationStrategyProvider.hasStrategy("trace-based-basic"));
         assertTrue(TestGenerationStrategyProvider.hasStrategy("ai-assisted"));
         assertFalse(TestGenerationStrategyProvider.hasStrategy("non-existent"));
     }
 
     @Test
-    public void testStrategyEquality() {
+    public void givenTestGenerationStrategies_whenComparingEquality_thenComparesById() {
         TestGenerationStrategy strategy1 = new TestGenerationStrategy("test-id", "Test Name", "Test Description", false);
         TestGenerationStrategy strategy2 = new TestGenerationStrategy("test-id", "Different Name", "Different Description", true);
         TestGenerationStrategy strategy3 = new TestGenerationStrategy("different-id", "Test Name", "Test Description", false);
@@ -96,7 +96,7 @@ public class TestGenerationStrategyProviderTest {
     }
 
     @Test
-    public void testOnlyOneDefaultStrategy() {
+    public void givenAvailableStrategies_whenCheckingDefaults_thenOnlyOneIsDefault() {
         List<TestGenerationStrategy> strategies = TestGenerationStrategyProvider.getAvailableStrategies();
         
         long defaultCount = strategies.stream()

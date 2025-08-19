@@ -91,7 +91,7 @@ class NaiveTraceBasedGeneratorRunConfigurationTest {
     }
 
     @Test
-    void testGenerateTests_WithRunConfiguration() throws Exception {
+    void givenRunConfiguration_whenGeneratingTests_thenCreatesValidTestFile() throws Exception {
         // When - generate tests using RunConfiguration directly
         List<Path> generatedFiles = generator.generateTests(trace, runConfiguration);
 
@@ -119,7 +119,7 @@ class NaiveTraceBasedGeneratorRunConfigurationTest {
     }
 
     @Test
-    void testGenerateTests_RunConfigurationVsManualContext() throws Exception {
+    void givenRunConfigurationVsManualContext_whenGeneratingTests_thenProducesSimilarResults() throws Exception {
         // Given - create manual TestGenerationContext for comparison
         MethodIdentifier methodIdentifier = new MethodIdentifier("add", "int", List.of("int","int")) {
             @Override public String getClassName() { return "Calculator"; }
@@ -156,7 +156,7 @@ class NaiveTraceBasedGeneratorRunConfigurationTest {
     }
 
     @Test
-    void testGenerateTests_WithNullRunConfiguration() {
+    void givenNullRunConfiguration_whenGeneratingTests_thenThrowsException() {
         // When/Then - should throw exception for null configuration
         assertThrows(IllegalArgumentException.class, () -> {
             generator.generateTests(trace, (JavaRunConfiguration) null);
@@ -164,7 +164,7 @@ class NaiveTraceBasedGeneratorRunConfigurationTest {
     }
 
     @Test
-    void testGenerateTests_WithEmptyTrace() {
+    void givenEmptyTrace_whenGeneratingTests_thenThrowsException() {
         // Given - empty trace
         Trace emptyTrace = new Trace();
 
@@ -175,7 +175,7 @@ class NaiveTraceBasedGeneratorRunConfigurationTest {
     }
 
     @Test
-    void testGenerateTests_UsesJavaMethodIdentifierUtilityMethods() throws Exception {
+    void givenJavaMethodIdentifier_whenGeneratingTests_thenUsesUtilityMethods() throws Exception {
         // When - generate tests using RunConfiguration
         List<Path> generatedFiles = generator.generateTests(trace, runConfiguration);
 

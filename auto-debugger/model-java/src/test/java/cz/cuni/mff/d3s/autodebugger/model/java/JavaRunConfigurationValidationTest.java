@@ -82,7 +82,7 @@ class JavaRunConfigurationValidationTest {
     }
 
     @Test
-    void testValidConfiguration() {
+    void givenValidConfiguration_whenValidating_thenSucceeds() {
         JavaRunConfiguration config = JavaRunConfiguration.builder()
             .applicationPath(validJarFile)
             .sourceCodePath(validSourceDir)
@@ -97,7 +97,7 @@ class JavaRunConfigurationValidationTest {
 
     // Application Path Validation Tests
     @Test
-    void testApplicationPathNull() {
+    void givenNullApplicationPath_whenValidating_thenThrows() {
         JavaRunConfiguration config = createConfigBuilder()
             .applicationPath(null)
             .build();
@@ -107,7 +107,7 @@ class JavaRunConfigurationValidationTest {
     }
 
     @Test
-    void testApplicationPathNotExists() {
+    void givenNonExistentApplicationPath_whenValidating_thenThrows() {
         Path nonExistentFile = tempDir.resolve("nonexistent.jar");
         JavaRunConfiguration config = createConfigBuilder()
             .applicationPath(nonExistentFile)
@@ -118,7 +118,7 @@ class JavaRunConfigurationValidationTest {
     }
 
     @Test
-    void testApplicationPathNotReadable() throws IOException {
+    void givenUnreadableApplicationPath_whenValidating_thenThrows() throws IOException {
         Path unreadableFile = tempDir.resolve("unreadable.jar");
         Files.createFile(unreadableFile);
         unreadableFile.toFile().setReadable(false);
@@ -137,7 +137,7 @@ class JavaRunConfigurationValidationTest {
     }
 
     @Test
-    void testApplicationPathIsDirectory() throws IOException {
+    void givenDirectoryAsApplicationPath_whenValidating_thenThrows() throws IOException {
         Path directory = tempDir.resolve("app-dir");
         Files.createDirectory(directory);
 
@@ -151,7 +151,7 @@ class JavaRunConfigurationValidationTest {
 
     // Source Code Path Validation Tests
     @Test
-    void testSourceCodePathNull() {
+    void givenNullSourceCodePath_whenValidating_thenThrows() {
         JavaRunConfiguration config = createConfigBuilder()
             .sourceCodePath(null)
             .build();
@@ -161,7 +161,7 @@ class JavaRunConfigurationValidationTest {
     }
 
     @Test
-    void testSourceCodePathNotExists() {
+    void givenNonExistentSourceCodePath_whenValidating_thenThrows() {
         Path nonExistentDir = tempDir.resolve("nonexistent-src");
         JavaRunConfiguration config = createConfigBuilder()
             .sourceCodePath(nonExistentDir)
@@ -172,7 +172,7 @@ class JavaRunConfigurationValidationTest {
     }
 
     @Test
-    void testSourceCodePathNotDirectory() throws IOException {
+    void givenFileAsSourceCodePath_whenValidating_thenThrows() throws IOException {
         Path file = tempDir.resolve("src-file.txt");
         Files.createFile(file);
 
@@ -186,7 +186,7 @@ class JavaRunConfigurationValidationTest {
 
     // DiSL Home Path Validation Tests
     @Test
-    void testDislHomePathNull() {
+    void givenNullDislHomePath_whenValidating_thenThrows() {
         JavaRunConfiguration config = createConfigBuilder()
             .dislHomePath(null)
             .build();
@@ -196,7 +196,7 @@ class JavaRunConfigurationValidationTest {
     }
 
     @Test
-    void testDislHomePathNotExists() {
+    void givenNonExistentDislHomePath_whenValidating_thenThrows() {
         Path nonExistentDir = tempDir.resolve("nonexistent-disl");
         JavaRunConfiguration config = createConfigBuilder()
             .dislHomePath(nonExistentDir)
@@ -207,7 +207,7 @@ class JavaRunConfigurationValidationTest {
     }
 
     @Test
-    void testDislHomePathMissingBinDislPy() throws IOException {
+    void givenDislHomeWithoutBinDislPy_whenValidating_thenThrows() throws IOException {
         Path invalidDislHome = tempDir.resolve("invalid-disl");
         Files.createDirectory(invalidDislHome);
         Files.createDirectories(invalidDislHome.resolve("output/lib"));
@@ -221,7 +221,7 @@ class JavaRunConfigurationValidationTest {
     }
 
     @Test
-    void testDislHomePathMissingOutputLib() throws IOException {
+    void givenDislHomeWithoutOutputLib_whenValidating_thenThrows() throws IOException {
         Path invalidDislHome = tempDir.resolve("invalid-disl");
         Files.createDirectory(invalidDislHome);
         Files.createDirectories(invalidDislHome.resolve("bin"));
@@ -237,7 +237,7 @@ class JavaRunConfigurationValidationTest {
 
     // Classpath Entries Validation Tests
     @Test
-    void testClasspathEntriesNull() {
+    void givenNullClasspathEntries_whenValidating_thenSucceeds() {
         // Don't set classpathEntries at all (they're optional)
         JavaRunConfiguration config = JavaRunConfiguration.builder()
             .applicationPath(validJarFile)
@@ -252,7 +252,7 @@ class JavaRunConfigurationValidationTest {
     }
 
     @Test
-    void testClasspathEntryNull() {
+    void givenNullClasspathEntry_whenValidating_thenThrows() {
         JavaRunConfiguration config = createConfigBuilder()
             .classpathEntry(null)
             .build();
@@ -262,7 +262,7 @@ class JavaRunConfigurationValidationTest {
     }
 
     @Test
-    void testClasspathEntryNotExists() {
+    void givenNonExistentClasspathEntry_whenValidating_thenThrows() {
         Path nonExistentPath = tempDir.resolve("nonexistent.jar");
         JavaRunConfiguration config = createConfigBuilder()
             .classpathEntry(nonExistentPath)
@@ -273,7 +273,7 @@ class JavaRunConfigurationValidationTest {
     }
 
     @Test
-    void testClasspathEntryValidJar() throws IOException {
+    void givenValidJarClasspathEntry_whenValidating_thenSucceeds() throws IOException {
         Path jarFile = tempDir.resolve("classpath.jar");
         Files.createFile(jarFile);
 
@@ -285,7 +285,7 @@ class JavaRunConfigurationValidationTest {
     }
 
     @Test
-    void testClasspathEntryValidDirectory() throws IOException {
+    void givenValidDirectoryClasspathEntry_whenValidating_thenSucceeds() throws IOException {
         Path directory = tempDir.resolve("classpath-dir");
         Files.createDirectory(directory);
 
@@ -298,7 +298,7 @@ class JavaRunConfigurationValidationTest {
 
     // Output Directory Validation Tests
     @Test
-    void testOutputDirectoryNull() {
+    void givenNullOutputDirectory_whenValidating_thenSucceeds() {
         JavaRunConfiguration config = createConfigBuilder()
             .outputDirectory(null)
             .build();
@@ -308,7 +308,7 @@ class JavaRunConfigurationValidationTest {
     }
 
     @Test
-    void testOutputDirectoryExistsButNotDirectory() throws IOException {
+    void givenFileAsOutputDirectory_whenValidating_thenThrows() throws IOException {
         Path file = tempDir.resolve("output-file.txt");
         Files.createFile(file);
 
@@ -321,7 +321,7 @@ class JavaRunConfigurationValidationTest {
     }
 
     @Test
-    void testOutputDirectoryCreated() {
+    void givenNonExistentOutputDirectory_whenValidating_thenCreatesDirectory() {
         Path newOutputDir = tempDir.resolve("new-output");
         JavaRunConfiguration config = createConfigBuilder()
             .outputDirectory(newOutputDir)
@@ -334,7 +334,7 @@ class JavaRunConfigurationValidationTest {
 
     // Target Method Validation Tests
     @Test
-    void testTargetMethodNull() {
+    void givenNullTargetMethod_whenValidating_thenThrows() {
         JavaRunConfiguration config = createConfigBuilder()
             .targetMethod(null)
             .build();
@@ -350,14 +350,14 @@ class JavaRunConfigurationValidationTest {
     // TODO: Enhance signature validation if stricter checking is needed
     @Test
     @Disabled
-    void testTargetMethodInvalidSignature() {
+    void givenInvalidTargetMethodSignature_whenValidating_thenThrows() {
         // This test would need a more sophisticated approach to create
         // a truly invalid signature that the parser rejects
     }
 
     // Exportable Values Validation Tests
     @Test
-    void testExportableValuesEmpty() {
+    void givenEmptyExportableValues_whenValidating_thenSucceeds() {
         JavaRunConfiguration config = createConfigBuilder()
             .exportableValues(Collections.emptyList())
             .build();
@@ -367,7 +367,7 @@ class JavaRunConfigurationValidationTest {
     }
 
     @Test
-    void testArgumentIdentifierNegativeSlot() {
+    void givenNegativeSlotArgumentIdentifier_whenValidating_thenThrows() {
         JavaArgumentIdentifier invalidArg = new JavaArgumentIdentifier(
             ArgumentIdentifierParameters.builder()
                 .argumentSlot(-1)
@@ -384,7 +384,7 @@ class JavaRunConfigurationValidationTest {
     }
 
     @Test
-    void testArgumentIdentifierSlotOutOfBounds() {
+    void givenOutOfBoundsSlotArgumentIdentifier_whenValidating_thenThrows() {
         JavaArgumentIdentifier invalidArg = new JavaArgumentIdentifier(
             ArgumentIdentifierParameters.builder()
                 .argumentSlot(5) // The method only has 2 parameters (indices 0 and 1)
@@ -401,7 +401,7 @@ class JavaRunConfigurationValidationTest {
     }
 
     @Test
-    void testArgumentIdentifierValidSlot() {
+    void givenValidSlotArgumentIdentifier_whenValidating_thenSucceeds() {
         JavaArgumentIdentifier validArg = new JavaArgumentIdentifier(
             ArgumentIdentifierParameters.builder()
                 .argumentSlot(1) // Valid slot for second parameter
@@ -417,7 +417,7 @@ class JavaRunConfigurationValidationTest {
     }
 
     @Test
-    void testFieldIdentifierNullFieldName() {
+    void givenNullFieldNameFieldIdentifier_whenValidating_thenThrows() {
         JavaPackageIdentifier packageIdentifier = new JavaPackageIdentifier("com.example");
         JavaClassIdentifier classIdentifier = new JavaClassIdentifier(
             ClassIdentifierParameters.builder()
@@ -443,7 +443,7 @@ class JavaRunConfigurationValidationTest {
     }
 
     @Test
-    void testFieldIdentifierEmptyFieldName() {
+    void givenEmptyFieldNameFieldIdentifier_whenValidating_thenThrows() {
         JavaPackageIdentifier packageIdentifier = new JavaPackageIdentifier("com.example");
         JavaClassIdentifier classIdentifier = new JavaClassIdentifier(
             ClassIdentifierParameters.builder()
@@ -469,7 +469,7 @@ class JavaRunConfigurationValidationTest {
     }
 
     @Test
-    void testFieldIdentifierNullOwnerClass() {
+    void givenNullOwnerClassFieldIdentifier_whenValidating_thenThrows() {
         JavaFieldIdentifier invalidField = new JavaFieldIdentifier(
             FieldIdentifierParameters.builder()
                 .variableName("testField")

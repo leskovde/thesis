@@ -55,7 +55,7 @@ class JavaTestGenerationContextFactoryTest {
     }
 
     @Test
-    void testCreateFromJavaRunConfiguration_WithDefaultSettings() {
+    void givenJavaRunConfiguration_whenCreatingContextWithDefaults_thenSetsExpectedDefaults() {
         TestGenerationContext context = JavaTestGenerationContextFactory
                 .createFromJavaRunConfiguration(javaRunConfiguration);
 
@@ -75,7 +75,7 @@ class JavaTestGenerationContextFactoryTest {
     }
 
     @Test
-    void testCreateFromJavaRunConfiguration_WithCustomSettings() {
+    void givenJavaRunConfigurationAndCustomSettings_whenCreatingContext_thenAppliesCustomSettings() {
         TestGenerationSettings customSettings = TestGenerationSettings.builder()
                 .testFramework("junit4")
                 .maxTestCount(25)
@@ -102,7 +102,7 @@ class JavaTestGenerationContextFactoryTest {
     }
 
     @Test
-    void testCreateForTraceBasedGeneration() {
+    void givenJavaRunConfiguration_whenCreatingForTraceBasedGeneration_thenReturnsValidContext() {
         TestGenerationContext context = JavaTestGenerationContextFactory
                 .createForTraceBasedGeneration(javaRunConfiguration);
 
@@ -122,7 +122,7 @@ class JavaTestGenerationContextFactoryTest {
     }
 
     @Test
-    void testCreateForLLMBasedGeneration() {
+    void givenJavaRunConfiguration_whenCreatingForLLMBasedGeneration_thenReturnsValidContext() {
         TestGenerationContext context = JavaTestGenerationContextFactory
                 .createForLLMBasedGeneration(javaRunConfiguration);
 
@@ -143,7 +143,7 @@ class JavaTestGenerationContextFactoryTest {
     }
 
     @Test
-    void testCreateFromJavaRunConfiguration_WithNullMethod() {
+    void givenNullMethod_whenCreatingContext_thenThrowsOnDependentGetters() {
         JavaRunConfiguration configWithNullMethod = JavaRunConfiguration.builder()
                 .applicationPath(Path.of("test-app.jar"))
                 .sourceCodePath(Path.of("src/main/java"))
@@ -161,7 +161,7 @@ class JavaTestGenerationContextFactoryTest {
     }
 
     @Test
-    void testCreateFromJavaRunConfiguration_WithNullConfiguration() {
+    void givenNullRunConfiguration_whenCreatingContext_thenThrowsIllegalArgumentException() {
         assertThrows(IllegalArgumentException.class, () -> 
             JavaTestGenerationContextFactory.createFromJavaRunConfiguration(null));
     }

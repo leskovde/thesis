@@ -2,8 +2,8 @@
 
 ## Overview
 
-The `auto-debugger` is a thesis project exploring automated test generation through dynamic program analysis and instrumentation. 
-Building upon established techniques in runtime analysis, this framework investigates how captured execution traces can be systematically transformed into meaningful test suites. 
+The `auto-debugger` is a thesis project exploring automated test generation through dynamic program analysis and instrumentation.
+Building upon established techniques in runtime analysis, this framework investigates how captured execution traces can be systematically transformed into meaningful test suites.
 The project extends existing approaches by integrating multiple test generation strategies, from traditional trace-based methods to modern AI-assisted techniques.
 
 Developed as part of academic research, this system demonstrates practical applications of dynamic analysis for test automation.
@@ -64,6 +64,7 @@ The following dependencies are required only for specific functionalities:
 ./gradlew :runner:run --args="
   --jar /path/to/your/application.jar
   --source /path/to/source/code
+  --output-dir /path/to/output
   --method org.example.YourClass.yourMethod(int,String)
   --disl-home /path/to/disl
 "
@@ -93,6 +94,35 @@ Run the complete test suite:
 ./gradlew :test-generator-java:test
 ./gradlew :instrumentor-java:test
 ```
+
+
+## Output artifacts and directories
+
+The auto-debugger uses a simplified configuration approach where all output paths are derived from the run configuration:
+
+- **Output Directory**: Specified via `--output-dir` command line option or `JavaRunConfiguration.outputDirectory`
+  - Default: `auto-debugger-output` in the current working directory
+  - Contains all generated artifacts: identifier mappings, test files, and results lists
+
+- **Identifier Mapping Files**: Serialized Java objects with `.ser` extension
+  - Location: `<outputDirectory>/identifiers/`
+  - Used by test generators to map runtime values to source code elements
+
+- **Generated Test Files**: Java source files created by test generators
+  - Location: `<outputDirectory>/stub-tests/` (for test stubs) or generator-specific subdirectories
+  - Listed in results files for orchestrator coordination
+
+- **Results List Files**: Text files listing paths to generated test files
+  - Format: `generated-tests-<runId>.lst` or `generated-tests.lst`
+  - Location: `<outputDirectory>/`
+  - One test file path per line
+
+- **Environment Variables**: Used only for sensitive configuration
+  - `ANTHROPIC_API_KEY`: API key for LLM-based test generation (preferred)
+  - `OPENAI_API_KEY`: Fallback API key for LLM-based test generation
+  - `AUTODEBUGGER_STUB`: Set to "1" or "true" for test stub mode (testing only)
+
+Note: Older builds may have left `identifierMapping*.json` files under `auto-debugger/identifiers`; these were an earlier format and are no longer produced.
 
 ### Development Without DiSL
 
@@ -292,12 +322,12 @@ public void givenValidInstrumentationModel_whenGeneratingInstrumentation_thenIns
 
     // when - Generate complete instrumentation package
     var resultPaths = instrumentor.generateInstrumentation(model);
-    
+
     // then - Verify instrumentation JAR is created with proper DiSL configuration
     assertEquals(1, resultPaths.size());
     assertEquals(instrumentationJarPath, resultPaths.getFirst());
     assertTrue(Files.exists(instrumentationJarPath));
-    
+
     System.out.println("✅ Generated instrumentation JAR: " + instrumentationJarPath);
     System.out.println("📦 JAR size: " + Files.size(instrumentationJarPath) + " bytes");
     System.out.println("🔧 Instrumentation includes: method entry/exit hooks, field access tracking, parameter capture");

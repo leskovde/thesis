@@ -52,7 +52,7 @@ class JavaRunConfigurationTestGenerationContextTest {
     }
 
     @Test
-    void testCreateTestGenerationContext_WithoutTestGeneratorModule() {
+    void givenMissingTestGeneratorModule_whenCreatingContext_thenThrows() {
         // When test-generator-java module is not available, should throw UnsupportedOperationException
         // This test verifies the expected behavior when the module is not on the classpath
 
@@ -65,7 +65,7 @@ class JavaRunConfigurationTestGenerationContextTest {
     }
 
     @Test
-    void testCreateTestGenerationContext_WithCustomSettings() {
+    void givenCustomSettings_whenCreatingContext_thenThrows() {
         // Test creating context with custom settings
         // Should throw UnsupportedOperationException when module is not available
 
@@ -79,7 +79,7 @@ class JavaRunConfigurationTestGenerationContextTest {
     }
 
     @Test
-    void testCreateTestGenerationContext_ReflectionBehavior() {
+    void givenReflectionBasedApproach_whenClassNotFound_thenThrows() {
         // Test that the reflection-based approach correctly throws exception when class not found
         UnsupportedOperationException exception = assertThrows(UnsupportedOperationException.class, () -> {
             javaRunConfiguration.createTestGenerationContext();
@@ -92,7 +92,7 @@ class JavaRunConfigurationTestGenerationContextTest {
     }
 
     @Test
-    void testCreateTestGenerationContext_WithNullMethod() {
+    void givenNullTargetMethod_whenCreatingContext_thenThrows() {
         // Test behavior when target method is null - should still throw UnsupportedOperationException
         // because the module is not available, regardless of the method being null
         JavaRunConfiguration configWithNullMethod = JavaRunConfiguration.builder()

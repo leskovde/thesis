@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class TargetLanguageTest {
     
     @Test
-    void testFromIdentifierValid() {
+    void givenValidIdentifier_whenCreatingFromIdentifier_thenReturnsCorrectLanguage() {
         assertEquals(TargetLanguage.JAVA, TargetLanguage.fromIdentifier("java"));
         assertEquals(TargetLanguage.JAVA, TargetLanguage.fromIdentifier("JAVA"));
         assertEquals(TargetLanguage.JAVA, TargetLanguage.fromIdentifier("Java"));
@@ -16,7 +16,7 @@ class TargetLanguageTest {
     }
     
     @Test
-    void testFromIdentifierInvalid() {
+    void givenInvalidIdentifier_whenCreatingFromIdentifier_thenThrowsException() {
         assertThrows(IllegalArgumentException.class, () -> {
             TargetLanguage.fromIdentifier("invalid");
         });
@@ -35,7 +35,7 @@ class TargetLanguageTest {
     }
     
     @Test
-    void testIsSupported() {
+    void givenLanguageIdentifier_whenCheckingSupport_thenReturnsCorrectResult() {
         assertTrue(TargetLanguage.isSupported("java"));
         assertTrue(TargetLanguage.isSupported("JAVA"));
 
@@ -45,7 +45,7 @@ class TargetLanguageTest {
     }
     
     @Test
-    void testGetSupportedLanguagesString() {
+    void givenTargetLanguage_whenGettingSupportedLanguagesString_thenReturnsValidString() {
         String supported = TargetLanguage.getSupportedLanguagesString();
         
         assertNotNull(supported);
@@ -53,7 +53,7 @@ class TargetLanguageTest {
     }
     
     @Test
-    void testValidateFileExtension() {
+    void givenFileExtensions_whenValidating_thenReturnsCorrectValidation() {
         // Test Java
         assertTrue(TargetLanguage.JAVA.validateFileExtension("app.jar", true));
         assertTrue(TargetLanguage.JAVA.validateFileExtension("Test.java", false));

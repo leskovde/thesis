@@ -18,7 +18,7 @@ class JavaRunConfigurationValidationSimpleTest {
     Path tempDir;
 
     @Test
-    void testValidationMethodExists() throws IOException {
+    void givenValidConfiguration_whenValidating_thenMethodExists() throws IOException {
         // Create minimal valid files
         Path jarFile = tempDir.resolve("test.jar");
         Files.createFile(jarFile);

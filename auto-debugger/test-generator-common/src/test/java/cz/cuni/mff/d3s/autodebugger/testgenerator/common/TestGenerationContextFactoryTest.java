@@ -100,7 +100,7 @@ class TestGenerationContextFactoryTest {
     }
 
     @Test
-    void testCreateFromRunConfiguration_WithDefaultSettings() {
+    void givenRunConfiguration_whenCreatingContextWithDefaults_thenSetsExpectedDefaults() {
         TestGenerationContext context = TestGenerationContextFactory
                 .createFromRunConfiguration(mockRunConfiguration);
 
@@ -120,7 +120,7 @@ class TestGenerationContextFactoryTest {
     }
 
     @Test
-    void testCreateFromRunConfiguration_WithCustomSettings() {
+    void givenRunConfigurationAndCustomSettings_whenCreatingContext_thenAppliesCustomSettings() {
         TestGenerationSettings customSettings = TestGenerationSettings.builder()
                 .testFramework("junit4")
                 .maxTestCount(25)
@@ -147,7 +147,7 @@ class TestGenerationContextFactoryTest {
     }
 
     @Test
-    void testCreateFromRunConfiguration_WithNullMethod() {
+    void givenNullMethod_whenCreatingContext_thenThrowsOnDependentGetters() {
         RunConfiguration configWithNullMethod = new RunConfiguration() {
             @Override
             public TargetLanguage getLanguage() {
@@ -200,7 +200,7 @@ class TestGenerationContextFactoryTest {
     }
 
     @Test
-    void testCreateMinimal() {
+    void givenMethodIdentifier_whenCreatingMinimalContext_thenSetsRequiredFields() {
         MethodIdentifier methodIdentifier = new MethodIdentifier("add", "int", List.of("int", "int")) {
             @Override public String getClassName() { return "Calculator"; }
             @Override public String getPackageName() { return ""; }
@@ -217,13 +217,13 @@ class TestGenerationContextFactoryTest {
     }
 
     @Test
-    void testCreateFromRunConfiguration_WithNullConfiguration() {
+    void givenNullRunConfiguration_whenCreatingContext_thenThrowsIllegalArgumentException() {
         assertThrows(IllegalArgumentException.class, () -> 
             TestGenerationContextFactory.createFromRunConfiguration(null));
     }
 
     @Test
-    void testCreateFromRunConfiguration_WithNullSettings() {
+    void givenNullSettings_whenCreatingContext_thenUsesDefaultSettings() {
         // Should use default settings when null is passed
         TestGenerationContext context = TestGenerationContextFactory
                 .createFromRunConfiguration(mockRunConfiguration, null);

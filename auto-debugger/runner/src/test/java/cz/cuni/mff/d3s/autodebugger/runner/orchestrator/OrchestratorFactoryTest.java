@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class OrchestratorFactoryTest {
 
     @Test
-    void testCreateJavaOrchestratorWithEnum() {
+    void givenJavaEnum_whenCreatingOrchestrator_thenReturnsJavaOrchestrator() {
         Orchestrator orchestrator = OrchestratorFactory.create(TargetLanguage.JAVA);
 
         assertNotNull(orchestrator);
@@ -17,7 +17,7 @@ class OrchestratorFactoryTest {
     }
 
     @Test
-    void testCreateJavaOrchestratorWithString() {
+    void givenJavaString_whenCreatingOrchestrator_thenReturnsJavaOrchestrator() {
         Orchestrator orchestrator = OrchestratorFactory.create("java");
 
         assertNotNull(orchestrator);
@@ -26,7 +26,7 @@ class OrchestratorFactoryTest {
     }
 
     @Test
-    void testCreateOrchestratorCaseInsensitive() {
+    void givenCaseVariations_whenCreatingOrchestrator_thenHandlesCaseInsensitively() {
         Orchestrator orchestrator1 = OrchestratorFactory.create("JAVA");
         Orchestrator orchestrator2 = OrchestratorFactory.create("Java");
 
@@ -37,7 +37,7 @@ class OrchestratorFactoryTest {
     }
 
     @Test
-    void testCreateOrchestratorNullLanguage() {
+    void givenNullLanguage_whenCreatingOrchestrator_thenThrows() {
         assertThrows(IllegalArgumentException.class, () -> {
             OrchestratorFactory.create((TargetLanguage) null);
         });
@@ -48,14 +48,14 @@ class OrchestratorFactoryTest {
     }
 
     @Test
-    void testCreateOrchestratorEmptyLanguage() {
+    void givenEmptyLanguage_whenCreatingOrchestrator_thenThrows() {
         assertThrows(IllegalArgumentException.class, () -> {
             OrchestratorFactory.create("");
         });
     }
 
     @Test
-    void testIsLanguageSupported() {
+    void givenLanguages_whenCheckingSupport_thenReturnsCorrectStatus() {
         // Test with enum
         assertTrue(OrchestratorFactory.isLanguageSupported(TargetLanguage.JAVA));
 
@@ -68,7 +68,7 @@ class OrchestratorFactoryTest {
     }
 
     @Test
-    void testGetSupportedLanguages() {
+    void givenFactory_whenGettingSupportedLanguages_thenReturnsLanguageList() {
         String supportedLanguages = OrchestratorFactory.getSupportedLanguages();
 
         assertNotNull(supportedLanguages);

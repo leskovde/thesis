@@ -77,7 +77,7 @@ class OrchestratorIIntegrationTest {
 
 
     @Test
-    void testCompleteNewAPIWorkflow() {
+    void givenNewAPI_whenExecutingCompleteWorkflow_thenSucceeds() {
         // This test demonstrates the complete new API workflow as specified in the requirements
 
         // Step 1: Create orchestrator for the language
@@ -103,7 +103,7 @@ class OrchestratorIIntegrationTest {
         // var testResults = testRunner.runTests(tests);
     }
     @Test
-    void testRunAnalysisProducesFilesInStubMode() throws Exception {
+    void givenStubMode_whenRunningAnalysis_thenProducesFiles() throws Exception {
         // given
         Orchestrator orchestrator = OrchestratorFactory.create(testArguments);
         var model = orchestrator.buildInstrumentationModel();
@@ -120,7 +120,7 @@ class OrchestratorIIntegrationTest {
 
 
     @Test
-    void testRunConfigurationValidation() {
+    void givenValidConfiguration_whenValidating_thenSucceeds() {
         Orchestrator orchestrator = OrchestratorFactory.create(testArguments.language);
 
         // Test completed successfully - orchestrator creates its own run configuration
@@ -130,7 +130,7 @@ class OrchestratorIIntegrationTest {
     }
 
     @Test
-    void testRunConfigurationWithInvalidPaths() {
+    void givenInvalidPaths_whenValidatingConfiguration_thenThrows() {
         // Test with non-existent JAR file
         testArguments.applicationJarPath = "/non/existent/path.jar";
 
@@ -143,7 +143,7 @@ class OrchestratorIIntegrationTest {
     }
 
     @Test
-    void testMultipleLanguageSupport() {
+    void givenMultipleLanguages_whenCheckingSupport_thenHandlesCorrectly() {
         // Test that the factory correctly handles different languages
         assertTrue(OrchestratorFactory.isLanguageSupported(TargetLanguage.JAVA));
 
@@ -157,7 +157,7 @@ class OrchestratorIIntegrationTest {
     }
 
     @Test
-    void testOrchestratorComponentCreation() {
+    void givenOrchestrator_whenCreatingComponents_thenSucceeds() {
         Orchestrator orchestrator = OrchestratorFactory.create("java");
 
         // Test that all components can be created without throwing exceptions
@@ -179,7 +179,7 @@ class OrchestratorIIntegrationTest {
      * including JAR creation, manifest verification, and DiSLClass content validation.
      */
     @Test
-    void testCreateInstrumentationEndToEnd() throws IOException {
+    void givenValidConfiguration_whenCreatingInstrumentation_thenSucceedsEndToEnd() throws IOException {
         // given
         Orchestrator orchestrator = OrchestratorFactory.create(testArguments);
         assertNotNull(orchestrator);
@@ -232,7 +232,7 @@ class OrchestratorIIntegrationTest {
      * multiple exportable values (arguments and fields).
      */
     @Test
-    void testCreateInstrumentationWithMultipleExportableValues() throws IOException {
+    void givenMultipleExportableValues_whenCreatingInstrumentation_thenHandlesCorrectly() throws IOException {
         // given - modify test arguments to include both parameters and fields
         testArguments.targetParameters = List.of("0:int", "1:java.lang.String");
         testArguments.targetFields = List.of("int:counter", "java.lang.String:status");
@@ -270,7 +270,7 @@ class OrchestratorIIntegrationTest {
      * Test that the orchestrator fails gracefully when given invalid configuration.
      */
     @Test
-    void testCreateInstrumentationWithInvalidConfiguration() {
+    void givenInvalidConfiguration_whenCreatingInstrumentation_thenThrows() {
         // given - invalid DiSL home path
         testArguments.dislHomePath = "/non/existent/disl/path";
 

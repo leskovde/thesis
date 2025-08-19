@@ -56,7 +56,7 @@ class JavaRunConfigurationIntegrationTest {
     }
 
     @Test
-    void testCreateTestGenerationContext_WithModulesAvailable() {
+    void givenModulesAvailable_whenCreatingTestGenerationContext_thenReturnsValidContext() {
         // When test-generator-java module is available, should successfully create context
         Object contextObj = javaRunConfiguration.createTestGenerationContext();
         
@@ -81,7 +81,7 @@ class JavaRunConfigurationIntegrationTest {
     }
 
     @Test
-    void testCreateTestGenerationContext_WithCustomSettings() {
+    void givenCustomSettings_whenCreatingTestGenerationContext_thenAppliesCustomConfiguration() {
         // Test creating context with custom settings
         TestGenerationSettings customSettings = TestGenerationSettings.builder()
                 .testFramework("junit4")
@@ -113,7 +113,7 @@ class JavaRunConfigurationIntegrationTest {
     }
 
     @Test
-    void testCreateTestGenerationContext_WithNullMethod() {
+    void givenNullMethod_whenCreatingTestGenerationContext_thenHandlesGracefully() {
         // Test behavior when target method is null
         JavaRunConfiguration configWithNullMethod = JavaRunConfiguration.builder()
                 .applicationPath(Path.of("test-app.jar"))
@@ -136,7 +136,7 @@ class JavaRunConfigurationIntegrationTest {
     }
 
     @Test
-    void testCreateTestGenerationContext_ReflectionWorksCorrectly() {
+    void givenReflectionBasedApproach_whenCreatingTestGenerationContext_thenWorksCorrectly() {
         // Test that the reflection-based approach works correctly when modules are available
         Object contextObj = javaRunConfiguration.createTestGenerationContext();
         

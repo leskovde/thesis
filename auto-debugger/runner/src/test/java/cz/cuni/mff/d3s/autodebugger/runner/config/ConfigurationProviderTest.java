@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class ConfigurationProviderTest {
 
     @Test
-    public void testRequiredConfigurationFields() {
+    public void givenConfigurationProvider_whenGettingRequiredFields_thenReturnsCorrectFields() {
         List<ConfigurationField> requiredFields = ConfigurationProvider.getRequiredConfigurationFields();
 
         assertNotNull(requiredFields);
@@ -42,7 +42,7 @@ public class ConfigurationProviderTest {
     }
 
     @Test
-    public void testOptionalConfigurationFields() {
+    public void givenConfigurationProvider_whenGettingOptionalFields_thenReturnsCorrectFields() {
         List<ConfigurationField> optionalFields = ConfigurationProvider.getOptionalConfigurationFields();
         
         assertNotNull(optionalFields);
@@ -60,7 +60,7 @@ public class ConfigurationProviderTest {
     }
 
     @Test
-    public void testAllConfigurationFields() {
+    public void givenConfigurationProvider_whenGettingAllFields_thenCombinesRequiredAndOptional() {
         List<ConfigurationField> allFields = ConfigurationProvider.getAllConfigurationFields();
         List<ConfigurationField> requiredFields = ConfigurationProvider.getRequiredConfigurationFields();
         List<ConfigurationField> optionalFields = ConfigurationProvider.getOptionalConfigurationFields();
@@ -80,7 +80,7 @@ public class ConfigurationProviderTest {
     }
 
     @Test
-    public void testConfigurationFieldProperties() {
+    public void givenConfigurationField_whenCheckingProperties_thenReturnsCorrectValues() {
         ConfigurationField field = new ConfigurationField(
                 "test.key",
                 "Test Field",

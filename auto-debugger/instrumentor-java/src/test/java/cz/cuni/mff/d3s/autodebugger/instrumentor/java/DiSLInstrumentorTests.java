@@ -67,7 +67,7 @@ class DiSLInstrumentorTests {
    * to the identifier mapping file.
    */
   @Test
-  void testCollectorTemplateTransformation() throws IOException {
+  void givenCollectorTemplate_whenTransforming_thenSubstitutesPlaceholders() throws IOException {
     // given - Test just the template transformation part, not the full compilation
     Path testMappingPath = testIdentifierDirectory.resolve("identifierMapping-test.json");
 
@@ -143,7 +143,7 @@ class DiSLInstrumentorTests {
    * Tests that identifier mapping is correctly serialized to a file and can be deserialized.
    */
   @Test
-  void testIdentifierMappingSerialization() throws IOException, ClassNotFoundException {
+  void givenIdentifierMapping_whenSerializing_thenCanDeserialize() throws IOException, ClassNotFoundException {
     // given
     JavaArgumentIdentifier argIdentifier = new JavaArgumentIdentifier(
             ArgumentIdentifierParameters.builder()
@@ -232,7 +232,7 @@ class DiSLInstrumentorTests {
    * manifest verification, and DiSLClass content validation.
    */
   @Test
-  void testFullJarGenerationAndManifestVerification() throws IOException {
+  void givenInstrumentationModel_whenGeneratingJar_thenCreatesValidJarWithManifest() throws IOException {
     // given
     JavaArgumentIdentifier stringArg = new JavaArgumentIdentifier(
             ArgumentIdentifierParameters.builder()
@@ -343,7 +343,7 @@ class DiSLInstrumentorTests {
    * for proper test generation technique integration.
    */
   @Test
-  void testCollectorAndCollectorREContent() throws IOException {
+  void givenRunConfiguration_whenGeneratingCollector_thenProducesValidContent() throws IOException {
     // given
     JavaRunConfiguration runConfiguration = JavaRunConfiguration.builder()
             .applicationPath(Constants.targetJarPath)

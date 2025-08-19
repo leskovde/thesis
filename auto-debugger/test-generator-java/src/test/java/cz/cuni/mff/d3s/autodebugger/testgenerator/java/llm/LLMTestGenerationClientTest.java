@@ -128,7 +128,7 @@ class LLMTestGenerationClientTest {
     }
 
     @Test
-    void testConfigurationValidation() {
+    void givenLLMConfiguration_whenValidating_thenValidatesCorrectly() {
         // Test valid configuration
         LLMConfiguration validConfig = LLMConfiguration.builder()
                 .modelName("claude-sonnet-4-20250514")
@@ -167,7 +167,7 @@ class LLMTestGenerationClientTest {
     }
 
     @Test
-    void testMockModelDoesNotRequireApiKey() {
+    void givenMockModel_whenCheckingApiKeyRequirement_thenDoesNotRequireApiKey() {
         LLMConfiguration mockConfig = LLMConfiguration.builder()
                 .modelName("mock")
                 .apiKey(null) // Should be fine for mock model
@@ -179,7 +179,7 @@ class LLMTestGenerationClientTest {
     }
 
     @Test
-    void testClaudeModelRequiresApiKey() {
+    void givenClaudeModel_whenCheckingApiKeyRequirement_thenRequiresApiKey() {
         LLMConfiguration claudeConfig = LLMConfiguration.builder()
                 .modelName("claude-sonnet-4-20250514")
                 .apiKey("test-key")
@@ -190,7 +190,7 @@ class LLMTestGenerationClientTest {
     }
 
     @Test
-    void testEffectiveApiKeyHandling() {
+    void givenDifferentApiKeyConfigurations_whenHandlingEffectiveApiKey_thenHandlesCorrectly() {
         // Test explicit API key
         LLMConfiguration explicitConfig = LLMConfiguration.builder()
                 .modelName("claude-sonnet-4-20250514")

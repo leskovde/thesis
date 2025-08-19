@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class JavaMethodSignatureParserTest {
 
     @Test
-    void testInvalidSignatureWithIncompleteParentheses() {
+    void givenIncompleteParentheses_whenParsingSignature_thenDetectsMethodNameOnly() {
         MethodSignature ms = JavaMethodSignatureParser.parseMethodSignature("Class.method(int");
 
         // Let's see what the parser actually returns
@@ -23,7 +23,7 @@ class JavaMethodSignatureParserTest {
     }
     
     @Test
-    void testValidFullMethodSignature() {
+    void givenValidFullMethodSignature_whenParsing_thenReturnsCorrectMethodSignature() {
         MethodSignature ms = JavaMethodSignatureParser.parseMethodSignature("com.example.Class.method(int,String)");
         
         assertEquals(SignatureState.FULL_METHOD, ms.getState());

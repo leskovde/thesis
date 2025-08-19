@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling.DiSLModel;
 import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.ExportableValue;
 import cz.cuni.mff.d3s.autodebugger.model.java.JavaRunConfiguration;
 import cz.cuni.mff.d3s.autodebugger.model.java.helper.DiSLPathHelper;
@@ -69,7 +70,7 @@ public class DiSLInstrumentor implements Instrumentor {
         String targetClass = "";
         String targetMethod = "";
         try {
-            if (model instanceof cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling.DiSLModel dislModel) {
+            if (model instanceof DiSLModel dislModel) {
                 var tm = dislModel.getTargetMethod();
                 targetPackage = tm.getPackageName();
                 targetClass = tm.getClassName();

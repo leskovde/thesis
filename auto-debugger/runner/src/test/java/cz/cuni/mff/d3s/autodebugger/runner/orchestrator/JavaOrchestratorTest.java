@@ -59,7 +59,7 @@ class JavaOrchestratorTest {
     }
 
     @Test
-    void testGetAvailableTestGenerationTechniques() {
+    void givenJavaOrchestrator_whenGettingAvailableTechniques_thenReturnsExpectedList() {
         String[] techniques = orchestrator.getAvailableTestGenerationTechniques();
 
         assertNotNull(techniques);
@@ -77,7 +77,7 @@ class JavaOrchestratorTest {
     }
     
     @Test
-    void testBuildInstrumentationModel() {
+    void givenJavaOrchestrator_whenBuildingInstrumentationModel_thenSucceeds() {
         // This should work without throwing exceptions
         assertDoesNotThrow(() -> {
             orchestrator.buildInstrumentationModel();
