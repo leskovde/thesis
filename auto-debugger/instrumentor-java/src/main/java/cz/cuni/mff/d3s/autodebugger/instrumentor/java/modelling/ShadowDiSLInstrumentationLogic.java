@@ -25,6 +25,8 @@ public class ShadowDiSLInstrumentationLogic extends DiSLInstrumentationLogic {
     }
     append(
         "System.out.println(\"[Instrumentation process] PID: \" + ProcessHandle.current().pid());\n");
+    // Start a new event for temporal tracing (no-op in naive mode)
+    append("CollectorRE.startEvent();\n");
     for (JavaValue variable : exports) {
       append(variable.emitCollectorCode());
       append("\n");

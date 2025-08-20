@@ -54,6 +54,7 @@ class DiSLInstrumentationLogicTests {
       @Before(marker = BodyMarker.class, scope = "Test.test")
       public static void generatedMethod1(DynamicContext di) {
       System.out.println("[Instrumentation process] PID: " + ProcessHandle.current().pid());
+      CollectorRE.startEvent();
       }
       """;
     assertEquals(normalizeVariableNames(expectedCode), normalizeVariableNames(code));

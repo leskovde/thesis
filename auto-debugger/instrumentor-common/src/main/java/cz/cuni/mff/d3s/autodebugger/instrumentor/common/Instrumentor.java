@@ -1,9 +1,7 @@
 package cz.cuni.mff.d3s.autodebugger.instrumentor.common;
 
 import cz.cuni.mff.d3s.autodebugger.instrumentor.common.modelling.InstrumentationModel;
-
-import java.nio.file.Path;
-import java.util.List;
+import cz.cuni.mff.d3s.autodebugger.model.common.artifacts.InstrumentationResult;
 
 /**
  * Interface for generating instrumentation code from instrumentation models.
@@ -18,7 +16,7 @@ public interface Instrumentor {
      * that can be used for runtime analysis.
      *
      * @param model The instrumentation model containing instrumentation specifications
-     * @return List of paths to generated instrumentation artifacts
+     * @return InstrumentationResult describing produced artifacts and conventions
      */
-    List<Path> generateInstrumentation(InstrumentationModel model);
+    InstrumentationResult generateInstrumentation(InstrumentationModel model);
 }

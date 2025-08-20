@@ -2,12 +2,12 @@ package cz.cuni.mff.d3s.autodebugger.instrumentor.java;
 
 import cz.cuni.mff.d3s.autodebugger.instrumentor.common.Instrumentor;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.common.modelling.InstrumentationModel;
+import cz.cuni.mff.d3s.autodebugger.model.common.artifacts.InstrumentationResult;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -46,7 +46,7 @@ public class DiSLInstrumentor implements Instrumentor {
     private final String apiKey;
 
     @Override
-    public List<Path> generateInstrumentation(InstrumentationModel model) {
+    public InstrumentationResult generateInstrumentation(InstrumentationModel model) {
         // Determine temp directory for identifier mapping files; allow override for tests
         Path identifiersBaseDir = Optional.ofNullable(System.getenv("AUTODEBUGGER_IDENTIFIERS_DIR"))
                 .map(Path::of)
@@ -56,27 +56,31 @@ public class DiSLInstrumentor implements Instrumentor {
 
         // Ensure the Collector.jt template and CollectorRE.java are available in the output directory
         Path collectorTemplate = generatedCodeOutputDirectory.resolve("Collector.jt");
-        ensureCollectorTemplateExists(collectorTemplate);
-        ensureCollectorREExists(generatedCodeOutputDirectory.resolve("CollectorRE.java"));
+        copyResourceTo(collectorTemplate, "/templates/java/disl-analysis/Collector.jt");
+        copyResourceTo(generatedCodeOutputDirectory.resolve("CollectorRE.java"), "/templates/java/disl-analysis/CollectorRE.java");
 
         Path resultsBaseDir = Optional.ofNullable(System.getenv("AUTODEBUGGER_RESULTS_DIR"))
                 .map(Path::of)
                 .orElse(runConfiguration.getOutputDirectory());
-        var resultsListPath = ensureResultsListFileWithRunId(resultsBaseDir, model);
+        var resultsListPath = generateResultsListPath(resultsBaseDir);
         // No need to set a system property; analyzer will read from runConfiguration output directory
 
         // Extract minimal generation context from the model if possible
         String targetPackage = "";
         String targetClass = "";
         String targetMethod = "";
+        String targetReturn = "";
         try {
             if (model instanceof DiSLModel dislModel) {
                 var tm = dislModel.getTargetMethod();
                 targetPackage = tm.getPackageName();
                 targetClass = tm.getClassName();
                 targetMethod = tm.getSimpleSignature();
+                try { targetReturn = tm.getReturnType(); } catch (Exception ignored) { targetReturn = ""; }
             }
-        } catch (Exception ignore) {}
+        } catch (Exception ignore) {
+            log.warn("Failed to extract target method from model; skipping target metadata injection into Collector");
+        }
 
         templateHandler.transformFile(
                 collectorTemplate,
@@ -86,9 +90,16 @@ public class DiSLInstrumentor implements Instrumentor {
                 Pair.with("TARGET_PACKAGE", targetPackage),
                 Pair.with("TARGET_CLASS", targetClass),
                 Pair.with("TARGET_METHOD", targetMethod),
-                Pair.with("STRATEGY", strategyId != null ? strategyId : "trace-based-naive"));
-        var instrumentationJarPath = generateDiSLClass(model).flatMap(this::compileDiSLClass);
-        return List.of(instrumentationJarPath.orElseThrow());
+                Pair.with("TARGET_RETURN", targetReturn),
+                Pair.with("STRATEGY", strategyId != null ? strategyId : "trace-based-naive"),
+                Pair.with("TRACE_MODE", runConfiguration.getTraceMode().name().toLowerCase()));
+        var instrumentationJarPath = generateDiSLClass(model).flatMap(this::compileDiSLClass)
+                .orElseThrow();
+        return InstrumentationResult.builder()
+                .primaryArtifact(instrumentationJarPath)
+                .identifiersMappingPath(identifierMapping)
+                .resultsListPath(resultsListPath)
+                .build();
     }
 
     private Optional<Path> generateDiSLClass(InstrumentationModel model) {
@@ -102,151 +113,17 @@ public class DiSLInstrumentor implements Instrumentor {
         return compiler.compileDiSLClass(instrumentationSource);
     }
 
-    /**
-     * Ensures that the Collector.jt template file exists in the target location.
-     * If it doesn't exist, copies it from the analyzer-disl module or from resources.
-     */
-    private void ensureCollectorTemplateExists(Path targetTemplate) {
-        if (Files.exists(targetTemplate)) {
-            return; // Template already exists
-        }
 
-        try {
-            // First, try to copy from the analyzer-disl module (for production use)
-            Path sourceTemplate = Path.of("../analyzer-disl/src/main/java/cz/cuni/mff/d3s/autodebugger/analyzer/disl/Collector.jt");
-            if (Files.exists(sourceTemplate)) {
-                Files.createDirectories(targetTemplate.getParent());
-                Files.copy(sourceTemplate, targetTemplate);
-                log.info("Copied Collector.jt template from analyzer-disl module to: {}", targetTemplate);
-                return;
-            }
-
-            // If not found, try to load from resources (for test use)
-            try (var templateStream = getClass().getResourceAsStream("/Collector.jt")) {
-                if (templateStream != null) {
-                    Files.createDirectories(targetTemplate.getParent());
-                    Files.copy(templateStream, targetTemplate);
-                    log.info("Copied Collector.jt template from resources to: {}", targetTemplate);
-                    return;
-                }
-            }
-
-            // If still not found, create a minimal template
-            log.warn("Collector.jt template not found, creating minimal template at: {}", targetTemplate);
-            createMinimalCollectorTemplate(targetTemplate);
-
+    private void copyResourceTo(Path target, String resourcePath) {
+        try (var in = getClass().getResourceAsStream(resourcePath)) {
+            if (in == null) throw new RuntimeException("Missing resource: " + resourcePath);
+            Files.createDirectories(target.getParent());
+            Files.copy(in, target, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
-            log.error("Failed to ensure Collector.jt template exists", e);
-            throw new RuntimeException("Failed to ensure Collector.jt template exists", e);
+            throw new RuntimeException("Failed to copy resource: " + resourcePath + " to " + target, e);
         }
     }
 
-    /**
-     * Ensures that the CollectorRE.java file exists in the target location.
-     * If it doesn't exist, copies it from the analyzer-disl module.
-     */
-    private void ensureCollectorREExists(Path targetCollectorRE) {
-        if (Files.exists(targetCollectorRE)) {
-            return; // CollectorRE already exists
-        }
-
-        try {
-            // First, try to copy from the analyzer-disl module
-            Path sourceCollectorRE = Path.of("../analyzer-disl/src/main/java/cz/cuni/mff/d3s/autodebugger/analyzer/disl/CollectorRE.java");
-            if (Files.exists(sourceCollectorRE)) {
-                Files.createDirectories(targetCollectorRE.getParent());
-                Files.copy(sourceCollectorRE, targetCollectorRE);
-                log.info("Copied CollectorRE.java from analyzer-disl module to: {}", targetCollectorRE);
-                return;
-            }
-
-            // If not found, create a minimal CollectorRE for testing
-            log.warn("CollectorRE.java not found, creating minimal CollectorRE at: {}", targetCollectorRE);
-            createMinimalCollectorRE(targetCollectorRE);
-
-        } catch (IOException e) {
-            log.error("Failed to ensure CollectorRE.java exists", e);
-            throw new RuntimeException("Failed to ensure CollectorRE.java exists", e);
-        }
-    }
-
-    /**
-     * Creates a minimal CollectorRE.java file for testing purposes.
-     */
-    private void createMinimalCollectorRE(Path targetCollectorRE) throws IOException {
-        String minimalCollectorRE = """
-            import ch.usi.dag.dislre.REDispatch;
-
-            public class CollectorRE {
-              private static final String messageFormat = "[%s]: %s";
-              private static final String processName = "Sending process";
-
-              private static short intId = REDispatch.registerMethod("Collector.collectInt");
-
-              public static void collectInt(final int slot, final int i) {
-                printPid();
-                REDispatch.analysisStart(intId);
-                REDispatch.sendInt(slot);
-                REDispatch.sendInt(i);
-                REDispatch.analysisEnd();
-              }
-
-              private static void printPid() {
-                System.out.println(
-                    String.format(messageFormat, processName, "PID: " + ProcessHandle.current().pid()));
-              }
-            }
-            """;
-        Files.createDirectories(targetCollectorRE.getParent());
-        Files.writeString(targetCollectorRE, minimalCollectorRE);
-    }
-
-    /**
-     * Creates a minimal Collector.jt template for testing purposes.
-     */
-    private void createMinimalCollectorTemplate(Path targetTemplate) throws IOException {
-        String minimalTemplate = """
-            import ch.usi.dag.dislreserver.remoteanalysis.RemoteAnalysis;
-            import ch.usi.dag.dislreserver.shadow.ShadowObject;
-            import cz.cuni.mff.d3s.autodebugger.model.java.Trace;
-            import cz.cuni.mff.d3s.autodebugger.testgenerator.java.trace.NaiveTraceBasedGenerator;
-            import java.nio.file.Path;
-
-            public class Collector extends RemoteAnalysis {
-              private final String messageFormat = "[%s]: %s";
-              private final String processName = "Receiving process";
-              private final String identifierMappingFilePath = "${PATH}";
-
-              private Trace trace = new Trace();
-
-              public void collectInt(final int slot, final int i) {
-                printPid();
-                trace.addIntValue(slot, i);
-                System.out.println("Collected int: " + i + " from slot: " + slot);
-              }
-
-              private void printPid() {
-                System.out.println(
-                    String.format(messageFormat, processName, "PID: " + ProcessHandle.current().pid()));
-              }
-
-              @Override
-              public void atExit() {
-                System.out.println(String.format(messageFormat, processName, "Exiting analysis..."));
-                trace.printSlotValues();
-                NaiveTraceBasedGenerator generator = new NaiveTraceBasedGenerator(Path.of(identifierMappingFilePath));
-                generator.generateTests(trace);
-              }
-
-              @Override
-              public void objectFree(final ShadowObject netRef) {
-                System.out.println("Object free for id " + netRef.getId());
-              }
-            }
-            """;
-        Files.createDirectories(targetTemplate.getParent());
-        Files.writeString(targetTemplate, minimalTemplate);
-    }
 
     private Path serializeIdentifiers(Path outputDirectory) {
         Map<Integer, ExportableValue> identifierMapping = new HashMap<>();
@@ -276,7 +153,7 @@ public class DiSLInstrumentor implements Instrumentor {
         }
     }
 
-    private Path ensureResultsListFileWithRunId(Path outputDirectory, InstrumentationModel model) {
+    private Path generateResultsListPath(Path outputDirectory) {
         try {
             if (!Files.exists(outputDirectory)) {
                 Files.createDirectories(outputDirectory);
@@ -284,8 +161,7 @@ public class DiSLInstrumentor implements Instrumentor {
             String runId = java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss-SSS")
                     .format(java.time.LocalDateTime.now()) + "-" + java.util.UUID.randomUUID();
             String fileName = String.format("generated-tests-%s.lst", runId);
-            Path resultsFile = outputDirectory.resolve(fileName);
-            return resultsFile;
+            return outputDirectory.resolve(fileName);
         } catch (IOException e) {
             log.error("Failed to create results list file", e);
             throw new RuntimeException(e);

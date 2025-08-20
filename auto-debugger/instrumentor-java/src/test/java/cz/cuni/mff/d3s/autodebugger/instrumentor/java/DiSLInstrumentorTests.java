@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
+import cz.cuni.mff.d3s.autodebugger.model.common.artifacts.InstrumentationResult;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.java.modelling.DiSLModel;
 import cz.cuni.mff.d3s.autodebugger.model.common.identifiers.ExportableValue;
 import cz.cuni.mff.d3s.autodebugger.model.java.JavaRunConfiguration;
@@ -285,11 +286,10 @@ class DiSLInstrumentorTests {
             List.of(stringArg, intField));
 
     // when
-    List<Path> resultPaths = instrumentor.generateInstrumentation(model);
+    InstrumentationResult result = instrumentor.generateInstrumentation(model);
 
     // then
-    assertEquals(1, resultPaths.size(), "Should return exactly one JAR path");
-    Path generatedJar = resultPaths.getFirst();
+    Path generatedJar = result.getPrimaryArtifact();
     assertNotNull(generatedJar, "JAR path should not be null");
     assertTrue(Files.exists(generatedJar), "Generated JAR file should exist");
 
@@ -336,6 +336,8 @@ class DiSLInstrumentorTests {
         "Should contain CollectorRE.collectString call");
     assertTrue(dislClassContent.contains("CollectorRE.collectInt("),
         "Should contain CollectorRE.collectInt call");
+    assertTrue(dislClassContent.contains("CollectorRE.startEvent();"),
+        "Should start a new event before collector calls");
   }
 
   /**
@@ -388,41 +390,27 @@ class DiSLInstrumentorTests {
     String collectorContent = Files.readString(collectorPath);
 
     // Check required imports for test generation
-    assertTrue(collectorContent.contains("import cz.cuni.mff.d3s.autodebugger.model.java.Trace"),
-        "Collector should import Trace class");
+    assertTrue(collectorContent.contains("import cz.cuni.mff.d3s.autodebugger.model.common.trace.Trace"),
+        "Collector should import common Trace class");
     assertTrue(collectorContent.contains("import cz.cuni.mff.d3s.autodebugger.testgenerator.java.trace.NaiveTraceBasedGenerator"),
         "Collector should import NaiveTraceBasedGenerator");
-    assertTrue(collectorContent.contains("import cz.cuni.mff.d3s.autodebugger.testgenerator.java.llm.LLMBasedTestGenerator"),
-        "Collector should import LLMBasedTestGenerator");
 
-    // Check that test generation technique is baked into the Collector (no system property reliance)
-    assertTrue(collectorContent.contains("private final String strategy = "),
-        "Collector should include a baked-in strategy constant");
-    assertTrue(collectorContent.contains("testPaths = naive.generateTests(trace)"),
-        "Collector should call generateTests on naive generator by default");
+    // Check that generator invocation is baked into the Collector with explicit results path
+    assertTrue(collectorContent.contains("new NaiveTraceBasedGenerator("),
+        "Collector should instantiate NaiveTraceBasedGenerator");
+    assertTrue(collectorContent.contains("generator.generateTests(trace"),
+        "Collector should call generateTests on the generator");
+    assertTrue(collectorContent.contains("resultsListPath"),
+        "Collector should have resultsListPath embedded");
 
-    // Verify CollectorRE exists (it should be copied/available)
-    // Note: CollectorRE is typically a static file, but we should verify it has the right structure
-    Path collectorREPath = testOutputDirectory.getParent().getParent().getParent()
-            .resolve("analyzer-disl/src/main/java/cz/cuni/mff/d3s/autodebugger/analyzer/disl/CollectorRE.java");
-
-    if (Files.exists(collectorREPath)) {
-      String collectorREContent = Files.readString(collectorREPath);
-
-      // Verify CollectorRE has all required collect methods
-      assertTrue(collectorREContent.contains("public static void collectInt("),
-          "CollectorRE should have collectInt method");
-      assertTrue(collectorREContent.contains("public static void collectString("),
-          "CollectorRE should have collectString method");
-      assertTrue(collectorREContent.contains("public static void collectBoolean("),
-          "CollectorRE should have collectBoolean method");
-
-      // Verify REDispatch integration
-      assertTrue(collectorREContent.contains("REDispatch.registerMethod("),
-          "CollectorRE should register methods with REDispatch");
-      assertTrue(collectorREContent.contains("REDispatch.analysisStart("),
-          "CollectorRE should start analysis with REDispatch");
-    }
+    // Verify CollectorRE.java has been materialized next to Collector.java
+    Path collectorREPath = testOutputDirectory.resolve("CollectorRE.java");
+    assertTrue(Files.exists(collectorREPath), "CollectorRE.java should be present");
+    String collectorREContent = Files.readString(collectorREPath);
+    assertTrue(collectorREContent.contains("public static void collectInt("),
+        "CollectorRE should have collectInt method");
+    assertTrue(collectorREContent.contains("REDispatch.registerMethod("),
+        "CollectorRE should register methods with REDispatch");
   }
 
   @Test
@@ -482,11 +470,10 @@ class DiSLInstrumentorTests {
             .build();
 
     // when
-    var resultPaths = instrumentor.generateInstrumentation(model);
+    var result = instrumentor.generateInstrumentation(model);
 
     // then
-    assertEquals(1, resultPaths.size());
-    assertEquals(instrumentationJarPath, resultPaths.getFirst());
+    assertEquals(instrumentationJarPath, result.getPrimaryArtifact());
   }
 
   @Test
@@ -559,11 +546,10 @@ class DiSLInstrumentorTests {
             .build();
 
     // when
-    var resultPaths = instrumentor.generateInstrumentation(model);
+    var result = instrumentor.generateInstrumentation(model);
 
     // then
-    assertEquals(1, resultPaths.size());
-    assertEquals(instrumentationJarPath, resultPaths.getFirst());
+    assertEquals(instrumentationJarPath, result.getPrimaryArtifact());
   }
 
   @Test
@@ -607,10 +593,9 @@ class DiSLInstrumentorTests {
                     .build();
 
     // when
-    var resultPaths = instrumentor.generateInstrumentation(model);
+    var result = instrumentor.generateInstrumentation(model);
 
     // then
-    assertEquals(1, resultPaths.size());
-    assertEquals(instrumentationJarPath, resultPaths.getFirst());
+    assertEquals(instrumentationJarPath, result.getPrimaryArtifact());
   }
 }

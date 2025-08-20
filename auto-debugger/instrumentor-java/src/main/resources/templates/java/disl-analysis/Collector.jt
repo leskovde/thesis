@@ -30,6 +30,10 @@ public class Collector extends RemoteAnalysis {
   private final TemporalTrace temporalTrace = new TemporalTrace();
   private int currentEventIndex = 0;
 
+  private void printPid() {
+    System.out.println(String.format(messageFormat, processName, String.format("PID: %s", (long) ProcessHandle.current().pid())));
+  }
+
   public void startEvent() {
     if ("temporal".equalsIgnoreCase(traceMode)) {
       currentEventIndex++;
@@ -106,8 +110,9 @@ public class Collector extends RemoteAnalysis {
           for (var f : files) {
             Files.writeString(Path.of(resultsListPath), f.toAbsolutePath().toString() + System.lineSeparator(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
           }
-      } catch (Exception e) {
-        System.err.println(String.format(messageFormat, processName, "Failed to write results: " + e.getMessage()));
+        } catch (Exception e) {
+          System.err.println(String.format(messageFormat, processName, "Failed to write results: " + e.getMessage()));
+        }
       }
     }
   }
@@ -116,25 +121,6 @@ public class Collector extends RemoteAnalysis {
     var outDir = Path.of(resultsListPath).getParent();
     return TestGenerationContextFactory.createFromStrings(
       targetPackage, targetClass, targetMethod, targetReturn, outDir);
-  }
-
-          }
-        } catch (Exception e) {
-          System.err.println(String.format(messageFormat, processName, "Failed to write results: " + e.getMessage()));
-        }
-      }
-    }
-  }
-
-  @Override
-  public void objectFree(final ShadowObject netRef) {
-    printPid();
-    System.out.println(String.format(messageFormat, processName, "Object free"));
-  }
-
-  private void printPid() {
-    String pid = java.lang.management.ManagementFactory.getRuntimeMXBean().getName().split("@")[0];
-    System.out.println(String.format(messageFormat, processName, String.format("PID: %s", pid)));
   }
 }
 
