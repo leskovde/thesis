@@ -41,10 +41,7 @@
                 factoryClass="cz.cuni.mff.d3s.autodebugger.intellijplugin.factories.DebuggerToolWindowFactory"/>
     
     <!-- Project-level services -->
-    <projectService serviceInterface="cz.cuni.mff.d3s.autodebugger.intellijplugin.services.InstrumentationService"
-                    serviceImplementation="cz.cuni.mff.d3s.autodebugger.intellijplugin.services.InstrumentationService"/>
-    <projectService serviceInterface="cz.cuni.mff.d3s.autodebugger.intellijplugin.services.RunConfigurationManager"
-                    serviceImplementation="cz.cuni.mff.d3s.autodebugger.intellijplugin.services.RunConfigurationManager"/>
+    <!-- InstrumentationService removed; orchestration runs via runner module directly -->
     <projectService serviceInterface="cz.cuni.mff.d3s.autodebugger.intellijplugin.services.SettingsService"
                     serviceImplementation="cz.cuni.mff.d3s.autodebugger.intellijplugin.services.SettingsService"/>
     <projectService serviceInterface="cz.cuni.mff.d3s.autodebugger.intellijplugin.services.OutputService"

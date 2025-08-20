@@ -1,13 +1,11 @@
 package cz.cuni.mff.d3s.autodebugger.intellijplugin.services;
 
 import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase5;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.*;
 
 /**
  * Test class for SettingsService functionality.
@@ -16,12 +14,12 @@ public class SettingsServiceTest extends LightJavaCodeInsightFixtureTestCase5 {
 
     private SettingsService settingsService;
 
-    @BeforeEach
-    void setUp() {
+    @org.junit.Before
+    public void setUp() {
         settingsService = SettingsService.getInstance(getFixture().getProject());
     }
 
-    @Test
+    @org.junit.Test
     public void givenSettingsService_whenPerformingBasicOperations_thenWorksCorrectly() {
         
         // Test setting and getting a single value
@@ -50,7 +48,7 @@ public class SettingsServiceTest extends LightJavaCodeInsightFixtureTestCase5 {
         assertEquals("secret-key", allValues.get("anthropic.key"));
     }
 
-    @Test
+    @org.junit.Test
     public void givenEmptyAndNullValues_whenStoringAndRetrieving_thenHandlesCorrectly() {
         
         // Test null value

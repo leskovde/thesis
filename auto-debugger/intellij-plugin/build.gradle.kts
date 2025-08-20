@@ -17,15 +17,21 @@ repositories {
 }
 
 dependencies {
+  implementation(project(mapOf("path" to ":model-common")))
   implementation(project(mapOf("path" to ":model-java")))
   implementation(project(mapOf("path" to ":instrumentor-common")))
   implementation(project(mapOf("path" to ":runner")))
+  implementation(project(mapOf("path" to ":test-runner-common")))
 
-  testImplementation(libs.bundles.junit)
-  testImplementation(libs.opentest4j)
-  testImplementation(libs.mockito)
-
+  // Use IntelliJ Platform provided test frameworks (JUnit5/Platform/Plugin)
+  // Avoid bringing additional JUnit engine/platform versions that can conflict with the platform
+  // Provide only compile-time APIs for JUnit so tests compile; engine is provided by the platform
+  testCompileOnly(libs.junit.api)
+  testCompileOnly(libs.junit.params)
+  // JUnit4 API for compile; runtime also needed due to IntelliJ test fixtures
+  testCompileOnly("junit:junit:4.13.2")
   testRuntimeOnly("junit:junit:4.13.2")
+  testImplementation(libs.mockito)
 
   intellijPlatform {
     intellijIdeaCommunity("2025.1")

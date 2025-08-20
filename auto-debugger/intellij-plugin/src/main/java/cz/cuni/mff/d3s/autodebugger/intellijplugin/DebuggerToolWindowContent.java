@@ -3,13 +3,14 @@ package cz.cuni.mff.d3s.autodebugger.intellijplugin;
 import com.intellij.execution.RunManager;
 import com.intellij.execution.configurations.RunConfiguration;
 import com.intellij.openapi.options.ShowSettingsUtil;
+import com.intellij.execution.application.ApplicationConfiguration;
+import com.intellij.execution.jar.JarApplicationConfiguration;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.Messages;
-import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBCheckBox;
 import com.intellij.util.ui.JBUI;
@@ -18,13 +19,14 @@ import com.intellij.util.textCompletion.TextFieldWithCompletion;
 import com.intellij.util.ui.FormBuilder;
 import com.intellij.psi.*;
 import cz.cuni.mff.d3s.autodebugger.intellijplugin.factories.DebuggerToolWindowFactory;
-import cz.cuni.mff.d3s.autodebugger.intellijplugin.model.ApplicationRunConfiguration;
 import cz.cuni.mff.d3s.autodebugger.intellijplugin.model.MethodValidationResult;
-import cz.cuni.mff.d3s.autodebugger.intellijplugin.services.InstrumentationService;
 import cz.cuni.mff.d3s.autodebugger.intellijplugin.services.OutputService;
+import cz.cuni.mff.d3s.autodebugger.intellijplugin.services.SettingsService;
 import cz.cuni.mff.d3s.autodebugger.intellijplugin.utils.MethodCompletionProvider;
 import cz.cuni.mff.d3s.autodebugger.intellijplugin.utils.MethodValidator;
+import cz.cuni.mff.d3s.autodebugger.intellijplugin.utils.RunnerArgumentsBuilder;
 import cz.cuni.mff.d3s.autodebugger.runner.args.Arguments;
+import cz.cuni.mff.d3s.autodebugger.runner.orchestrator.OrchestratorFactory;
 import cz.cuni.mff.d3s.autodebugger.runner.strategies.TestGenerationStrategy;
 import cz.cuni.mff.d3s.autodebugger.runner.strategies.TestGenerationStrategyName;
 import cz.cuni.mff.d3s.autodebugger.runner.strategies.TestGenerationStrategyProvider;
@@ -32,11 +34,9 @@ import cz.cuni.mff.d3s.autodebugger.runner.strategies.TestGenerationStrategyProv
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Main content panel for the auto-debugger IntelliJ plugin tool window.
@@ -66,6 +66,8 @@ public class DebuggerToolWindowContent {
 
     // Selected method information
     private PsiMethod selectedMethod = null;
+    // Selected IntelliJ run configuration
+    private RunConfiguration selectedIntellijRunConfig = null;
 
     // State management for checkboxes
     private final Map<String, Boolean> fieldSelectionState = new HashMap<>();
@@ -75,8 +77,17 @@ public class DebuggerToolWindowContent {
     // Method validation logic
     private final MethodValidator methodValidator;
 
+    // Orchestrator runner indirection to enable unit testing
+    private final OrchestratorRunner orchestratorRunner;
+
     public DebuggerToolWindowContent(Project project) {
+        this(project, new OrchestratorRunner());
+    }
+
+    // Visible for tests
+    DebuggerToolWindowContent(Project project, OrchestratorRunner runner) {
         this.project = project;
+        this.orchestratorRunner = runner;
         this.methodValidator = new MethodValidator(project);
 
         // Initialize method completion field
@@ -225,12 +236,37 @@ public class DebuggerToolWindowContent {
                 LOG.debug("Added strategy: " + strategy.getDisplayName());
             }
 
-            // Select the default strategy
-            TestGenerationStrategy defaultStrategy = TestGenerationStrategyProvider.getDefaultStrategy();
-            if (defaultStrategy != null) {
-                testGenerationStrategyComboBox.setSelectedItem(defaultStrategy);
-                LOG.info("Selected default strategy: " + defaultStrategy.getDisplayName());
+            // Restore previously selected strategy if present
+            var settings = SettingsService.getInstance(project);
+            String savedId = settings.getConfigurationValue("strategy.id");
+            if (savedId != null && !savedId.isBlank()) {
+                for (int i = 0; i < testGenerationStrategyComboBox.getItemCount(); i++) {
+                    TestGenerationStrategy s = testGenerationStrategyComboBox.getItemAt(i);
+                    if (s != null && savedId.equals(s.getId())) {
+                        testGenerationStrategyComboBox.setSelectedItem(s);
+                        LOG.info("Restored saved strategy: " + s.getDisplayName());
+                        break;
+                    }
+                }
             }
+
+            // If nothing selected yet, select the default strategy
+            if (testGenerationStrategyComboBox.getSelectedItem() == null) {
+                TestGenerationStrategy defaultStrategy = TestGenerationStrategyProvider.getDefaultStrategy();
+                if (defaultStrategy != null) {
+                    testGenerationStrategyComboBox.setSelectedItem(defaultStrategy);
+                    LOG.info("Selected default strategy: " + defaultStrategy.getDisplayName());
+                }
+            }
+
+            // Persist selection on change
+            testGenerationStrategyComboBox.addActionListener(ev -> {
+                Object sel = testGenerationStrategyComboBox.getSelectedItem();
+                if (sel instanceof TestGenerationStrategy tgs) {
+                    settings.setConfigurationValue("strategy.id", tgs.getId());
+                    LOG.info("Persisted strategy selection: " + tgs.getId());
+                }
+            });
 
         } catch (Exception e) {
             LOG.error("Failed to load test generation strategies", e);
@@ -313,7 +349,8 @@ public class DebuggerToolWindowContent {
         runAnalysisButton.setEnabled(hasConfiguration && hasValidMethod);
     }
 
-    private void showAdditionalConfig(PsiMethod method) {
+    // Visible for tests
+    void showAdditionalConfig(PsiMethod method) {
         LOG.info("Showing additional configuration for method: " + method.getName());
 
         // Clear existing content
@@ -516,7 +553,10 @@ public class DebuggerToolWindowContent {
         runAnalysisButton.addActionListener(this::onRunAnalysis);
 
         // Add combo box listener to update run button state
-        runConfigComboBox.addActionListener(e -> updateRunButtonState());
+        runConfigComboBox.addActionListener(e -> {
+            selectedIntellijRunConfig = (RunConfiguration) runConfigComboBox.getSelectedItem();
+            updateRunButtonState();
+        });
 
         // Add focus listener to method field for validation
         targetMethodField.addFocusListener(new java.awt.event.FocusAdapter() {
@@ -583,121 +623,186 @@ public class DebuggerToolWindowContent {
 
         LOG.info("Starting analysis with strategy: " + selectedStrategy.getDisplayName());
 
-        // Create auto-debugger run configuration
-        ApplicationRunConfiguration autoDebuggerConfig =
+        // Only JAR Application run configurations are supported in the current iteration
+        if (!(selectedConfig instanceof JarApplicationConfiguration)) {
+            Messages.showErrorDialog(project,
+                    "Please select a 'JAR Application' run configuration (Run/Debug Configurations -> JAR Application).\n" +
+                    "Application configurations without a JAR are not supported yet.",
+                    "Unsupported Run Configuration");
+            return;
+        }
+
+        // Create simplified run configuration from IntelliJ run configuration
+        SimpleRunConfig autoDebuggerConfig =
                 createAutoDebuggerConfiguration(selectedConfig, methodSignature.trim());
 
+        // Cache field for downstream extraction
+        this.selectedIntellijRunConfig = selectedConfig;
         // Run the analysis with the selected strategy
         runAnalysis(autoDebuggerConfig, selectedStrategy);
     }
 
-    private ApplicationRunConfiguration createAutoDebuggerConfiguration(
+    private static class SimpleRunConfig {
+        private final String name;
+        private final String description;
+        private final String targetMethodReference;
+        private final java.nio.file.Path applicationJarPath;
+        private final java.util.List<String> programArguments;
+        private final java.nio.file.Path workingDirectory;
+        SimpleRunConfig(String name, String description, String targetMethodReference,
+                        java.nio.file.Path applicationJarPath,
+                        java.util.List<String> programArguments,
+                        java.nio.file.Path workingDirectory) {
+            this.name = name;
+            this.description = description;
+            this.targetMethodReference = targetMethodReference;
+            this.applicationJarPath = applicationJarPath;
+            this.programArguments = programArguments;
+            this.workingDirectory = workingDirectory;
+        }
+        String getName() { return name; }
+        String getDescription() { return description; }
+        String getTargetMethodReference() { return targetMethodReference; }
+        java.nio.file.Path getApplicationJarPath() { return applicationJarPath; }
+        java.util.List<String> getProgramArguments() { return programArguments; }
+        java.nio.file.Path getWorkingDirectory() { return workingDirectory; }
+    }
+
+    private SimpleRunConfig createAutoDebuggerConfiguration(
             RunConfiguration intellijConfig, String targetMethodSignature) {
 
         String configName = "Auto-Debug: " + intellijConfig.getName();
-        ApplicationRunConfiguration config =
-                new ApplicationRunConfiguration(configName);
+        String description = "Auto-generated configuration for " + targetMethodSignature;
+        java.nio.file.Path workingDir = null;
+        java.nio.file.Path jar = null;
+        java.util.List<String> args = java.util.List.of();
 
-        config.setDescription("Auto-generated configuration for " + targetMethodSignature);
-        config.setTargetMethodReference(targetMethodSignature);
-
-        // Set required fields with mock/default values for now
-        // TODO: Extract actual information from IntelliJ run configuration
-        config.setApplicationJarPath(java.nio.file.Path.of("target/application.jar"));
-        config.setMainClass("com.example.MainClass");
-
-        // Set optional fields
-        config.setWorkingDirectory(java.nio.file.Path.of(project.getBasePath() != null ? project.getBasePath() : "."));
-
-        // Extract class name from method signature for main class if possible
-        if (targetMethodSignature.contains(".")) {
-            String className = targetMethodSignature.substring(0, targetMethodSignature.lastIndexOf('.'));
-            if (className.contains(".")) {
-                // If it contains package, use it as is
-                config.setMainClass(className.substring(0, className.lastIndexOf('.')));
-            } else {
-                // Simple class name
-                config.setMainClass(className);
+        // Extract data from IntelliJ RunConfiguration if supported
+        try {
+            if (intellijConfig instanceof ApplicationConfiguration appCfg) {
+                String params = appCfg.getProgramParameters();
+                if (params != null && !params.isBlank()) {
+                    args = java.util.Arrays.stream(params.trim().split("\\s+")).toList();
+                }
+                var wd = appCfg.getWorkingDirectory();
+                if (wd != null && !wd.isBlank()) { workingDir = java.nio.file.Path.of(wd); }
+            } else if (intellijConfig instanceof JarApplicationConfiguration jarCfg) {
+                String params = jarCfg.getProgramParameters();
+                if (params != null && !params.isBlank()) {
+                    args = java.util.Arrays.stream(params.trim().split("\\s+")).toList();
+                }
+                var wd = jarCfg.getWorkingDirectory();
+                if (wd != null && !wd.isBlank()) { workingDir = java.nio.file.Path.of(wd); }
+                var jarPath = jarCfg.getJarPath();
+                if (jarPath != null && !jarPath.isBlank()) { jar = java.nio.file.Path.of(jarPath); }
             }
+        } catch (Throwable t) {
+            LOG.warn("Failed to extract IntelliJ run configuration details", t);
         }
 
-        return config;
+        // Ensure working directory
+        if (workingDir == null) {
+            workingDir = java.nio.file.Path.of(project.getBasePath() != null ? project.getBasePath() : ".");
+        }
+
+        return new SimpleRunConfig(configName, description, targetMethodSignature, jar, args, workingDir);
     }
 
-    private void runAnalysis(ApplicationRunConfiguration config, TestGenerationStrategy strategy) {
+    private void runAnalysis(SimpleRunConfig config, TestGenerationStrategy strategy) {
+        // Build runner Arguments from IntelliJ + settings and invoke orchestrator
         OutputService outputService = OutputService.getInstance(project);
+        try {
+            var args = buildRunnerArguments(config, strategy);
+            // Run orchestrator in pooled thread, and stream per-phase updates
+            ApplicationManager.getApplication().executeOnPooledThread(() -> runOrchestrator(args, outputService));
+        } catch (Exception ex) {
+            outputService.printError(OutputService.OutputType.TOOL_OUTPUT, "Failed to prepare analysis: " + ex.getMessage());
+            LOG.error("Failed to prepare analysis", ex);
+        }
+    }
 
-        // Clear previous output and start new analysis
-        outputService.clear(OutputService.OutputType.TOOL_OUTPUT);
-        outputService.print(OutputService.OutputType.TOOL_OUTPUT, "Starting analysis...");
-        outputService.print(OutputService.OutputType.TOOL_OUTPUT, "Selected test generation strategy: " + strategy.getDisplayName());
-        outputService.print(OutputService.OutputType.TOOL_OUTPUT, "Strategy description: " + strategy.getDescription());
-
-        runAnalysisButton.setEnabled(false);
-
-        ApplicationManager.getApplication().executeOnPooledThread(() -> {
-            try {
-                // Start instrumentation phase
-                outputService.print(OutputService.OutputType.TOOL_OUTPUT, "Phase 1: Running instrumentation...");
-
-                // TODO: Arguments arguments = new Arguments();
-                // TODO: Runner.run();
-
-                InstrumentationService service = InstrumentationService.getInstance(project);
-                service.runInstrumentation(config, line ->
-                    outputService.print(OutputService.OutputType.TOOL_OUTPUT, line))
-                        .whenComplete((result, throwable) -> {
-                            SwingUtilities.invokeLater(() -> {
-                                runAnalysisButton.setEnabled(true);
-                                if (throwable != null) {
-                                    outputService.printError(OutputService.OutputType.TOOL_OUTPUT,
-                                        "Analysis failed: " + throwable.getMessage());
-                                    LOG.error("Analysis failed", throwable);
-                                } else {
-                                    outputService.print(OutputService.OutputType.TOOL_OUTPUT,
-                                        "Instrumentation completed successfully!");
-
-                                    if (result != null && !result.isEmpty()) {
-                                        outputService.print(OutputService.OutputType.TOOL_OUTPUT,
-                                            "Generated files: " + result.stream()
-                                                .map(Path::toString)
-                                                .collect(Collectors.joining(", ")));
-                                    }
-
-                                    // Start application run phase
-                                    runApplicationAnalysis(config, outputService);
-
-                                    // Start test generation and execution phase
-                                    runTestGeneration(config, strategy, outputService);
-                                }
-                            });
-                        });
-            } catch (Exception ex) {
-                SwingUtilities.invokeLater(() -> {
-                    runAnalysisButton.setEnabled(true);
-                    outputService.printError(OutputService.OutputType.TOOL_OUTPUT,
-                        "Failed to start analysis: " + ex.getMessage());
-                    LOG.error("Failed to start analysis", ex);
-                });
+    private Arguments buildRunnerArguments(SimpleRunConfig config, TestGenerationStrategy strategy) {
+        // Collect settings from SettingsService
+        var settings = SettingsService.getInstance(project);
+        String dislHome = settings.getConfigurationValue("disl.path");
+        String outputDir = settings.getConfigurationValue("output.directory");
+        String apiKey = settings.getConfigurationValue("anthropic.key");
+        if (outputDir == null || outputDir.isBlank()) {
+            outputDir = System.getProperty("user.home") + "/auto-debugger-output";
+        }
+        // Target values
+        List<String> params = selectedMethod != null ? buildTargetParametersForRunner(selectedMethod) : java.util.List.of();
+        List<String> fields = selectedMethod != null ? buildTargetFieldsForRunner(selectedMethod) : java.util.List.of();
+        // Extract classpath/runtime args from the selected IntelliJ run configuration when possible
+        java.util.ArrayList<String> cp = new java.util.ArrayList<>();
+        java.util.List<String> runtimeArgs = config.getProgramArguments();
+        try {
+            if (selectedIntellijRunConfig instanceof JarApplicationConfiguration jarCfg) {
+                String jarPath = jarCfg.getJarPath();
+                if (jarPath != null && !jarPath.isBlank()) {
+                    // Include application JAR on classpath as a safe default; runner can deduplicate if needed
+                    cp.add(jarPath);
+                }
+                String programParams = jarCfg.getProgramParameters();
+                if (programParams != null && !programParams.isBlank()) {
+                    runtimeArgs = java.util.Arrays.stream(programParams.trim().split("\\s+")).toList();
+                }
             }
-        });
+        } catch (Throwable t) {
+            LOG.warn("Failed to extract classpath/runtime args from run configuration", t);
+        }
+        // Build arguments
+        return RunnerArgumentsBuilder.forJava(
+            config.getApplicationJarPath() != null ? config.getApplicationJarPath().toString() : null,
+            project.getBasePath() != null ? project.getBasePath() : ".",
+            dislHome,
+            outputDir,
+            config.getTargetMethodReference(),
+            params,
+            fields,
+            runtimeArgs,
+            cp,
+            strategy.getId(),
+            apiKey
+        );
+    }
+
+    private void runOrchestrator(Arguments args, OutputService outputService) {
+        runAnalysisButton.setEnabled(false);
+        try {
+            outputService.clear(OutputService.OutputType.TOOL_OUTPUT);
+            outputService.print(OutputService.OutputType.TOOL_OUTPUT, "Phase 0: Preparing orchestrator...");
+            var orchestrator = OrchestratorFactory.create(args);
+            orchestratorRunner.run(orchestrator, outputService);
+        } catch (Exception ex) {
+            outputService.printError(OutputService.OutputType.TOOL_OUTPUT, "Analysis failed: " + ex.getMessage());
+            LOG.error("Orchestrator run failed", ex);
+        } finally {
+            SwingUtilities.invokeLater(() -> runAnalysisButton.setEnabled(true));
+        }
+
+        // Legacy simulated flows are no longer used once real orchestration is wired
+        /* previous simulated phases removed */
     }
 
     /**
      * Simulates running the instrumented application and collecting runtime data.
      */
-    private void runApplicationAnalysis(ApplicationRunConfiguration config, OutputService outputService) {
+    @Deprecated
+    private void runApplicationAnalysis(SimpleRunConfig config, OutputService outputService) {
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
             try {
                 outputService.clear(OutputService.OutputType.ANALYSIS_RUN);
                 outputService.print(OutputService.OutputType.ANALYSIS_RUN, "Phase 2: Running instrumented application...");
-                outputService.print(OutputService.OutputType.ANALYSIS_RUN, "Command: java -javaagent:instrumentation.jar " + config.getMainClass());
+                outputService.print(OutputService.OutputType.ANALYSIS_RUN, "Command: java -javaagent:instrumentation.jar");
                 outputService.print(OutputService.OutputType.ANALYSIS_RUN, "");
 
                 // Simulate application startup
                 Thread.sleep(1000);
                 outputService.print(OutputService.OutputType.ANALYSIS_RUN, "Application started successfully");
                 outputService.print(OutputService.OutputType.ANALYSIS_RUN, "Collecting runtime data for method: " + config.getTargetMethodReference());
+
+
 
                 // Simulate method execution and data collection
                 Thread.sleep(2000);
@@ -719,7 +824,8 @@ public class DebuggerToolWindowContent {
     /**
      * Simulates generating and running unit tests based on collected data.
      */
-    private void runTestGeneration(ApplicationRunConfiguration config, TestGenerationStrategy strategy, OutputService outputService) {
+    @Deprecated
+    private void runTestGeneration(SimpleRunConfig config, TestGenerationStrategy strategy, OutputService outputService) {
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
             try {
                 // Wait a bit for application analysis to start
@@ -810,4 +916,71 @@ public class DebuggerToolWindowContent {
                 break;
         }
     }
+
+    /**
+     * Builds target parameter descriptors in the format expected by the runner (slot:type)
+     * using current selection state. Missing entries default to selected=true for parameters.
+     */
+    public List<String> buildTargetParametersForRunner(PsiMethod method) {
+        java.util.ArrayList<String> result = new java.util.ArrayList<>();
+        PsiParameter[] parameters = method.getParameterList().getParameters();
+        for (int i = 0; i < parameters.length; i++) {
+
+
+
+            PsiParameter p = parameters[i];
+            String key = getParameterKey(p, i);
+            boolean selected = parameterSelectionState.getOrDefault(key, true);
+            if (selected) {
+                String type = p.getType().getCanonicalText();
+                result.add(i + ":" + type);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Builds target field descriptors in the format expected by the runner (type:name)
+     * using current selection state. Missing entries default to selected=false for fields.
+     */
+    public List<String> buildTargetFieldsForRunner(PsiMethod method) {
+        java.util.ArrayList<String> result = new java.util.ArrayList<>();
+        PsiClass containingClass = method.getContainingClass();
+        if (containingClass == null) { return result; }
+        for (PsiField field : containingClass.getAllFields()) {
+            if (!shouldShowField(field)) { continue; }
+            String key = getFieldKey(field);
+            boolean selected = fieldSelectionState.getOrDefault(key, false);
+            if (selected) {
+                String type = field.getType().getCanonicalText();
+                result.add(type + ":" + field.getName());
+            }
+        }
+        return result;
+    }
+
+    // Testing helpers (package-private) to modify selection in tests without UI interaction
+    void setFieldSelectedForTesting(String fieldKey, boolean selected) {
+        fieldSelectionState.put(fieldKey, selected);
+    }
+    void setParameterSelectedForTesting(String parameterKey, boolean selected) {
+        parameterSelectionState.put(parameterKey, selected);
+    }
+    void setSelectedIntellijRunConfigForTesting(RunConfiguration cfg) {
+        this.selectedIntellijRunConfig = cfg;
+    }
+    cz.cuni.mff.d3s.autodebugger.runner.args.Arguments buildRunnerArgumentsForTesting(
+            String appJar,
+            java.util.List<String> programArgs,
+            String methodRef,
+            TestGenerationStrategy strategy) {
+        java.nio.file.Path wd = java.nio.file.Path.of(project.getBasePath() != null ? project.getBasePath() : ".");
+        SimpleRunConfig cfg = new SimpleRunConfig("test","test", methodRef,
+                appJar != null ? java.nio.file.Path.of(appJar) : null,
+                programArgs,
+                wd);
+        return buildRunnerArguments(cfg, strategy);
+    }
+
 }
+
