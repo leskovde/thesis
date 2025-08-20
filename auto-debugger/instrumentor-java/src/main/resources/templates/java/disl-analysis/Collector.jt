@@ -64,6 +64,77 @@ public class Collector extends RemoteAnalysis {
     }
   }
 
+
+  public void collectByte(final int slot, final byte b) {
+    printPid();
+    System.out.println(String.format(messageFormat, processName, String.format("Collecting byte: %s", b)));
+    trace.addByteValue(slot, b);
+    if ("temporal".equalsIgnoreCase(traceMode)) {
+      var id = identifierMapping.get(slot);
+      if (id != null) { temporalTrace.addValue(id, currentEventIndex, b); }
+    }
+  }
+
+  public void collectChar(final int slot, final char c) {
+    printPid();
+    System.out.println(String.format(messageFormat, processName, String.format("Collecting char: %s", c)));
+    trace.addCharValue(slot, c);
+    if ("temporal".equalsIgnoreCase(traceMode)) {
+      var id = identifierMapping.get(slot);
+      if (id != null) { temporalTrace.addValue(id, currentEventIndex, c); }
+    }
+  }
+
+  public void collectShort(final int slot, final short s) {
+    printPid();
+    System.out.println(String.format(messageFormat, processName, String.format("Collecting short: %s", s)));
+    trace.addShortValue(slot, s);
+    if ("temporal".equalsIgnoreCase(traceMode)) {
+      var id = identifierMapping.get(slot);
+      if (id != null) { temporalTrace.addValue(id, currentEventIndex, s); }
+    }
+  }
+
+  public void collectLong(final int slot, final long l) {
+    printPid();
+    System.out.println(String.format(messageFormat, processName, String.format("Collecting long: %s", l)));
+    trace.addLongValue(slot, l);
+    if ("temporal".equalsIgnoreCase(traceMode)) {
+      var id = identifierMapping.get(slot);
+      if (id != null) { temporalTrace.addValue(id, currentEventIndex, l); }
+    }
+  }
+
+  public void collectFloat(final int slot, final float f) {
+    printPid();
+    System.out.println(String.format(messageFormat, processName, String.format("Collecting float: %s", f)));
+    trace.addFloatValue(slot, f);
+    if ("temporal".equalsIgnoreCase(traceMode)) {
+      var id = identifierMapping.get(slot);
+      if (id != null) { temporalTrace.addValue(id, currentEventIndex, f); }
+    }
+  }
+
+  public void collectBoolean(final int slot, final boolean z) {
+    printPid();
+    System.out.println(String.format(messageFormat, processName, String.format("Collecting boolean: %s", z)));
+    trace.addBooleanValue(slot, z);
+    if ("temporal".equalsIgnoreCase(traceMode)) {
+      var id = identifierMapping.get(slot);
+      if (id != null) { temporalTrace.addValue(id, currentEventIndex, z); }
+    }
+  }
+
+  public void collectString(final int slot, final Object s) {
+    printPid();
+    System.out.println(String.format(messageFormat, processName, String.format("Collecting string: %s", s)));
+    trace.addObjectValue(slot, s);
+    if ("temporal".equalsIgnoreCase(traceMode)) {
+      var id = identifierMapping.get(slot);
+      if (id != null) { temporalTrace.addValue(id, currentEventIndex, s); }
+    }
+  }
+
   public void collectDouble(final int slot, final double d) {
     printPid();
     System.out.println(String.format(messageFormat, processName, String.format("Collecting double: %s", d)));

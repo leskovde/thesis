@@ -216,11 +216,13 @@ class DiSLCollectorIntegrationTest {
      * and verifies that all primitive values are correctly captured and written to the output file.
      */
     @Test
-    @Disabled("Not yet implemented")
-    // TODO
+    @Disabled("Pending DiSL end-to-end wiring")
     void givenPrimitiveExerciser_whenCollectingAllTypes_thenWritesAllValues() {
-        // Skip this test for now to debug the instrumentation generation issue
-        System.out.println("Skipping end-to-end test - debugging instrumentation generation");
+        // Arrange: create minimal target jar with a PrimitiveExerciser exercising all types
+        // and generate instrumentation mapping slots to each type.
+        // Act: run the analyzer with mock DiSL and the instrumented jar
+        // Assert: verify collector output contains lines for each type and slot
+        // Note: Enable when DiSL server wiring for e2e is in place.
     }
 
     /**
