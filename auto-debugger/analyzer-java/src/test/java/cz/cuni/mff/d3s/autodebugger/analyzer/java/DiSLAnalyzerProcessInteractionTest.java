@@ -150,11 +150,11 @@ class DiSLAnalyzerProcessInteractionTest {
         TestableAnalyzer analyzer = new TestableAnalyzer(testConfig, "mock-disl-success.py");
 
         // When
-        var generated = analyzer.runAnalysis(List.of(instrumentationJarPath));
+        var generated = analyzer.runAnalysis(cz.cuni.mff.d3s.autodebugger.model.common.artifacts.InstrumentationResult.builder().primaryArtifact(instrumentationJarPath).build());
 
         // Then
         assertNotNull(generated, "Analysis should return generated test paths");
-        assertTrue(generated.size() >= 0, "Generated list should be returned");
+        assertTrue(generated.getTestFiles().size() >= 0, "Generated list should be returned");
     }
 
     @Test
@@ -163,12 +163,12 @@ class DiSLAnalyzerProcessInteractionTest {
         TestableAnalyzer analyzer = new TestableAnalyzer(testConfig, "mock-disl-failure.py");
 
         // When
-        var generated = analyzer.runAnalysis(List.of(instrumentationJarPath));
+        var generated = analyzer.runAnalysis(cz.cuni.mff.d3s.autodebugger.model.common.artifacts.InstrumentationResult.builder().primaryArtifact(instrumentationJarPath).build());
 
         // Then
         assertNotNull(generated, "Analysis should return generated test paths even on failure");
         // The analyzer should handle process failures gracefully and still return an empty list of generated tests
-        assertTrue(generated.isEmpty() || generated.size() >= 0);
+        assertTrue(generated.getTestFiles().isEmpty() || generated.getTestFiles().size() >= 0);
     }
 
     @Test
@@ -183,7 +183,7 @@ class DiSLAnalyzerProcessInteractionTest {
 
         // When & Then
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            analyzer.runAnalysis(List.of(instrumentationJarPath));
+            analyzer.runAnalysis(cz.cuni.mff.d3s.autodebugger.model.common.artifacts.InstrumentationResult.builder().primaryArtifact(instrumentationJarPath).build());
         });
 
         assertTrue(exception.getMessage().contains("timed out"),
@@ -197,7 +197,7 @@ class DiSLAnalyzerProcessInteractionTest {
 
         // When & Then
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            analyzer.runAnalysis(List.of(instrumentationJarPath));
+            analyzer.runAnalysis(cz.cuni.mff.d3s.autodebugger.model.common.artifacts.InstrumentationResult.builder().primaryArtifact(instrumentationJarPath).build());
         });
 
         assertTrue(exception.getMessage().contains("Analysis execution failed") ||
@@ -230,12 +230,12 @@ class DiSLAnalyzerProcessInteractionTest {
         TestableAnalyzer analyzer = new TestableAnalyzer(testConfig, "mock-disl-success.py");
 
         // When
-        var generated = analyzer.runAnalysis(List.of(instrumentationJarPath));
+        var generated = analyzer.runAnalysis(cz.cuni.mff.d3s.autodebugger.model.common.artifacts.InstrumentationResult.builder().primaryArtifact(instrumentationJarPath).build());
 
         // Then
         assertNotNull(generated, "Should capture process output and return generated tests list");
         // No structure checks here; we just validate presence of a list
-        assertTrue(generated.size() >= 0);
+        assertTrue(generated.getTestFiles().size() >= 0);
     }
 
     /**
@@ -249,7 +249,7 @@ class DiSLAnalyzerProcessInteractionTest {
 
         // When
         long startTime = System.currentTimeMillis();
-        var generated = analyzer.runAnalysis(List.of(instrumentationJarPath));
+        var generated = analyzer.runAnalysis(cz.cuni.mff.d3s.autodebugger.model.common.artifacts.InstrumentationResult.builder().primaryArtifact(instrumentationJarPath).build());
         long endTime = System.currentTimeMillis();
 
         // Then
@@ -265,6 +265,6 @@ class DiSLAnalyzerProcessInteractionTest {
         // 2. Process execution
         // 3. Output capture
         // 4. Generated tests list returned
-        assertTrue(generated.size() >= 0, "Generated tests should have been returned successfully");
+        assertTrue(generated.getTestFiles().size() >= 0, "Generated tests should have been returned successfully");
     }
 }

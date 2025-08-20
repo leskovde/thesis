@@ -11,7 +11,9 @@ repositories {
 
 dependencies {
     implementation(project(mapOf("path" to ":model-common")))
-    testImplementation(libs.bundles.junit)
+    testImplementation(platform(libs.junit.bom))
+    testImplementation("org.junit.jupiter:junit-jupiter-api")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine")
 }
 
 tasks.test {

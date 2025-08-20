@@ -1,7 +1,7 @@
 package cz.cuni.mff.d3s.autodebugger.analyzer.common;
 
-import java.nio.file.Path;
-import java.util.List;
+import cz.cuni.mff.d3s.autodebugger.model.common.artifacts.InstrumentationResult;
+import cz.cuni.mff.d3s.autodebugger.model.common.tests.TestSuite;
 
 /**
  * Interface for analyzing instrumented applications and collecting runtime traces.
@@ -9,20 +9,20 @@ import java.util.List;
  * process the collected data into structured traces.
  */
 public interface Analyzer {
-    
+
     /**
      * Runs analysis on the instrumented application and generates tests inside the analysis process.
      *
-     * @param instrumentationPaths Path to the instrumented application's components
-     * @return List of generated test file paths produced by the analysis process
+     * @param instrumentation Instrumentation artifacts and conventions produced by the instrumentor
+     * @return TestSuite of generated test files produced by the analysis process
      */
-    List<Path> runAnalysis(List<Path> instrumentationPaths);
-    
+    TestSuite runAnalysis(InstrumentationResult instrumentation);
+
     /**
      * Validates that the analyzer can process the given instrumentation.
-     * 
-     * @param instrumentationPaths Path to the instrumented application's components
+     *
+     * @param instrumentation Instrumentation artifacts and conventions produced by the instrumentor
      * @throws IllegalArgumentException if the instrumentation is not compatible
      */
-    void validateInstrumentation(List<Path> instrumentationPaths);
+    void validateInstrumentation(InstrumentationResult instrumentation);
 }

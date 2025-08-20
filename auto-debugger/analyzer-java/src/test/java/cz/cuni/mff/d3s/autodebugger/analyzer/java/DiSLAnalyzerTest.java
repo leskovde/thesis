@@ -1,6 +1,6 @@
 package cz.cuni.mff.d3s.autodebugger.analyzer.java;
 
-import cz.cuni.mff.d3s.autodebugger.model.common.trace.Trace;
+import cz.cuni.mff.d3s.autodebugger.model.common.artifacts.InstrumentationResult;
 import cz.cuni.mff.d3s.autodebugger.model.java.JavaRunConfiguration;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.*;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.MethodIdentifierParameters;
@@ -30,6 +30,7 @@ class DiSLAnalyzerTest {
     private JavaRunConfiguration configWithoutRuntimeArgs;
     private JavaRunConfiguration configWithSpacesInPaths;
     private Path instrumentationJarPath;
+    private InstrumentationResult instrumentation;
 
     @BeforeEach
     void setUp() {
@@ -51,6 +52,7 @@ class DiSLAnalyzerTest {
         );
 
         instrumentationJarPath = Path.of("/tmp/instrumentation.jar");
+        instrumentation = InstrumentationResult.builder().primaryArtifact(instrumentationJarPath).build();
 
         // Standard configuration with runtime arguments
         standardConfig = JavaRunConfiguration.builder()
@@ -90,7 +92,7 @@ class DiSLAnalyzerTest {
         DiSLAnalyzer analyzer = new DiSLAnalyzer(standardConfig);
 
         // When
-        List<String> command = analyzer.buildExecutionCommand(instrumentationJarPath);
+        List<String> command = analyzer.buildExecutionCommand(instrumentation.getPrimaryArtifact());
 
         // Then
         assertNotNull(command);
@@ -103,7 +105,7 @@ class DiSLAnalyzerTest {
         assertEquals("/opt/disl/output", command.get(3));
         assertEquals("-cse", command.get(4));
         assertEquals("-e_cp", command.get(5));
-        assertEquals("../test-generator-java/build/libs/*:../test-generator-common/build/libs/*:../model-java/build/libs/*", command.get(6));
+        assertEquals("../test-generator-java/build/libs/*:../test-generator-common/build/libs/*:../model-common/build/libs/*:../model-java/build/libs/*", command.get(6));
         assertEquals("--", command.get(7));
         assertEquals("/tmp/instrumentation.jar", command.get(8));
         assertEquals("-jar", command.get(9));
@@ -120,7 +122,7 @@ class DiSLAnalyzerTest {
         DiSLAnalyzer analyzer = new DiSLAnalyzer(configWithoutRuntimeArgs);
 
         // When
-        List<String> command = analyzer.buildExecutionCommand(instrumentationJarPath);
+        List<String> command = analyzer.buildExecutionCommand(instrumentation.getPrimaryArtifact());
 
         // Then
         assertNotNull(command);
@@ -133,7 +135,7 @@ class DiSLAnalyzerTest {
         assertEquals("/opt/disl/output", command.get(3));
         assertEquals("-cse", command.get(4));
         assertEquals("-e_cp", command.get(5));
-        assertEquals("../test-generator-java/build/libs/*:../test-generator-common/build/libs/*:../model-java/build/libs/*", command.get(6));
+        assertEquals("../test-generator-java/build/libs/*:../test-generator-common/build/libs/*:../model-common/build/libs/*:../model-java/build/libs/*", command.get(6));
         assertEquals("--", command.get(7));
         assertEquals("/tmp/instrumentation.jar", command.get(8));
         assertEquals("-jar", command.get(9));
@@ -146,7 +148,7 @@ class DiSLAnalyzerTest {
         DiSLAnalyzer analyzer = new DiSLAnalyzer(configWithSpacesInPaths);
 
         // When
-        List<String> command = analyzer.buildExecutionCommand(instrumentationJarPath);
+        List<String> command = analyzer.buildExecutionCommand(instrumentation.getPrimaryArtifact());
 
         // Then
         assertNotNull(command);
@@ -159,7 +161,7 @@ class DiSLAnalyzerTest {
         assertEquals("/opt/DiSL Framework/output", command.get(3));
         assertEquals("-cse", command.get(4));
         assertEquals("-e_cp", command.get(5));
-        assertEquals("../test-generator-java/build/libs/*:../test-generator-common/build/libs/*:../model-java/build/libs/*", command.get(6));
+        assertEquals("../test-generator-java/build/libs/*:../test-generator-common/build/libs/*:../model-common/build/libs/*:../model-java/build/libs/*", command.get(6));
         assertEquals("--", command.get(7));
         assertEquals("/tmp/instrumentation.jar", command.get(8));
         assertEquals("-jar", command.get(9));
@@ -174,7 +176,7 @@ class DiSLAnalyzerTest {
 
         // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            analyzer.runAnalysis(List.of(nonExistentJar));
+            analyzer.runAnalysis(InstrumentationResult.builder().primaryArtifact(nonExistentJar).build());
         });
 
         assertTrue(exception.getMessage().contains("does not exist"));
@@ -187,10 +189,10 @@ class DiSLAnalyzerTest {
 
         // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            analyzer.runAnalysis(List.of());
+            analyzer.runAnalysis(null);
         });
 
-        assertTrue(exception.getMessage().contains("Expected exactly one"));
+        assertTrue(exception.getMessage().contains("cannot be null"));
     }
 
     @Test
@@ -279,11 +281,11 @@ class DiSLAnalyzerTest {
         // When & Then - This test demonstrates the structure for testing process execution
         // The test may succeed or fail depending on the system setup, but it should not crash
         try {
-            var generated = analyzer.runAnalysis(List.of(mockInstrumentationJar));
+            var generated = analyzer.runAnalysis(InstrumentationResult.builder().primaryArtifact(mockInstrumentationJar).build());
 
             // If it succeeds, we should get a list of generated test paths
-            assertNotNull(generated, "Analysis should return a non-null list of generated tests");
-            assertTrue(generated.size() >= 0, "Generated tests list should be returned");
+            assertNotNull(generated, "Analysis should return a non-null TestSuite");
+            assertTrue(generated.getTestFiles().size() >= 0, "Generated tests list should be returned");
 
         } catch (Exception e) {
             // If it fails, it should be due to process execution issues

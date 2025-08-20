@@ -14,8 +14,11 @@ dependencies {
     implementation(project(mapOf("path" to ":model-common")))
     implementation(project(mapOf("path" to ":model-java")))
     implementation(project(mapOf("path" to ":analyzer-common")))
+    implementation(platform(libs.log4j.bom))
     implementation(libs.log4j)
-    testImplementation(libs.bundles.junit)
+    testImplementation(platform(libs.junit.bom))
+    testImplementation("org.junit.jupiter:junit-jupiter-api")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine")
     testImplementation(libs.mockito)
     testImplementation(project(":test-utils"))
 }

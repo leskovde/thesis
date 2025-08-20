@@ -1,0 +1,140 @@
+import ch.usi.dag.dislreserver.remoteanalysis.RemoteAnalysis;
+import ch.usi.dag.dislreserver.shadow.ShadowObject;
+import cz.cuni.mff.d3s.autodebugger.model.common.trace.Trace;
+import cz.cuni.mff.d3s.autodebugger.model.common.trace.TemporalTrace;
+import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.JavaValueIdentifier;
+import cz.cuni.mff.d3s.autodebugger.testgenerator.common.TestGenerationContext;
+import cz.cuni.mff.d3s.autodebugger.testgenerator.common.TestGenerationContextFactory;
+import cz.cuni.mff.d3s.autodebugger.testgenerator.java.trace.NaiveTraceBasedGenerator;
+import cz.cuni.mff.d3s.autodebugger.testgenerator.java.trace.TemporalTraceBasedGenerator;
+import java.nio.file.Path;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+public class Collector extends RemoteAnalysis {
+  private final String messageFormat = "[%s]: %s";
+  private final String processName = "Receiving process";
+  private final String identifierMappingFilePath = "${PATH}";
+  private final String resultsListPath = "${RESULTS}";
+  private final String traceMode = "${TRACE_MODE}";
+  private final String targetPackage = "${TARGET_PACKAGE}";
+  private final String targetClass = "${TARGET_CLASS}";
+  private final String targetMethod = "${TARGET_METHOD}";
+  private final String targetReturn = "${TARGET_RETURN}";
+
+  private final Map<Integer, JavaValueIdentifier> identifierMapping = loadIdentifierMapping(identifierMappingFilePath);
+  private final Trace trace = new Trace();
+  private final TemporalTrace temporalTrace = new TemporalTrace();
+  private int currentEventIndex = 0;
+
+  public void startEvent() {
+    if ("temporal".equalsIgnoreCase(traceMode)) {
+      currentEventIndex++;
+    }
+  }
+
+  private Map<Integer, JavaValueIdentifier> loadIdentifierMapping(String path) {
+    try {
+      try (java.io.FileInputStream fileReader = new java.io.FileInputStream(java.nio.file.Path.of(path).toFile());
+           java.io.ObjectInputStream objectStream = new java.io.ObjectInputStream(fileReader)) {
+        @SuppressWarnings("unchecked")
+        Map<Integer, JavaValueIdentifier> loaded = (HashMap<Integer, JavaValueIdentifier>) objectStream.readObject();
+        return loaded;
+      }
+    } catch (Exception e) {
+      System.err.println(String.format(messageFormat, processName, "Failed to load identifier mapping: " + e.getMessage()));
+      return new HashMap<>();
+    }
+  }
+
+  public void collectInt(final int slot, final int i) {
+    printPid();
+    System.out.println(String.format(messageFormat, processName, String.format("Collecting int: %s", i)));
+    trace.addIntValue(slot, i);
+    if ("temporal".equalsIgnoreCase(traceMode)) {
+      var id = identifierMapping.get(slot);
+      if (id != null) { temporalTrace.addValue(id, currentEventIndex, i); }
+    }
+  }
+
+  public void collectDouble(final int slot, final double d) {
+    printPid();
+    System.out.println(String.format(messageFormat, processName, String.format("Collecting double: %s", d)));
+    trace.addDoubleValue(slot, d);
+    if ("temporal".equalsIgnoreCase(traceMode)) {
+      var id = identifierMapping.get(slot);
+      if (id != null) { temporalTrace.addValue(id, currentEventIndex, d); }
+    }
+  }
+
+  public void collectObject(final int slot, final ShadowObject obj) {
+    printPid();
+    System.out.println(String.format(messageFormat, processName, String.format("Collecting object: %s", obj)));
+    trace.addObjectValue(slot, obj);
+    if ("temporal".equalsIgnoreCase(traceMode)) {
+      var id = identifierMapping.get(slot);
+      if (id != null) { temporalTrace.addValue(id, currentEventIndex, obj); }
+    }
+  }
+
+  @Override
+  public void atExit() {
+    System.out.println(String.format(messageFormat, processName, "Exiting analysis..."));
+    trace.printSlotValues();
+    // Choose generator based on mode
+    if ("temporal".equalsIgnoreCase(traceMode)) {
+      var ctx = buildContext();
+      var generator = new TemporalTraceBasedGenerator();
+      var files = generator.generateTests(temporalTrace, ctx);
+      if (files != null && !files.isEmpty()) {
+        try {
+          for (var f : files) {
+            Files.writeString(Path.of(resultsListPath), f.toAbsolutePath().toString() + System.lineSeparator(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+          }
+        } catch (Exception e) {
+          System.err.println(String.format(messageFormat, processName, "Failed to write results: " + e.getMessage()));
+        }
+      }
+    } else {
+      var generator = new NaiveTraceBasedGenerator(Path.of(identifierMappingFilePath));
+      var files = generator.generateTests(trace, Path.of(identifierMappingFilePath), buildContext());
+      if (files != null && !files.isEmpty()) {
+        try {
+          for (var f : files) {
+            Files.writeString(Path.of(resultsListPath), f.toAbsolutePath().toString() + System.lineSeparator(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+          }
+      } catch (Exception e) {
+        System.err.println(String.format(messageFormat, processName, "Failed to write results: " + e.getMessage()));
+      }
+    }
+  }
+
+  private TestGenerationContext buildContext() {
+    var outDir = Path.of(resultsListPath).getParent();
+    return TestGenerationContextFactory.createFromStrings(
+      targetPackage, targetClass, targetMethod, targetReturn, outDir);
+  }
+
+          }
+        } catch (Exception e) {
+          System.err.println(String.format(messageFormat, processName, "Failed to write results: " + e.getMessage()));
+        }
+      }
+    }
+  }
+
+  @Override
+  public void objectFree(final ShadowObject netRef) {
+    printPid();
+    System.out.println(String.format(messageFormat, processName, "Object free"));
+  }
+
+  private void printPid() {
+    String pid = java.lang.management.ManagementFactory.getRuntimeMXBean().getName().split("@")[0];
+    System.out.println(String.format(messageFormat, processName, String.format("PID: %s", pid)));
+  }
+}
+

@@ -1,7 +1,8 @@
 package cz.cuni.mff.d3s.autodebugger.analyzer.java;
 
 import cz.cuni.mff.d3s.autodebugger.analyzer.common.Analyzer;
-import cz.cuni.mff.d3s.autodebugger.model.common.trace.Trace;
+import cz.cuni.mff.d3s.autodebugger.model.common.artifacts.InstrumentationResult;
+import cz.cuni.mff.d3s.autodebugger.model.common.tests.TestSuite;
 import cz.cuni.mff.d3s.autodebugger.model.java.JavaRunConfiguration;
 import cz.cuni.mff.d3s.autodebugger.model.java.helper.DiSLPathHelper;
 import lombok.RequiredArgsConstructor;
@@ -50,11 +51,11 @@ public class DiSLAnalyzer implements Analyzer {
      * captures output streams, and deserializes the collected trace data.
      */
     @Override
-    public List<Path> runAnalysis(List<Path> instrumentationPaths) {
-        log.info("Starting Java analysis on instrumented application: {}", instrumentationPaths);
+    public TestSuite runAnalysis(InstrumentationResult instrumentation) {
+        log.info("Starting Java analysis on instrumented application: {}", instrumentation);
 
-        validateInstrumentation(instrumentationPaths);
-        Path instrumentationJarPath = instrumentationPaths.getFirst();
+        validateInstrumentation(instrumentation);
+        Path instrumentationJarPath = instrumentation.getPrimaryArtifact();
         try {
             // Build the command to execute the instrumented JAR
             List<String> command = buildExecutionCommand(instrumentationJarPath);
@@ -102,34 +103,62 @@ public class DiSLAnalyzer implements Analyzer {
             // Read generated test paths from results file created by Collector
             List<Path> generatedTests = new ArrayList<>();
             try {
-                // Determine results file path from environment or run configuration output directory
-                // The instrumentor injected the exact ${RESULTS} path into the Collector; here we read any *.lst under that directory
-                Path resultsDir = runConfiguration.getOutputDirectory() != null
-                        ? runConfiguration.getOutputDirectory()
-                        : Path.of(System.getProperty("java.io.tmpdir"), "autodebugger-output");
-                Path resultsFile = resultsDir.resolve("generated-tests.lst");
-                // Prefer the most recent generated-tests-<runId>.lst if available
-                try {
-                    var candidates = java.nio.file.Files.list(resultsDir)
-                        .filter(p -> p.getFileName().toString().startsWith("generated-tests-") && p.getFileName().toString().endsWith(".lst"))
-                        .sorted((a,b) -> b.getFileName().toString().compareTo(a.getFileName().toString()))
-                        .toList();
-                    if (!candidates.isEmpty()) { resultsFile = candidates.get(0); }
-                } catch (Exception ignore) {}
-                log.info("Reading generated test list from {}", resultsFile);
-                if (java.nio.file.Files.exists(resultsFile)) {
-                    var lines = java.nio.file.Files.readAllLines(resultsFile);
-                    lines.forEach(l -> {
-                        log.info("Generated test: {}", l);
-                        generatedTests.add(Path.of(l));
-                    });
+                Path resultsFile = instrumentation.getResultsListPath();
+                if (resultsFile == null) {
+                    // Backward compatibility: fall back to scanning output dir for generated-tests-*.lst
+                    Path resultsDir = runConfiguration.getOutputDirectory() != null
+                            ? runConfiguration.getOutputDirectory()
+                            : Path.of(System.getProperty("java.io.tmpdir"), "autodebugger-output");
+                    try {
+                        var candidates = java.nio.file.Files.list(resultsDir)
+                            .filter(p -> p.getFileName().toString().startsWith("generated-tests-") && p.getFileName().toString().endsWith(".lst"))
+                            .sorted((a,b) -> b.getFileName().toString().compareTo(a.getFileName().toString()))
+                            .toList();
+                        if (!candidates.isEmpty()) { resultsFile = candidates.get(0); }
+                    } catch (Exception ignore) {}
+                }
+                if (resultsFile != null) {
+                    log.info("Reading generated test list from {}", resultsFile);
+                    if (java.nio.file.Files.exists(resultsFile)) {
+                        var lines = java.nio.file.Files.readAllLines(resultsFile);
+                        lines.forEach(l -> {
+                            log.info("Generated test: {}", l);
+                            generatedTests.add(Path.of(l));
+                        });
+                    } else {
+                        log.warn("No generated test list file found at {} — falling back to scan output dir", resultsFile);
+                        Path resultsDir = runConfiguration.getOutputDirectory();
+                        if (resultsDir != null && java.nio.file.Files.exists(resultsDir)) {
+                            try {
+                                var candidates = java.nio.file.Files.list(resultsDir)
+                                    .filter(p -> p.getFileName().toString().startsWith("generated-tests-") && p.getFileName().toString().endsWith(".lst"))
+                                    .sorted((a,b) -> b.getFileName().toString().compareTo(a.getFileName().toString()))
+                                    .toList();
+                                if (!candidates.isEmpty()) {
+                                    resultsFile = candidates.get(0);
+                                } else {
+                                    resultsFile = resultsDir.resolve("generated-tests.lst");
+                                }
+                                if (java.nio.file.Files.exists(resultsFile)) {
+                                    var lines = java.nio.file.Files.readAllLines(resultsFile);
+                                    lines.forEach(l -> {
+                                        log.info("Generated test (fallback): {}", l);
+                                        generatedTests.add(Path.of(l));
+                                    });
+                                }
+                            } catch (Exception ignore) {}
+                        }
+                    }
                 } else {
-                    log.warn("No generated test list file found at {}", resultsFile);
+                    log.warn("No results list path available; no tests will be returned");
                 }
             } catch (Exception ex) {
                 log.warn("Failed to read generated test list", ex);
             }
-            return generatedTests;
+            return TestSuite.builder()
+                    .baseDirectory(runConfiguration.getOutputDirectory())
+                    .testFiles(generatedTests)
+                    .build();
         } catch (IOException | InterruptedException e) {
             log.error("Failed to execute instrumented application", e);
             throw new RuntimeException("Analysis execution failed", e);
@@ -137,26 +166,18 @@ public class DiSLAnalyzer implements Analyzer {
     }
 
     @Override
-    public void validateInstrumentation(List<Path> instrumentationPaths) {
-        if (instrumentationPaths == null) {
-            throw new IllegalArgumentException("Instrumentation path cannot be null");
+    public void validateInstrumentation(InstrumentationResult instrumentation) {
+        if (instrumentation == null || instrumentation.getPrimaryArtifact() == null) {
+            throw new IllegalArgumentException("Instrumentation primary artifact cannot be null");
         }
-
-        if (instrumentationPaths.size() != 1) {
-            throw new IllegalArgumentException("Expected exactly one instrumentation path, got: " + instrumentationPaths);
-        }
-
-        var instrumentationPath = instrumentationPaths.getFirst();
-
+        var instrumentationPath = instrumentation.getPrimaryArtifact();
         if (!Files.exists(instrumentationPath)) {
             throw new IllegalArgumentException("Instrumentation file does not exist: " + instrumentationPath);
         }
-
         if (!instrumentationPath.toString().endsWith(".jar")) {
             throw new IllegalArgumentException("Expected JAR file for DiSL instrumentation, got: " + instrumentationPath);
         }
-
-        log.debug("Instrumentation validation passed for: {}", instrumentationPaths);
+        log.debug("Instrumentation validation passed for: {}", instrumentationPath);
     }
 
    public List<String> buildExecutionCommand(Path instrumentationJarPath) {
@@ -177,7 +198,7 @@ public class DiSLAnalyzer implements Analyzer {
         // Note that this is not present in the basic distribution of DiSL - and might potentially be unnecessary
         // Subject to further testing...
         command.add("-e_cp");
-        command.add("../test-generator-java/build/libs/*:../test-generator-common/build/libs/*:../model-java/build/libs/*");
+        command.add("../test-generator-java/build/libs/*:../test-generator-common/build/libs/*:../model-common/build/libs/*:../model-java/build/libs/*");
 
         command.add("--");
 
