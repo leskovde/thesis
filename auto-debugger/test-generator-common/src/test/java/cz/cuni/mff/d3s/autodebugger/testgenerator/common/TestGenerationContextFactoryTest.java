@@ -218,7 +218,7 @@ class TestGenerationContextFactoryTest {
 
     @Test
     void givenNullRunConfiguration_whenCreatingContext_thenThrowsIllegalArgumentException() {
-        assertThrows(IllegalArgumentException.class, () -> 
+        assertThrows(IllegalArgumentException.class, () ->
             TestGenerationContextFactory.createFromRunConfiguration(null));
     }
 
@@ -231,5 +231,35 @@ class TestGenerationContextFactoryTest {
         assertNotNull(context);
         assertEquals("junit5", context.getTestFramework()); // Default value
         assertEquals(50, context.getMaxTestCount()); // Default value
+}
+
+    @Test
+    void givenStrings_whenCreateFromStrings_withEmptyPackage_thenBuildsDefaultClassNameAndSignature() {
+        var ctx = TestGenerationContextFactory.createFromStrings(
+            "", "Calculator", "divide(int, int)", "int", tempDir);
+        assertNotNull(ctx);
+        assertEquals("Calculator", ctx.getTargetClassName());
+        assertEquals("Calculator.divide(int, int)", ctx.getTargetMethodSignature());
+        assertEquals("", ctx.getPackageName());
     }
+
+    @Test
+    void givenStrings_whenCreateFromStrings_withNoParams_thenParsesMethodNameOnly() {
+        var ctx = TestGenerationContextFactory.createFromStrings(
+            "com.example", "Util", "now()", "long", tempDir);
+        assertNotNull(ctx);
+        assertEquals("com.example.Util", ctx.getTargetMethod().getFullyQualifiedClassName());
+        assertEquals("com.example", ctx.getPackageName());
+        assertEquals("com.example.Util.now()", ctx.getTargetMethodSignature());
+    }
+
+    @Test
+    void givenStrings_whenCreateFromStrings_withSpacing_thenTrimsParameterTypes() {
+        var ctx = TestGenerationContextFactory.createFromStrings(
+            "a.b", "C", "m( int ,  java.lang.String  ,double)", "void", tempDir);
+        assertNotNull(ctx);
+        assertEquals("a.b.C.m(int, java.lang.String, double)", ctx.getTargetMethodSignature());
+    }
+
+
 }

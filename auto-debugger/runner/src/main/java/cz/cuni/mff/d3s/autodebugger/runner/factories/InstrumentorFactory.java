@@ -4,44 +4,32 @@ import cz.cuni.mff.d3s.autodebugger.instrumentor.common.Instrumentor;
 import cz.cuni.mff.d3s.autodebugger.instrumentor.java.DiSLInstrumentor;
 import cz.cuni.mff.d3s.autodebugger.model.common.RunConfiguration;
 import cz.cuni.mff.d3s.autodebugger.model.common.TargetLanguage;
+import cz.cuni.mff.d3s.autodebugger.model.common.technique.TestTechniqueConfig;
 import cz.cuni.mff.d3s.autodebugger.model.java.JavaRunConfiguration;
 import lombok.extern.slf4j.Slf4j;
 
-/**
- * Factory for creating language-specific Instrumentor instances.
- * Uses factory pattern to abstract instrumentor creation based on
- * target language, configuring appropriate instrumentor implementations.
- */
 @Slf4j
 public class InstrumentorFactory {
 
-    /**
-     * Creates a language-specific Instrumentor from run configuration.
-     * Dispatches to appropriate language-specific factory method based on target language.
-     */
-    public static Instrumentor createInstrumentor(RunConfiguration runConfiguration, String strategyId, String apiKey) {
+    public static Instrumentor createInstrumentor(RunConfiguration runConfiguration, TestTechniqueConfig technique) {
         TargetLanguage language = runConfiguration.getLanguage();
         if (language == TargetLanguage.JAVA) {
-            return createJavaInstrumentor(runConfiguration, strategyId, apiKey);
+            return createJavaInstrumentor(runConfiguration, technique);
         }
-
         throw new IllegalArgumentException("Unsupported language: " + language);
     }
 
-    private static DiSLInstrumentor createJavaInstrumentor(RunConfiguration runConfiguration, String strategyId, String apiKey) {
+    private static DiSLInstrumentor createJavaInstrumentor(RunConfiguration runConfiguration, TestTechniqueConfig technique) {
         log.info("Building DiSL instrumentor");
-
         if (runConfiguration instanceof JavaRunConfiguration javaRunConfiguration) {
             DiSLInstrumentor instrumentor = DiSLInstrumentor.builder()
                 .runConfiguration(javaRunConfiguration)
-                .strategyId(strategyId)
-                .apiKey(apiKey)
+                .strategyId(technique != null ? technique.getId() : null)
+                .apiKey(technique != null ? technique.getApiKey() : null)
                 .build();
-
             log.info("Successfully built DiSL instrumentor");
             return instrumentor;
         }
-
         throw new IllegalArgumentException("Expected JavaRunConfiguration, got: " + runConfiguration.getClass().getSimpleName());
     }
 }

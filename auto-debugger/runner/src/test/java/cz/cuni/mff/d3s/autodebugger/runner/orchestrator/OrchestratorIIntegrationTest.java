@@ -111,7 +111,8 @@ class OrchestratorIIntegrationTest {
         prepareStubResults();
 
         // when
-        List<java.nio.file.Path> generated = orchestrator.runAnalysis(instrumentation);
+        var testSuite = orchestrator.runAnalysis(instrumentation);
+        var generated = testSuite.getTestFiles();
 
         // then
         assertNotNull(generated);
@@ -189,13 +190,11 @@ class OrchestratorIIntegrationTest {
         assertNotNull(instrumentationModel);
 
         // when
-        List<Path> instrumentationPaths = orchestrator.createInstrumentation(instrumentationModel);
+        var instrumentationPaths = orchestrator.createInstrumentation(instrumentationModel);
 
         // then
         assertNotNull(instrumentationPaths, "Instrumentation paths should not be null");
-        assertEquals(1, instrumentationPaths.size(), "Should return exactly one instrumentation JAR");
-
-        Path instrumentationJar = instrumentationPaths.get(0);
+        Path instrumentationJar = instrumentationPaths.getPrimaryArtifact();
         assertNotNull(instrumentationJar, "Instrumentation JAR path should not be null");
         assertTrue(Files.exists(instrumentationJar), "Instrumentation JAR file should exist");
 
@@ -241,11 +240,10 @@ class OrchestratorIIntegrationTest {
         InstrumentationModel instrumentationModel = orchestrator.buildInstrumentationModel();
 
         // when
-        List<Path> instrumentationPaths = orchestrator.createInstrumentation(instrumentationModel);
+        var instrumentationPaths = orchestrator.createInstrumentation(instrumentationModel);
 
         // then
-        assertEquals(1, instrumentationPaths.size(), "Should create one instrumentation JAR");
-        Path instrumentationJar = instrumentationPaths.get(0);
+        Path instrumentationJar = instrumentationPaths.getPrimaryArtifact();
         assertTrue(Files.exists(instrumentationJar), "Instrumentation JAR should exist");
 
         // Verify the JAR is properly structured

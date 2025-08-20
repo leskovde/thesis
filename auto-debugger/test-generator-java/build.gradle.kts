@@ -15,9 +15,12 @@ dependencies {
     api(project(mapOf("path" to ":test-generator-common")))
     implementation(project(mapOf("path" to ":model-common")))
     implementation(project(mapOf("path" to ":model-java")))
+    implementation(platform(libs.log4j.bom))
     implementation(libs.log4j)
     implementation(libs.anthropic.java)
-    testImplementation(libs.bundles.junit)
+    testImplementation(platform(libs.junit.bom))
+    testImplementation("org.junit.jupiter:junit-jupiter-api")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine")
     testImplementation(libs.mockito)
 }
 

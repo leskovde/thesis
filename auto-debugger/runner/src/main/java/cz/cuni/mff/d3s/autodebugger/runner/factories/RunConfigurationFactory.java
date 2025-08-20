@@ -6,6 +6,7 @@ import cz.cuni.mff.d3s.autodebugger.model.java.JavaRunConfiguration;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.JavaMethodIdentifier;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.JavaValueIdentifier;
 import cz.cuni.mff.d3s.autodebugger.runner.args.Arguments;
+import cz.cuni.mff.d3s.autodebugger.model.common.TraceMode;
 import cz.cuni.mff.d3s.autodebugger.runner.parsing.JavaMethodSignatureParser;
 import lombok.extern.slf4j.Slf4j;
 
@@ -58,6 +59,11 @@ public class RunConfigurationFactory {
             exportableValues.addAll(parameterValues);
             exportableValues.addAll(fieldValues);
 
+            // Determine trace mode
+            TraceMode traceMode = (arguments.traceMode != null && arguments.traceMode.equalsIgnoreCase("temporal"))
+                    ? TraceMode.TEMPORAL
+                    : TraceMode.NAIVE;
+
             // Create the Java run configuration
             JavaRunConfiguration configuration = JavaRunConfiguration.builder()
                     .applicationPath(applicationPath)
@@ -68,6 +74,7 @@ public class RunConfigurationFactory {
                     .classpathEntries(classpathEntries)
                     .dislHomePath(dislHomePath)
                     .outputDirectory(outputDir)
+                    .traceMode(traceMode)
                     .build();
 
             // Validate the configuration

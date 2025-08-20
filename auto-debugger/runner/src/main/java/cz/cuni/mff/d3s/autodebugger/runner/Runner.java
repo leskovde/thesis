@@ -55,6 +55,7 @@ public class Runner {
     log.info("  Target fields: {}", arguments.targetFields);
     log.info("  Language: {}", arguments.language.getDisplayName());
     log.info("  Test generation strategy: {}", arguments.testGenerationStrategy);
+    log.info("  API key provided: {}", arguments.apiKey != null && !arguments.apiKey.isBlank());
     log.info("  Classpath: {}", arguments.classpath);
     log.info("  DiSL home: {}", arguments.dislHomePath);
 
@@ -64,19 +65,14 @@ public class Runner {
     var instrumentationModel = orchestrator.buildInstrumentationModel();
     log.info("Built instrumentation model");
 
-    var instrumentationPaths = orchestrator.createInstrumentation(instrumentationModel);
-    log.info("Created instrumentation: {}", instrumentationPaths);
-
-    if (instrumentationPaths.isEmpty()) {
-      log.warn("No instrumentation paths returned, skipping analysis and test generation");
-      return;
-    }
+    var instrumentation = orchestrator.createInstrumentation(instrumentationModel);
+    log.info("Created instrumentation: {}", instrumentation);
 
     log.info("Running analysis...");
-    var tests = orchestrator.runAnalysis(instrumentationPaths);
-    log.info("Analysis completed and tests generated. {} test files: {}", tests.size(), tests);
+    var testSuite = orchestrator.runAnalysis(instrumentation);
+    log.info("Analysis completed and tests generated. {} test files: {}", testSuite.getTestFiles().size(), testSuite.getTestFiles());
 
-    var testResults = orchestrator.runTests(tests);
+    var testResults = orchestrator.runTests(testSuite);
     log.info("Test execution completed. Results: {}", testResults);
   }
 }

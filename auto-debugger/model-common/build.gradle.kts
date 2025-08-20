@@ -11,8 +11,11 @@ repositories {
 }
 
 dependencies {
+    implementation(platform(libs.log4j.bom))
     implementation(libs.log4j)
-    testImplementation(libs.bundles.junit)
+    testImplementation(platform(libs.junit.bom))
+    testImplementation("org.junit.jupiter:junit-jupiter-api")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine")
 }
 
 tasks.test {

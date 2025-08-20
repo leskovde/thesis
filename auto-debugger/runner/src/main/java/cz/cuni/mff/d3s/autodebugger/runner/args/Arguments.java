@@ -47,6 +47,11 @@ public class Arguments {
                         defaultValue = "trace-based-basic")
     public String testGenerationStrategy;
 
+    @CommandLine.Option(names = { "-r", "--trace-mode" }, paramLabel = "TRACE_MODE",
+                        description = "Trace collection mode: naive or temporal",
+                        defaultValue = "naive")
+    public String traceMode;
+
     @CommandLine.Option(names = { "-k", "--api-key" }, paramLabel = "API_KEY",
                         description = "API key for LLM services (can also be set via ANTHROPIC_API_KEY environment variable)")
     public String apiKey;

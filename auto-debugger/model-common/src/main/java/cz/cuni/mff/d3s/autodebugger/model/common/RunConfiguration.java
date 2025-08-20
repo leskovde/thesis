@@ -23,35 +23,35 @@ public interface RunConfiguration {
 
     /**
      * Gets the path to the application JAR or executable file.
-     * 
+     *
      * @return Path to the application file
      */
     Path getApplicationPath();
-    
+
     /**
      * Gets the path to the source code directory.
-     * 
+     *
      * @return Path to the source code
      */
     Path getSourceCodePath();
-    
+
     /**
      * Gets the target method identifier that should be instrumented and analyzed.
-     * 
+     *
      * @return Method identifier for the target method
      */
     MethodIdentifier getTargetMethod();
-    
+
     /**
      * Gets the list of exportable values (parameters, fields, etc.) that should be tracked.
-     * 
+     *
      * @return List of exportable values to track during execution
      */
     List<? extends ExportableValue> getExportableValues();
-    
+
     /**
      * Gets the output directory where generated files should be placed.
-     * 
+     *
      * @return Output directory path
      */
     Path getOutputDirectory();
@@ -62,6 +62,12 @@ public interface RunConfiguration {
      * @return List of runtime arguments
      */
     List<String> getRuntimeArguments();
+
+    /**
+     * Selects the trace collection mode used by the analyzer (naive vs temporal).
+     * Default should be NAIVE if not specified by concrete implementations.
+     */
+    default TraceMode getTraceMode() { return TraceMode.NAIVE; }
 
     /**
      * Validates that this configuration is complete and valid.

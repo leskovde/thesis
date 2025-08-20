@@ -95,7 +95,8 @@ class OrchestratorGenerateTestsIntegrationTest {
         var instrumentation = orchestrator.createInstrumentation(model);
         // Pre-create stub results to satisfy non-empty contract since we don't run a real DiSL
         prepareStubResults(outputDir);
-        List<Path> generatedFiles = orchestrator.runAnalysis(instrumentation);
+        var testSuite = orchestrator.runAnalysis(instrumentation);
+        var generatedFiles = testSuite.getTestFiles();
         assertFalse(generatedFiles.isEmpty(), "In stub mode, some files should be generated");
         for (Path testFile : generatedFiles) {
             assertTrue(Files.exists(testFile), "Generated test file should exist: " + testFile);
@@ -187,7 +188,7 @@ class OrchestratorGenerateTestsIntegrationTest {
         var model = orchestrator.buildInstrumentationModel();
         var instrumentation = orchestrator.createInstrumentation(model);
         prepareStubResults(outputDir);
-        List<Path> generatedFiles = orchestrator.runAnalysis(instrumentation);
+        var generatedFiles = orchestrator.runAnalysis(instrumentation).getTestFiles();
 
         assertFalse(generatedFiles.isEmpty());
 
@@ -238,7 +239,7 @@ class OrchestratorGenerateTestsIntegrationTest {
         var model = orchestrator.buildInstrumentationModel();
         var instrumentation = orchestrator.createInstrumentation(model);
         prepareStubResults(outputDir);
-        List<Path> generatedFiles = orchestrator.runAnalysis(instrumentation);
+        var generatedFiles = orchestrator.runAnalysis(instrumentation).getTestFiles();
 
         assertFalse(generatedFiles.isEmpty());
 

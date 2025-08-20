@@ -2,6 +2,7 @@ package cz.cuni.mff.d3s.autodebugger.model.java;
 
 import cz.cuni.mff.d3s.autodebugger.model.common.RunConfiguration;
 import cz.cuni.mff.d3s.autodebugger.model.common.TargetLanguage;
+import cz.cuni.mff.d3s.autodebugger.model.common.TraceMode;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.JavaArgumentIdentifier;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.JavaFieldIdentifier;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.JavaMethodIdentifier;
@@ -48,6 +49,9 @@ public class JavaRunConfiguration implements RunConfiguration {
 
     @Builder.Default
     private final TargetLanguage language = TargetLanguage.JAVA;
+
+    @Builder.Default
+    private final TraceMode traceMode = TraceMode.NAIVE;
 
     @Builder.Default
     private final Path dislHomePath = Path.of("../../disl/");

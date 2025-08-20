@@ -5,6 +5,7 @@ import cz.cuni.mff.d3s.autodebugger.model.common.TargetLanguage;
 import cz.cuni.mff.d3s.autodebugger.model.java.JavaRunConfiguration;
 import cz.cuni.mff.d3s.autodebugger.testrunner.common.TestRunner;
 import cz.cuni.mff.d3s.autodebugger.testrunner.java.JUnitTestRunner;
+import cz.cuni.mff.d3s.autodebugger.testrunner.common.TestRunnerConfiguration;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -25,8 +26,10 @@ public class TestRunnerFactory {
         if (runConfiguration instanceof JavaRunConfiguration javaRunConfiguration) {
             try {
                 JUnitTestRunner testRunner = new JUnitTestRunner();
-                testRunner.configure(runConfiguration);
-
+                TestRunnerConfiguration config = TestRunnerConfiguration.builder()
+                        .workingDirectory(javaRunConfiguration.getOutputDirectory())
+                        .build();
+                testRunner.configure(config);
                 log.info("Successfully created Java test runner");
                 return testRunner;
             } catch (Exception e) {
