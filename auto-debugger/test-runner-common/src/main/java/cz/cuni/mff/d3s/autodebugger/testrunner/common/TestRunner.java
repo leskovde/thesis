@@ -1,7 +1,5 @@
 package cz.cuni.mff.d3s.autodebugger.testrunner.common;
 
-import cz.cuni.mff.d3s.autodebugger.model.common.RunConfiguration;
-
 import java.nio.file.Path;
 import java.util.List;
 
@@ -12,12 +10,6 @@ import java.util.List;
  */
 public interface TestRunner {
 
-    /**
-     * Configures the test runner with the given run configuration.
-     *
-     * @param configuration The run configuration containing execution parameters
-     */
-    void configure(RunConfiguration configuration);
 
     /**
      * Executes a test suite from the given test files.

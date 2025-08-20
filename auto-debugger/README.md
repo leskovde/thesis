@@ -94,6 +94,15 @@ Run the complete test suite:
 ./gradlew :test-generator-java:test
 ./gradlew :instrumentor-java:test
 ```
+### Trace mode and Collector context
+
+- The runner accepts a trace mode argument to control how traces are collected and how tests are generated:
+  - -r, --trace-mode naive|temporal (default: naive)
+- In temporal mode, instrumentation inserts event boundaries and the analysis Collector builds a TemporalTrace in addition to the classic Trace.
+- The generated Collector constructs a TestGenerationContext using injected placeholders:
+  - ${TARGET_PACKAGE}, ${TARGET_CLASS}, ${TARGET_METHOD}, ${TARGET_RETURN}
+  - Construction is done via TestGenerationContextFactory.createFromStrings(...), ensuring consistent metadata for generators.
+
 
 
 ## Output artifacts and directories

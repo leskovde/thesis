@@ -10,8 +10,12 @@ repositories {
 }
 
 dependencies {
-    implementation(libs.bundles.junit)
-    testImplementation(libs.bundles.junit)
+    implementation(platform(libs.junit.bom))
+    implementation("org.junit.jupiter:junit-jupiter-api")
+    implementation("org.junit.jupiter:junit-jupiter-engine")
+    testImplementation(platform(libs.junit.bom))
+    testImplementation("org.junit.jupiter:junit-jupiter-api")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine")
 }
 
 tasks.test {

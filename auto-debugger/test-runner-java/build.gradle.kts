@@ -15,12 +15,14 @@ dependencies {
     implementation(project(mapOf("path" to ":test-runner-common")))
     implementation(project(mapOf("path" to ":model-common")))
     implementation(project(mapOf("path" to ":model-java")))
+    implementation(platform(libs.log4j.bom))
     implementation(libs.log4j)
 
-    // JUnit Platform for test execution
-    implementation("org.junit.platform:junit-platform-launcher:1.10.0")
-    implementation("org.junit.platform:junit-platform-engine:1.10.0")
-    implementation("org.junit.jupiter:junit-jupiter-engine:5.10.0")
+    // JUnit Platform for test execution (use BOM to align versions)
+    implementation(platform(libs.junit.bom))
+    implementation("org.junit.platform:junit-platform-launcher")
+    implementation("org.junit.platform:junit-platform-engine")
+    implementation("org.junit.jupiter:junit-jupiter-engine")
 
     // For compiling generated tests
     implementation("org.eclipse.jdt:ecj:3.35.0")
