@@ -26,11 +26,32 @@ public class TestRunnerFactory {
         if (runConfiguration instanceof JavaRunConfiguration javaRunConfiguration) {
             try {
                 JUnitTestRunner testRunner = new JUnitTestRunner();
-                TestRunnerConfiguration config = TestRunnerConfiguration.builder()
-                        .workingDirectory(javaRunConfiguration.getOutputDirectory())
-                        .build();
+
+                // Build classpath for test compilation and execution
+                TestRunnerConfiguration.TestRunnerConfigurationBuilder configBuilder = TestRunnerConfiguration.builder()
+                        .workingDirectory(javaRunConfiguration.getOutputDirectory());
+
+                // Add application JAR to classpath so tests can reference application classes
+                configBuilder.classpathEntry(javaRunConfiguration.getApplicationPath());
+                log.info("Added application JAR to test classpath: {}", javaRunConfiguration.getApplicationPath());
+
+                // Add additional classpath entries from the run configuration (skip empty entries)
+                if (javaRunConfiguration.getClasspathEntries() != null) {
+                    for (var classpathEntry : javaRunConfiguration.getClasspathEntries()) {
+                        // Skip empty or whitespace-only classpath entries
+                        if (classpathEntry != null && !classpathEntry.toString().trim().isEmpty()) {
+                            configBuilder.classpathEntry(classpathEntry);
+                            log.info("Added classpath entry to test classpath: {}", classpathEntry);
+                        } else {
+                            log.debug("Skipped empty classpath entry");
+                        }
+                    }
+                }
+
+                TestRunnerConfiguration config = configBuilder.build();
                 testRunner.configure(config);
-                log.info("Successfully created Java test runner");
+                log.info("Successfully created Java test runner with {} classpath entries",
+                        config.getClasspathEntries().size());
                 return testRunner;
             } catch (Exception e) {
                 log.error("Failed to create Java test runner", e);

@@ -1,17 +1,28 @@
-import ch.usi.dag.dislreserver.remoteanalysis.REDispatch;
+import ch.usi.dag.dislre.REDispatch;
 
 public class CollectorRE {
-  private static short startEventId = REDispatch.registerMethod("Collector.startEvent");
-  private static short collectByteId = REDispatch.registerMethod("Collector.collectByte");
-  private static short collectCharId = REDispatch.registerMethod("Collector.collectChar");
-  private static short collectShortId = REDispatch.registerMethod("Collector.collectShort");
-  private static short collectIntId = REDispatch.registerMethod("Collector.collectInt");
-  private static short collectLongId = REDispatch.registerMethod("Collector.collectLong");
-  private static short collectFloatId = REDispatch.registerMethod("Collector.collectFloat");
-  private static short collectDoubleId = REDispatch.registerMethod("Collector.collectDouble");
-  private static short collectBooleanId = REDispatch.registerMethod("Collector.collectBoolean");
-  private static short collectStringId = REDispatch.registerMethod("Collector.collectString");
-  private static short collectObjectId = REDispatch.registerMethod("Collector.collectObject");
+  static {
+    System.out.println("*** CollectorRE CLASS LOADED ***");
+  }
+
+  private static short startEventId = registerMethodWithDebug("Collector.startEvent");
+  private static short collectByteId = registerMethodWithDebug("Collector.collectByte");
+  private static short collectCharId = registerMethodWithDebug("Collector.collectChar");
+  private static short collectShortId = registerMethodWithDebug("Collector.collectShort");
+  private static short collectIntId = registerMethodWithDebug("Collector.collectInt");
+  private static short collectLongId = registerMethodWithDebug("Collector.collectLong");
+  private static short collectFloatId = registerMethodWithDebug("Collector.collectFloat");
+  private static short collectDoubleId = registerMethodWithDebug("Collector.collectDouble");
+  private static short collectBooleanId = registerMethodWithDebug("Collector.collectBoolean");
+  private static short collectStringId = registerMethodWithDebug("Collector.collectString");
+  private static short collectObjectId = registerMethodWithDebug("Collector.collectObject");
+
+  private static short registerMethodWithDebug(String methodName) {
+    System.out.println("*** CollectorRE: Registering method " + methodName + " ***");
+    short id = REDispatch.registerMethod(methodName);
+    System.out.println("*** CollectorRE: Method " + methodName + " registered with ID " + id + " ***");
+    return id;
+  }
 
   public static void startEvent() {
     REDispatch.analysisStart(startEventId);

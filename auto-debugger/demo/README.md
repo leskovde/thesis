@@ -1,6 +1,22 @@
 # Auto-Debugger Demo Apps
 
-This demo shows how to run the auto-debugger end-to-end against small toy Java applications, without requiring a real DiSL installation. We use a mock DiSL script and pre-populated stub results so the pipeline launches, runs analysis, and proceeds to test execution.
+This demo shows how to run the auto-debugger end-to-end against small toy Java applications.
+
+**⚠️ Important: For full functionality, use a real DiSL installation.** The auto-debugger requires DiSL for runtime instrumentation and data collection. While mock DiSL scripts and stub results can be used for testing the pipeline structure, they will not perform actual instrumentation or generate meaningful tests.
+
+## Real DiSL vs Mock DiSL
+
+### Real DiSL Installation (Recommended)
+- **Functionality**: Full instrumentation, runtime data collection, and test generation
+- **Requirements**: DiSL installation at `/Users/leskovde/repos/disl/output/lib` (or update `--disl-home` path)
+- **Output**: Actual tests generated from captured runtime data
+- **Use case**: Production use, meaningful test generation
+
+### Mock DiSL (Limited Testing Only)
+- **Functionality**: Pipeline structure testing only - no real instrumentation
+- **Requirements**: Mock DiSL script and pre-populated stub results
+- **Output**: Pre-written stub tests (not generated from runtime data)
+- **Use case**: Testing pipeline integration without DiSL installation
 
 Contents:
 - apps/args: demonstrates argument capture (naive vs temporal)
@@ -50,9 +66,23 @@ jar --create --file static-app.jar --main-class com.example.StaticApp -C out .
 
 The resulting JARs will be placed next to each app.
 
-## 2) Prepare a mock DiSL home
+## 2) Setup DiSL Installation
 
-The analyzer expects a `disl.py` script under `<DISL_HOME>/bin`. We provide a small mock script that simulates DiSL output.
+### Option A: Real DiSL Installation (Recommended)
+
+Use the actual DiSL installation for full functionality:
+
+```bash
+# Use the real DiSL installation
+export DISL_HOME="/Users/leskovde/repos/disl"
+# Verify DiSL installation
+ls -la "$DISL_HOME/output/lib"  # Should contain disl-server.jar, dislre-server.jar, etc.
+ls -la "$DISL_HOME/bin/disl.py"  # Should exist and be executable
+```
+
+### Option B: Mock DiSL (Limited Testing Only)
+
+⚠️ **Warning**: Mock DiSL only tests pipeline structure - no real instrumentation occurs.
 
 ```bash
 # From repo root
@@ -65,9 +95,11 @@ cp mock-disl.py "$DEMO_DISL_HOME/bin/disl.py"
 chmod +x "$DEMO_DISL_HOME/bin/disl.py"
 ```
 
-## 3) Pre-populate stub results (so analysis has tests to read)
+## 3) Pre-populate stub results (Mock DiSL only)
 
-Since we are not running real instrumentation yet, create a stub test and the results list in the chosen output directory. Use shell or Python variant.
+⚠️ **Skip this step if using real DiSL** - real DiSL will generate actual tests from runtime data.
+
+**Only needed for Mock DiSL testing**: Create stub test and results list in the output directory.
 
 ```bash
 # Using shell
@@ -78,7 +110,8 @@ python3 prepare_stub_results.py /absolute/path/to/output
 ```
 
 Notes:
-- The analyzer will look for a generated results list path; if not present, it falls back to scanning the output directory for a file matching `generated-tests-*.lst` or uses `generated-tests.lst` if present.
+- With real DiSL: Tests are generated from actual runtime instrumentation data
+- With mock DiSL: Pre-written stub tests simulate the expected output structure
 - The helper script writes: output/stub-tests/StubTest.java and output/generated-tests.lst
 
 ## 4) Run the auto-debugger runner
@@ -86,14 +119,30 @@ Notes:
 General form:
 
 ```bash
+# With real DiSL installation
 ./gradlew :runner:run --args=" \
   --jar <app.jar> \
   --source <path-to-source> \
   --output-dir <path-to-output> \
   --method <fully.qualified.TargetClass.targetMethod(signature)> \
-  --disl-home $DEMO_DISL_HOME \
+  --disl-home /Users/leskovde/repos/disl \
   --trace-mode <naive|temporal> \
   --test-strategy trace-based-basic \
+  --classpath '' \
+  --args '' \
+"
+
+# With mock DiSL (limited functionality)
+./gradlew :runner:run --args=" \
+  --jar <app.jar> \
+  --source <path-to-source> \
+  --output-dir <path-to-output> \
+  --method <fully.qualified.TargetClass.targetMethod(signature)> \
+  --disl-home \$DEMO_DISL_HOME \
+  --trace-mode <naive|temporal> \
+  --test-strategy trace-based-basic \
+  --classpath '' \
+  --args '' \
 "
 ```
 
@@ -104,26 +153,32 @@ Examples:
 - Demonstrates argument export. Run in both naive and temporal modes.
 
 ```bash
-# Naive
+# Naive mode with real DiSL
 ./gradlew :runner:run --args=" \
-  --jar $(pwd)/demo/calc-app.jar \
+  --jar $(pwd)/demo/apps/args/calc-app.jar \
   --source $(pwd)/demo/apps/args/src \
   --output-dir $(pwd)/demo/output/args-naive \
   --method com.example.Calculator.add(int,int) \
-  --disl-home $DEMO_DISL_HOME \
+  --parameters 0:int --parameters 1:int \
+  --disl-home /Users/leskovde/repos/disl \
   --trace-mode naive \
   --test-strategy trace-based-basic \
+  --classpath '' \
+  --args '' \
 "
 
-# Temporal
+# Temporal mode with real DiSL
 ./gradlew :runner:run --args=" \
-  --jar $(pwd)/demo/calc-app.jar \
+  --jar $(pwd)/demo/apps/args/calc-app.jar \
   --source $(pwd)/demo/apps/args/src \
   --output-dir $(pwd)/demo/output/args-temporal \
   --method com.example.Calculator.add(int,int) \
-  --disl-home $DEMO_DISL_HOME \
+  --parameters 0:int --parameters 1:int \
+  --disl-home /Users/leskovde/repos/disl \
   --trace-mode temporal \
   --test-strategy trace-based-basic \
+  --classpath '' \
+  --args '' \
 "
 ```
 
@@ -133,13 +188,15 @@ Examples:
 
 ```bash
 ./gradlew :runner:run --args=" \
-  --jar $(pwd)/demo/fields-app.jar \
+  --jar $(pwd)/demo/apps/fields/fields-app.jar \
   --source $(pwd)/demo/apps/fields/src \
   --output-dir $(pwd)/demo/output/fields-naive \
   --method com.example.Counter.increment() \
-  --disl-home $DEMO_DISL_HOME \
+  --disl-home /Users/leskovde/repos/disl \
   --trace-mode naive \
   --test-strategy trace-based-basic \
+  --classpath '' \
+  --args '' \
 "
 ```
 
@@ -149,19 +206,37 @@ Examples:
 
 ```bash
 ./gradlew :runner:run --args=" \
-  --jar $(pwd)/demo/static-app.jar \
+  --jar $(pwd)/demo/apps/static/static-app.jar \
   --source $(pwd)/demo/apps/static/src \
   --output-dir $(pwd)/demo/output/static-temporal \
   --method com.example.Globals.bump() \
-  --disl-home $DEMO_DISL_HOME \
+  --disl-home /Users/leskovde/repos/disl \
   --trace-mode temporal \
   --test-strategy trace-based-basic \
+  --classpath '' \
+  --args '' \
 "
 ```
 
-Tips:
-- Remember to pre-create stub results for each output directory you plan to use (step 3). The analyzer will read generated test paths from that list.
-- Once DiSL integration is added, you can skip the stub preparation and observe real generated tests.
+## Tips and Troubleshooting
+
+### With Real DiSL Installation:
+- **No stub preparation needed** - tests are generated from actual runtime data
+- **Verify DiSL installation**: Ensure `disl.py` exists and DiSL JARs are present
+- **Check output**: Look for `disl-analysis-complete.marker` and `collected-values.ser` files
+- **Expected behavior**: Application runs with DiSL instrumentation, data is captured, tests are generated
+- **Current status**: ✅ DiSL integration working, instrumentation JAR created, DiSL servers started successfully
+- **Known issue**: Test generation from DiSL RE data collection needs further configuration
+
+### With Mock DiSL (Limited):
+- **Stub preparation required** - pre-create stub results for each output directory
+- **Limited functionality** - no real instrumentation occurs
+- **Expected behavior** - Pipeline structure testing only
+
+### Common Issues:
+- **"DiSL dependencies not found"**: Using mock DiSL or missing DiSL installation
+- **"No test files generated"**: Check DiSL installation path and permissions
+- **Path issues**: Ensure all paths are absolute and accessible
 
 ## App sources
 - apps/args/src/com/example/CalcApp.java

@@ -53,8 +53,16 @@ public class DiSLCompiler {
                 Iterable<? extends JavaFileObject> compilationUnits =
                         fileManager.getJavaFileObjectsFromFiles(
                                 List.of(dislClassFile, collectorClassFile, collectorReClassFile));
-                if (!compiler.getTask(null, fileManager, null, null, null, compilationUnits).call()) {
+
+                // Create a diagnostic collector to capture compilation errors
+                DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
+
+                if (!compiler.getTask(null, fileManager, diagnostics, null, null, compilationUnits).call()) {
                     log.error("Failed to compile DiSL class");
+                    System.out.println("DiSLCompiler: Compilation failed. Diagnostics:");
+                    for (var diagnostic : diagnostics.getDiagnostics()) {
+                        System.out.println("  " + diagnostic.toString());
+                    }
                     return Optional.empty();
                 }
                 return packageObjects(outputDirectory);
@@ -128,6 +136,7 @@ public class DiSLCompiler {
         addProjectJarIfExists(classPath, "../test-generator-java/build/libs/test-generator-java-1.0-SNAPSHOT-all.jar");
         addProjectJarIfExists(classPath, "../test-generator-common/build/libs/test-generator-common-1.0-SNAPSHOT.jar");
         addProjectJarIfExists(classPath, "../model-java/build/libs/model-java-1.0-SNAPSHOT.jar");
+        addProjectJarIfExists(classPath, "../model-common/build/libs/model-common-1.0-SNAPSHOT.jar");
 
         return classPath;
     }
@@ -149,7 +158,48 @@ public class DiSLCompiler {
             log.debug("Added project JAR to classpath: {}", jarFile.getAbsolutePath());
         } else {
             log.warn("Project JAR not found: {}", jarFile.getAbsolutePath());
+            log.warn("Current working directory: {}", System.getProperty("user.dir"));
+            // Try to find the JAR in the current working directory structure
+            tryAlternativeJarPaths(classPath, jarPath);
         }
+    }
+
+    private void tryAlternativeJarPaths(List<File> classPath, String originalPath) {
+        // Extract the module name and JAR name from the original path
+        String jarName = new File(originalPath).getName();
+        String moduleName = extractModuleName(originalPath);
+
+        if (moduleName != null) {
+            // Try different base directories
+            String[] baseDirs = {".", "..", "../..", "../../.."};
+            for (String baseDir : baseDirs) {
+                File alternativeJar = new File(baseDir, moduleName + "/build/libs/" + jarName);
+                log.debug("Trying alternative JAR path: {}", alternativeJar.getAbsolutePath());
+                if (alternativeJar.exists()) {
+                    classPath.add(alternativeJar);
+                    log.debug("Found alternative project JAR: {}", alternativeJar.getAbsolutePath());
+                    return;
+                } else {
+                    log.debug("Alternative JAR path does not exist: {}", alternativeJar.getAbsolutePath());
+                }
+            }
+        }
+        log.warn("No alternative JAR found for module: {} with JAR name: {}", moduleName, jarName);
+    }
+
+    private String extractModuleName(String jarPath) {
+        // Extract module name from paths like "../test-generator-common/build/libs/..."
+        if (jarPath.contains("/build/libs/")) {
+            String beforeBuild = jarPath.substring(0, jarPath.indexOf("/build/libs/"));
+            int lastSlash = beforeBuild.lastIndexOf('/');
+            if (lastSlash >= 0) {
+                return beforeBuild.substring(lastSlash + 1);
+            } else if (beforeBuild.startsWith("../")) {
+                return beforeBuild.substring(3);
+            }
+            return beforeBuild;
+        }
+        return null;
     }
 
     /**

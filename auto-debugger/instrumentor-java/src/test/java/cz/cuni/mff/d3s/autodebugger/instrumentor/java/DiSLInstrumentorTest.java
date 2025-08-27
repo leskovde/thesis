@@ -21,7 +21,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class DiSLInstrumentorTests {
+class DiSLInstrumentorTest {
 
   @TempDir
   Path tempDir;

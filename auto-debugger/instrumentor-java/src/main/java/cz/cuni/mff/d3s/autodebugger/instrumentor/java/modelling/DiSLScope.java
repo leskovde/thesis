@@ -13,9 +13,26 @@ public class DiSLScope extends Metaclass {
     @Override
     public String emitCode() {
         append("scope = \"");
-        append(methodIdentifier.getOwnerClassIdentifier().getName());
+        // Use fully qualified class name for DiSL scope
+        var classIdentifier = methodIdentifier.getOwnerClassIdentifier();
+        append(classIdentifier.getPackageIdentifier().getPackageName());
+        append(".");
+        append(classIdentifier.getName());
         append(".");
         append(methodIdentifier.getName());
+
+        // Include parameter types for precise method matching
+        if (!methodIdentifier.getParameterTypes().isEmpty()) {
+            append("(");
+            for (int i = 0; i < methodIdentifier.getParameterTypes().size(); i++) {
+                if (i > 0) {
+                    append(",");
+                }
+                append(methodIdentifier.getParameterTypes().get(i));
+            }
+            append(")");
+        }
+
         append("\"");
         return getCode();
     }

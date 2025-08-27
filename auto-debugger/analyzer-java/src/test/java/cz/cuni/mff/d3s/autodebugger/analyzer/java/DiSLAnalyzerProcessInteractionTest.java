@@ -1,5 +1,6 @@
 package cz.cuni.mff.d3s.autodebugger.analyzer.java;
 
+import cz.cuni.mff.d3s.autodebugger.model.common.artifacts.InstrumentationResult;
 import cz.cuni.mff.d3s.autodebugger.model.java.JavaRunConfiguration;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.*;
 import cz.cuni.mff.d3s.autodebugger.model.java.identifiers.MethodIdentifierParameters;
@@ -150,7 +151,7 @@ class DiSLAnalyzerProcessInteractionTest {
         TestableAnalyzer analyzer = new TestableAnalyzer(testConfig, "mock-disl-success.py");
 
         // When
-        var generated = analyzer.runAnalysis(cz.cuni.mff.d3s.autodebugger.model.common.artifacts.InstrumentationResult.builder().primaryArtifact(instrumentationJarPath).build());
+        var generated = analyzer.runAnalysis(InstrumentationResult.builder().primaryArtifact(instrumentationJarPath).build());
 
         // Then
         assertNotNull(generated, "Analysis should return generated test paths");
@@ -163,7 +164,7 @@ class DiSLAnalyzerProcessInteractionTest {
         TestableAnalyzer analyzer = new TestableAnalyzer(testConfig, "mock-disl-failure.py");
 
         // When
-        var generated = analyzer.runAnalysis(cz.cuni.mff.d3s.autodebugger.model.common.artifacts.InstrumentationResult.builder().primaryArtifact(instrumentationJarPath).build());
+        var generated = analyzer.runAnalysis(InstrumentationResult.builder().primaryArtifact(instrumentationJarPath).build());
 
         // Then
         assertNotNull(generated, "Analysis should return generated test paths even on failure");
@@ -183,7 +184,7 @@ class DiSLAnalyzerProcessInteractionTest {
 
         // When & Then
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            analyzer.runAnalysis(cz.cuni.mff.d3s.autodebugger.model.common.artifacts.InstrumentationResult.builder().primaryArtifact(instrumentationJarPath).build());
+            analyzer.runAnalysis(InstrumentationResult.builder().primaryArtifact(instrumentationJarPath).build());
         });
 
         assertTrue(exception.getMessage().contains("timed out"),
@@ -197,7 +198,7 @@ class DiSLAnalyzerProcessInteractionTest {
 
         // When & Then
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            analyzer.runAnalysis(cz.cuni.mff.d3s.autodebugger.model.common.artifacts.InstrumentationResult.builder().primaryArtifact(instrumentationJarPath).build());
+            analyzer.runAnalysis(InstrumentationResult.builder().primaryArtifact(instrumentationJarPath).build());
         });
 
         assertTrue(exception.getMessage().contains("Analysis execution failed") ||
@@ -230,7 +231,7 @@ class DiSLAnalyzerProcessInteractionTest {
         TestableAnalyzer analyzer = new TestableAnalyzer(testConfig, "mock-disl-success.py");
 
         // When
-        var generated = analyzer.runAnalysis(cz.cuni.mff.d3s.autodebugger.model.common.artifacts.InstrumentationResult.builder().primaryArtifact(instrumentationJarPath).build());
+        var generated = analyzer.runAnalysis(InstrumentationResult.builder().primaryArtifact(instrumentationJarPath).build());
 
         // Then
         assertNotNull(generated, "Should capture process output and return generated tests list");
@@ -249,7 +250,7 @@ class DiSLAnalyzerProcessInteractionTest {
 
         // When
         long startTime = System.currentTimeMillis();
-        var generated = analyzer.runAnalysis(cz.cuni.mff.d3s.autodebugger.model.common.artifacts.InstrumentationResult.builder().primaryArtifact(instrumentationJarPath).build());
+        var generated = analyzer.runAnalysis(InstrumentationResult.builder().primaryArtifact(instrumentationJarPath).build());
         long endTime = System.currentTimeMillis();
 
         // Then

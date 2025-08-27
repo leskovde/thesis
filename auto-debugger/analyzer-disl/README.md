@@ -36,7 +36,6 @@ Notes:
 The Collector process (ShadowVM) recognizes the following environment variables:
 
 - ANTHROPIC_API_KEY: preferred key for the LLM-based generator
-- OPENAI_API_KEY: fallback key if ANTHROPIC_API_KEY is not set
 - AUTODEBUGGER_STUB: if set to "1" or "true", the Collector writes a minimal stub test and exits, used for testing
 
 These variables are read via System.getenv(...) inside the Collector.

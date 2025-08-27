@@ -307,7 +307,7 @@ public class LLMBasedTestGenerator implements TestGenerator {
                                        "Use this information to generate tests that capture the evolution of state over time.")
                 .build();
     }
-    
+
     /**
      * Builds prompt context for LLM with regular Trace data.
      *
@@ -437,8 +437,7 @@ public class LLMBasedTestGenerator implements TestGenerator {
             String refinementPrompt = promptBuilder.buildRefinementPrompt(currentCode, validation, context);
             
             try {
-                String refinedCode = anthropicClient.generateCode(refinementPrompt);
-                currentCode = refinedCode;
+                currentCode = anthropicClient.generateCode(refinementPrompt);
                 log.debug("Completed refinement iteration {}", iteration + 1);
             } catch (Exception e) {
                 log.warn("Refinement iteration {} failed: {}", iteration + 1, e.getMessage());

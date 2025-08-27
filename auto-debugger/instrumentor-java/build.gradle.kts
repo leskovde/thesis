@@ -22,6 +22,8 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-engine")
     testImplementation(project(mapOf("path" to ":analyzer-common")))
     testImplementation(project(mapOf("path" to ":analyzer-java")))
+    testImplementation(project(mapOf("path" to ":test-generator-common")))
+    testImplementation(project(mapOf("path" to ":test-generator-java")))
 }
 
 tasks.test {

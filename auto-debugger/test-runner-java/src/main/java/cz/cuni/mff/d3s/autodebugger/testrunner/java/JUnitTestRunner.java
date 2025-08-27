@@ -10,6 +10,7 @@ import org.junit.platform.launcher.core.LauncherFactory;
 
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -123,15 +124,24 @@ public class JUnitTestRunner implements TestRunner {
             // Create custom classloader with test classpath
             URLClassLoader testClassLoader = createTestClassLoader(compiledClass);
             
-            // Execute the test using JUnit Platform
+            // Execute the test using JUnit Platform with custom classloader
             AutoDebuggerTestExecutionListener listener = new AutoDebuggerTestExecutionListener();
-            
-            Launcher launcher = LauncherFactory.create();
-            LauncherDiscoveryRequest request = LauncherDiscoveryRequestBuilder.request()
-                    .selectors(DiscoverySelectors.selectClass(getTestClassName(testFile)))
-                    .build();
-                    
-            launcher.execute(request, listener);
+
+            // Set the context classloader so JUnit can find our compiled test classes
+            ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
+            try {
+                Thread.currentThread().setContextClassLoader(testClassLoader);
+
+                Launcher launcher = LauncherFactory.create();
+                LauncherDiscoveryRequest request = LauncherDiscoveryRequestBuilder.request()
+                        .selectors(DiscoverySelectors.selectClass(getTestClassName(testFile)))
+                        .build();
+
+                launcher.execute(request, listener);
+            } finally {
+                // Restore original classloader
+                Thread.currentThread().setContextClassLoader(originalClassLoader);
+            }
             
             testResults.addAll(listener.getTestResults());
             
@@ -191,22 +201,64 @@ public class JUnitTestRunner implements TestRunner {
     
     private URLClassLoader createTestClassLoader(Path compiledClass) throws Exception {
         List<URL> urls = new ArrayList<>();
-        
-        // Add compiled test class directory
-        urls.add(compiledClass.getParent().toUri().toURL());
-        
+
+        // Add compiled test class root directory (not the package directory)
+        // Find the root compiled directory by looking for "compiled" in the path
+        Path compiledRoot = compiledClass;
+        while (compiledRoot != null && !compiledRoot.getFileName().toString().equals("compiled")) {
+            compiledRoot = compiledRoot.getParent();
+        }
+        if (compiledRoot != null) {
+            urls.add(compiledRoot.toUri().toURL());
+            log.debug("Added compiled classes root to classpath: {}", compiledRoot);
+        } else {
+            // Fallback to parent directory
+            urls.add(compiledClass.getParent().toUri().toURL());
+            log.warn("Could not find 'compiled' directory, using parent: {}", compiledClass.getParent());
+        }
+
         // Add classpath entries from configuration
         for (Path classpathEntry : configuration.getClasspathEntries()) {
             urls.add(classpathEntry.toUri().toURL());
+            log.debug("Added classpath entry: {}", classpathEntry);
         }
-        
+
         return new URLClassLoader(urls.toArray(new URL[0]), getClass().getClassLoader());
     }
     
     private String getTestClassName(Path testFile) {
-        // Extract class name from file path
-        String fileName = testFile.getFileName().toString();
-        return fileName.substring(0, fileName.lastIndexOf('.'));
+        try {
+            // Read the Java file to extract package and class name
+            String content = Files.readString(testFile);
+
+            // Extract package name
+            String packageName = "";
+            String[] lines = content.split("\n");
+            for (String line : lines) {
+                line = line.trim();
+                if (line.startsWith("package ") && line.endsWith(";")) {
+                    packageName = line.substring(8, line.length() - 1).trim();
+                    break;
+                }
+            }
+
+            // Get simple class name
+            String fileName = testFile.getFileName().toString();
+            String className = fileName.substring(0, fileName.lastIndexOf('.'));
+
+            // Return fully qualified class name
+            if (packageName.isEmpty()) {
+                return className;
+            } else {
+                return packageName + "." + className;
+            }
+
+        } catch (Exception e) {
+            log.warn("Failed to extract package from {}, using simple class name", testFile, e);
+            // Fallback to simple class name
+            String fileName = testFile.getFileName().toString();
+            return fileName.substring(0, fileName.lastIndexOf('.'));
+        }
     }
     
     private List<ExecutionTrace> collectExecutionTraces(Path testFile, AutoDebuggerTestExecutionListener listener) {

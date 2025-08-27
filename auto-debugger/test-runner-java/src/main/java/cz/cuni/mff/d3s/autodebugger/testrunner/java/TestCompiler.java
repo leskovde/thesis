@@ -56,10 +56,10 @@ public class TestCompiler {
                 throw new RuntimeException("Compilation failed: " + errors);
             }
             
-            // Return path to compiled class file
-            String className = getClassNameFromFile(testFile);
-            Path compiledClass = outputDir.resolve(className + ".class");
-            
+            // Return path to compiled class file (accounting for package structure)
+            String classPath = getClassPathFromFile(testFile);
+            Path compiledClass = outputDir.resolve(classPath + ".class");
+
             if (!Files.exists(compiledClass)) {
                 throw new RuntimeException("Compiled class file not found: " + compiledClass);
             }
@@ -134,22 +134,38 @@ public class TestCompiler {
     
     private String buildClasspath(TestRunnerConfiguration configuration) {
         List<String> classpathEntries = new ArrayList<>();
-        
-        // Add configuration classpath entries
+
+        // Add configuration classpath entries (convert to absolute paths)
         for (Path entry : configuration.getClasspathEntries()) {
-            classpathEntries.add(entry.toString());
+            if (Files.exists(entry)) {
+                classpathEntries.add(entry.toAbsolutePath().toString());
+                log.debug("Added existing classpath entry: {}", entry.toAbsolutePath());
+            } else {
+                log.warn("Skipping non-existent classpath entry: {}", entry);
+            }
         }
-        
-        // Add JUnit dependencies (these should be in the classpath already)
-        // This is a fallback in case they're not included
+
+        // Add JUnit dependencies from system classpath, but filter out non-existent files
         String junitClasspath = System.getProperty("java.class.path");
         if (junitClasspath != null && !junitClasspath.isEmpty()) {
-            classpathEntries.add(junitClasspath);
+            String[] systemClasspathEntries = junitClasspath.split(System.getProperty("path.separator"));
+            for (String entry : systemClasspathEntries) {
+                Path entryPath = Paths.get(entry);
+                if (Files.exists(entryPath)) {
+                    classpathEntries.add(entryPath.toAbsolutePath().toString());
+                    log.debug("Added system classpath entry: {}", entryPath.toAbsolutePath());
+                } else {
+                    log.debug("Skipped non-existent system classpath entry: {}", entry);
+                }
+            }
         }
-        
-        return classpathEntries.stream()
+
+        String finalClasspath = classpathEntries.stream()
                 .distinct()
                 .collect(Collectors.joining(System.getProperty("path.separator")));
+
+        log.debug("Final test compilation classpath: {}", finalClasspath);
+        return finalClasspath;
     }
     
     private String getClassNameFromFile(Path testFile) {
@@ -158,5 +174,37 @@ public class TestCompiler {
             return fileName.substring(0, fileName.length() - 5);
         }
         return fileName;
+    }
+
+    private String getClassPathFromFile(Path testFile) {
+        try {
+            // Read the Java file to extract package and class name
+            String content = Files.readString(testFile);
+
+            // Extract package name
+            String packageName = "";
+            String[] lines = content.split("\n");
+            for (String line : lines) {
+                line = line.trim();
+                if (line.startsWith("package ") && line.endsWith(";")) {
+                    packageName = line.substring(8, line.length() - 1).trim();
+                    break;
+                }
+            }
+
+            // Get class name
+            String className = getClassNameFromFile(testFile);
+
+            // Construct full class path
+            if (packageName.isEmpty()) {
+                return className;
+            } else {
+                return packageName.replace('.', '/') + "/" + className;
+            }
+
+        } catch (Exception e) {
+            log.warn("Failed to extract package from {}, using simple class name", testFile, e);
+            return getClassNameFromFile(testFile);
+        }
     }
 }

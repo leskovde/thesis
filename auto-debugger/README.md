@@ -128,7 +128,6 @@ The auto-debugger uses a simplified configuration approach where all output path
 
 - **Environment Variables**: Used only for sensitive configuration
   - `ANTHROPIC_API_KEY`: API key for LLM-based test generation (preferred)
-  - `OPENAI_API_KEY`: Fallback API key for LLM-based test generation
   - `AUTODEBUGGER_STUB`: Set to "1" or "true" for test stub mode (testing only)
 
 Note: Older builds may have left `identifierMapping*.json` files under `auto-debugger/identifiers`; these were an earlier format and are no longer produced.
